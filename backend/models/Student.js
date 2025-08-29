@@ -1,5 +1,5 @@
 const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const { sequelize } = require('../config/database');
 const bcrypt = require('bcryptjs');
 
 class Student extends Model {
@@ -14,16 +14,16 @@ Student.init({
     primaryKey: true,
     autoIncrement: true
   },
-  studentId: {
+  student_id: {
     type: DataTypes.STRING,
     unique: true,
     allowNull: false
   },
-  firstName: {
+  first_name: {
     type: DataTypes.STRING,
     allowNull: false
   },
-  lastName: {
+  last_name: {
     type: DataTypes.STRING,
     allowNull: false
   },
@@ -39,11 +39,11 @@ Student.init({
     type: DataTypes.STRING,
     allowNull: false
   },
-  departmentId: {
+  department_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'Departments',
+      model: 'departments',
       key: 'id'
     }
   },
@@ -55,13 +55,13 @@ Student.init({
       max: 8
     }
   },
-  phoneNumber: {
+  phone_number: {
     type: DataTypes.STRING,
     validate: {
       is: /^[0-9]{10}$/
     }
   },
-  dateOfBirth: {
+  date_of_birth: {
     type: DataTypes.DATEONLY,
     allowNull: false
   },
@@ -70,12 +70,12 @@ Student.init({
     defaultValue: {},
     comment: 'Student address details in JSON format'
   },
-  guardianInfo: {
+  guardian_info: {
     type: DataTypes.JSONB,
     defaultValue: {},
     comment: 'Parent/Guardian contact information'
   },
-  academicHistory: {
+  academic_history: {
     type: DataTypes.JSONB,
     defaultValue: [],
     comment: 'Previous academic records'
@@ -89,7 +89,7 @@ Student.init({
     type: DataTypes.ENUM('active', 'inactive', 'alumni', 'suspended'),
     defaultValue: 'active'
   },
-  lastLoginAt: {
+  last_login_at: {
     type: DataTypes.DATE,
     allowNull: true
   },
@@ -98,7 +98,7 @@ Student.init({
     defaultValue: {},
     comment: 'Additional metadata about the student'
   },
-  searchVector: {
+  search_vector: {
     type: DataTypes.TSVECTOR,
     allowNull: true
   }
@@ -108,7 +108,7 @@ Student.init({
   timestamps: true,
   indexes: [
     {
-      fields: ['searchVector'],
+      fields: ['search_vector'],
       using: 'gin'
     },
     {
@@ -116,7 +116,7 @@ Student.init({
       using: 'gin'
     },
     {
-      fields: ['departmentId', 'semester']
+      fields: ['department_id', 'semester']
     },
     {
       fields: ['status']
@@ -151,10 +151,10 @@ sequelize.query(`
   END;
   $$ LANGUAGE plpgsql;
 
-  DROP TRIGGER IF EXISTS student_search_vector_trigger ON "Students";
+  DROP TRIGGER IF EXISTS student_search_vector_trigger ON "students";
   
   CREATE TRIGGER student_search_vector_trigger
-  BEFORE INSERT OR UPDATE ON "Students"
+  BEFORE INSERT OR UPDATE ON "students"
   FOR EACH ROW
   EXECUTE FUNCTION student_search_vector_update();
 `).catch(err => console.log('Search vector trigger already exists'));

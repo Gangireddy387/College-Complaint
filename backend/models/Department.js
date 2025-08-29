@@ -1,5 +1,5 @@
 const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const { sequelize } = require('../config/database');
 
 class Department extends Model {}
 
@@ -9,7 +9,7 @@ Department.init({
     primaryKey: true,
     autoIncrement: true
   },
-  departmentCode: {
+  department_code: {
     type: DataTypes.STRING,
     unique: true,
     allowNull: false,
@@ -28,15 +28,12 @@ Department.init({
     type: DataTypes.TEXT,
     allowNull: true
   },
-  hodId: {
+  hod_id: {
     type: DataTypes.INTEGER,
     allowNull: true,
-    references: {
-      model: 'Faculty',
-      key: 'id'
-    }
+    // We'll add the foreign key constraint after both tables are created
   },
-  establishedYear: {
+  established_year: {
     type: DataTypes.INTEGER,
     allowNull: false,
     validate: {
@@ -52,7 +49,7 @@ Department.init({
       isEmail: true
     }
   },
-  phoneNumber: {
+  phone_number: {
     type: DataTypes.STRING,
     validate: {
       is: /^[0-9]{10}$/
@@ -78,7 +75,7 @@ Department.init({
     defaultValue: [],
     comment: 'Department achievements and accolades'
   },
-  researchAreas: {
+  research_areas: {
     type: DataTypes.ARRAY(DataTypes.STRING),
     defaultValue: [],
     comment: 'Research focus areas of the department'
@@ -87,11 +84,11 @@ Department.init({
     type: DataTypes.ENUM('active', 'inactive'),
     defaultValue: 'active'
   },
-  totalStudents: {
+  total_students: {
     type: DataTypes.INTEGER,
     defaultValue: 0
   },
-  totalFaculty: {
+  total_faculty: {
     type: DataTypes.INTEGER,
     defaultValue: 0
   },
@@ -105,7 +102,7 @@ Department.init({
     defaultValue: {},
     comment: 'Additional metadata about the department'
   },
-  searchVector: {
+  search_vector: {
     type: DataTypes.TSVECTOR,
     allowNull: true
   }
@@ -115,7 +112,7 @@ Department.init({
   timestamps: true,
   indexes: [
     {
-      fields: ['searchVector'],
+      fields: ['search_vector'],
       using: 'gin'
     },
     {
@@ -123,7 +120,7 @@ Department.init({
       using: 'gin'
     },
     {
-      fields: ['researchAreas'],
+      fields: ['research_areas'],
       using: 'gin'
     },
     {

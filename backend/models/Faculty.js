@@ -1,5 +1,5 @@
 const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const { sequelize } = require('../config/database');
 const bcrypt = require('bcryptjs');
 
 class Faculty extends Model {
@@ -14,16 +14,16 @@ Faculty.init({
     primaryKey: true,
     autoIncrement: true
   },
-  employeeId: {
+  employee_id: {
     type: DataTypes.STRING,
     unique: true,
     allowNull: false
   },
-  firstName: {
+  first_name: {
     type: DataTypes.STRING,
     allowNull: false
   },
-  lastName: {
+  last_name: {
     type: DataTypes.STRING,
     allowNull: false
   },
@@ -39,11 +39,11 @@ Faculty.init({
     type: DataTypes.STRING,
     allowNull: false
   },
-  departmentId: {
+  department_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'Departments',
+      model: 'departments',
       key: 'id'
     }
   },
@@ -61,13 +61,13 @@ Faculty.init({
     defaultValue: [],
     comment: 'Academic and professional qualifications'
   },
-  phoneNumber: {
+  phone_number: {
     type: DataTypes.STRING,
     validate: {
       is: /^[0-9]{10}$/
     }
   },
-  joiningDate: {
+  joining_date: {
     type: DataTypes.DATEONLY,
     allowNull: false
   },
@@ -86,7 +86,7 @@ Faculty.init({
     defaultValue: [],
     comment: 'Awards and recognitions'
   },
-  currentWorkload: {
+  current_workload: {
     type: DataTypes.INTEGER,
     defaultValue: 0,
     comment: 'Current teaching hours per week'
@@ -95,7 +95,7 @@ Faculty.init({
     type: DataTypes.ENUM('active', 'on_leave', 'inactive', 'terminated'),
     defaultValue: 'active'
   },
-  lastLoginAt: {
+  last_login_at: {
     type: DataTypes.DATE,
     allowNull: true
   },
@@ -104,7 +104,7 @@ Faculty.init({
     defaultValue: {},
     comment: 'Additional metadata about the faculty'
   },
-  searchVector: {
+  search_vector: {
     type: DataTypes.TSVECTOR,
     allowNull: true
   }
@@ -114,7 +114,7 @@ Faculty.init({
   timestamps: true,
   indexes: [
     {
-      fields: ['searchVector'],
+      fields: ['search_vector'],
       using: 'gin'
     },
     {
@@ -122,7 +122,7 @@ Faculty.init({
       using: 'gin'
     },
     {
-      fields: ['departmentId', 'status']
+      fields: ['department_id', 'status']
     },
     {
       fields: ['specializations'],
@@ -159,10 +159,10 @@ sequelize.query(`
   END;
   $$ LANGUAGE plpgsql;
 
-  DROP TRIGGER IF EXISTS faculty_search_vector_trigger ON "Faculty";
+  DROP TRIGGER IF EXISTS faculty_search_vector_trigger ON "faculties";
   
   CREATE TRIGGER faculty_search_vector_trigger
-  BEFORE INSERT OR UPDATE ON "Faculty"
+  BEFORE INSERT OR UPDATE ON "faculties"
   FOR EACH ROW
   EXECUTE FUNCTION faculty_search_vector_update();
 `).catch(err => console.log('Search vector trigger already exists'));

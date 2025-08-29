@@ -1,12 +1,12 @@
 const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const { sequelize } = require('../config/database');
 
 class ClassRoom extends Model {
   // Instance methods
   async isAvailable(date, startTime, endTime) {
     const bookings = await sequelize.models.TimeSlot.findAll({
       where: {
-        roomNumber: this.roomNumber,
+        room_number: this.room_number,
         date,
         status: 'active',
         $or: [
@@ -23,7 +23,7 @@ class ClassRoom extends Model {
   }
 
   async getCurrentCapacityUtilization() {
-    const currentOccupancy = this.currentOccupancy || 0;
+    const currentOccupancy = this.current_occupancy || 0;
     return {
       capacity: this.capacity,
       currentOccupancy,
@@ -32,15 +32,15 @@ class ClassRoom extends Model {
   }
 
   async addMaintenance(details) {
-    const maintenanceHistory = this.maintenanceHistory || [];
+    const maintenanceHistory = this.maintenance_history || [];
     maintenanceHistory.push({
       date: new Date(),
       ...details
     });
     await this.update({
-      maintenanceHistory,
-      lastMaintenance: new Date(),
-      nextMaintenance: details.nextMaintenanceDate
+      maintenance_history: maintenanceHistory,
+      last_maintenance: new Date(),
+      next_maintenance: details.nextMaintenanceDate
     });
   }
 }
@@ -51,7 +51,7 @@ ClassRoom.init({
     primaryKey: true,
     autoIncrement: true
   },
-  roomNumber: {
+  room_number: {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true,
@@ -141,7 +141,7 @@ ClassRoom.init({
     defaultValue: {},
     comment: 'Room booking schedule'
   },
-  maintenanceHistory: {
+  maintenance_history: {
     type: DataTypes.JSONB,
     defaultValue: [],
     comment: 'History of maintenance activities'
@@ -162,22 +162,22 @@ ClassRoom.init({
       }
     }
   },
-  lastMaintenance: {
+  last_maintenance: {
     type: DataTypes.DATE,
     allowNull: true
   },
-  nextMaintenance: {
+  next_maintenance: {
     type: DataTypes.DATE,
     allowNull: true,
     validate: {
       isAfterLastMaintenance(value) {
-        if (value && this.lastMaintenance && value <= this.lastMaintenance) {
+        if (value && this.last_maintenance && value <= this.last_maintenance) {
           throw new Error('Next maintenance must be after last maintenance');
         }
       }
     }
   },
-  currentOccupancy: {
+  current_occupancy: {
     type: DataTypes.INTEGER,
     defaultValue: 0,
     validate: {
@@ -201,7 +201,7 @@ ClassRoom.init({
     defaultValue: {},
     comment: 'Additional metadata about the classroom'
   },
-  searchVector: {
+  search_vector: {
     type: DataTypes.TSVECTOR,
     allowNull: true
   }
@@ -211,7 +211,7 @@ ClassRoom.init({
   timestamps: true,
   indexes: [
     {
-      fields: ['searchVector'],
+      fields: ['search_vector'],
       using: 'gin',
       name: 'classroom_search_idx'
     },
@@ -242,8 +242,8 @@ ClassRoom.init({
   hooks: {
     beforeValidate: async (classroom) => {
       // Ensure room number follows building convention
-      if (classroom.roomNumber && classroom.building) {
-        const buildingPrefix = classroom.roomNumber.split('-')[0];
+      if (classroom.room_number && classroom.building) {
+        const buildingPrefix = classroom.room_number.split('-')[0];
         if (!classroom.building.includes(buildingPrefix)) {
           throw new Error('Room number must match building prefix');
         }
@@ -253,14 +253,14 @@ ClassRoom.init({
       // Track maintenance schedule
       if (classroom.changed('status')) {
         if (classroom.status === 'maintenance') {
-          classroom.lastMaintenance = new Date();
-          classroom.nextMaintenance = new Date(Date.now() + (90 * 24 * 60 * 60 * 1000)); // 90 days
+          classroom.last_maintenance = new Date();
+          classroom.next_maintenance = new Date(Date.now() + (90 * 24 * 60 * 60 * 1000)); // 90 days
         }
       }
     },
     afterCreate: async (classroom) => {
       // Initialize maintenance schedule
-      classroom.nextMaintenance = new Date(Date.now() + (90 * 24 * 60 * 60 * 1000)); // 90 days
+      classroom.next_maintenance = new Date(Date.now() + (90 * 24 * 60 * 60 * 1000)); // 90 days
       await classroom.save();
     }
   }
@@ -279,10 +279,10 @@ sequelize.query(`
   END;
   $$ LANGUAGE plpgsql;
 
-  DROP TRIGGER IF EXISTS class_room_search_vector_trigger ON "ClassRooms";
+  DROP TRIGGER IF EXISTS class_room_search_vector_trigger ON "class_rooms";
   
   CREATE TRIGGER class_room_search_vector_trigger
-  BEFORE INSERT OR UPDATE ON "ClassRooms"
+  BEFORE INSERT OR UPDATE ON "class_rooms"
   FOR EACH ROW
   EXECUTE FUNCTION class_room_search_vector_update();
 `).catch(err => console.log('Search vector trigger already exists'));

@@ -1,12 +1,12 @@
-const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const { Model, DataTypes, Op } = require('sequelize');
+const { sequelize } = require('../config/database');
 
 class Attendance extends Model {
   // Instance methods
-  static async getAttendanceStats(timeSlotId, startDate, endDate) {
+  static async getAttendanceStats(time_slot_id, startDate, endDate) {
     const stats = await this.findAll({
       where: {
-        timeSlotId,
+        time_slot_id,
         date: {
           [Op.between]: [startDate, endDate]
         }
@@ -20,12 +20,12 @@ class Attendance extends Model {
     return stats;
   }
 
-  static async getStudentAttendance(studentId, subjectId, semester) {
+  static async getStudentAttendance(student_id, subject_id, semester) {
     const stats = await this.findAll({
-      where: { studentId },
+      where: { student_id },
       include: [{
         model: TimeSlot,
-        where: { subjectId },
+        where: { subject_id },
         include: [{
           model: Subject,
           where: { semester }
@@ -42,19 +42,19 @@ Attendance.init({
     primaryKey: true,
     autoIncrement: true
   },
-  timeSlotId: {
+  time_slot_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'TimeSlots',
+      model: 'time_slots',
       key: 'id'
     }
   },
-  studentId: {
+  student_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'Students',
+      model: 'students',
       key: 'id'
     }
   },
@@ -65,7 +65,7 @@ Attendance.init({
       isIn: [['present', 'absent', 'late', 'excused']]
     }
   },
-  lateMinutes: {
+  late_minutes: {
     type: DataTypes.INTEGER,
     allowNull: true,
     validate: {
@@ -88,11 +88,11 @@ Attendance.init({
       len: [0, 500] // Maximum 500 characters for remarks
     }
   },
-  markedBy: {
+  marked_by: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'Faculty',
+      model: 'faculties',
       key: 'id'
     }
   },
@@ -108,20 +108,20 @@ Attendance.init({
       }
     }
   },
-  markedAt: {
+  marked_at: {
     type: DataTypes.DATE,
     allowNull: false,
     defaultValue: DataTypes.NOW
   },
-  lastModifiedBy: {
+  last_modified_by: {
     type: DataTypes.INTEGER,
     allowNull: true,
     references: {
-      model: 'Faculty',
+      model: 'faculties',
       key: 'id'
     }
   },
-  modificationHistory: {
+  modification_history: {
     type: DataTypes.JSONB,
     defaultValue: [],
     comment: 'History of attendance modifications',
@@ -133,7 +133,7 @@ Attendance.init({
       }
     }
   },
-  proofOfAbsence: {
+  proof_of_absence: {
     type: DataTypes.JSONB,
     defaultValue: {},
     comment: 'Documents supporting absence (medical certificates, etc.)',
@@ -158,7 +158,7 @@ Attendance.init({
     // Unique constraint for one attendance record per student per time slot per date
     {
       unique: true,
-      fields: ['timeSlotId', 'studentId', 'date'],
+      fields: ['time_slot_id', 'student_id', 'date'],
       name: 'unique_attendance_record'
     },
     // Index for searching metadata
@@ -169,7 +169,7 @@ Attendance.init({
     },
     // Index for searching modification history
     {
-      fields: ['modificationHistory'],
+      fields: ['modification_history'],
       using: 'gin',
       name: 'attendance_history_idx'
     },
@@ -180,27 +180,27 @@ Attendance.init({
     },
     // Index for faculty queries
     {
-      fields: ['markedBy', 'date'],
+      fields: ['marked_by', 'date'],
       name: 'attendance_faculty_date_idx'
     }
   ],
   hooks: {
     beforeValidate: async (attendance) => {
       // Validate date is within time slot schedule
-      const timeSlot = await sequelize.models.TimeSlot.findByPk(attendance.timeSlotId);
-      if (timeSlot && attendance.date < timeSlot.effectiveDate) {
+      const timeSlot = await sequelize.models.TimeSlot.findByPk(attendance.time_slot_id);
+      if (timeSlot && attendance.date < timeSlot.effective_date) {
         throw new Error('Attendance date must be after time slot effective date');
       }
     },
     beforeCreate: async (attendance) => {
       // Check if student is enrolled in the section
-      const timeSlot = await sequelize.models.TimeSlot.findByPk(attendance.timeSlotId, {
+      const timeSlot = await sequelize.models.TimeSlot.findByPk(attendance.time_slot_id, {
         include: ['section']
       });
       const enrollment = await sequelize.models.SectionStudent.findOne({
         where: {
-          studentId: attendance.studentId,
-          sectionId: timeSlot.section.id,
+          student_id: attendance.student_id,
+          section_id: timeSlot.section.id,
           status: 'active'
         }
       });
@@ -213,23 +213,23 @@ Attendance.init({
         const oldHistory = attendance.modificationHistory || [];
         oldHistory.push({
           timestamp: new Date(),
-          modifiedBy: attendance.lastModifiedBy,
-          oldStatus: attendance.previous('status'),
-          newStatus: attendance.status,
-          oldRemarks: attendance.previous('remarks'),
-          newRemarks: attendance.remarks,
-          oldLateMinutes: attendance.previous('lateMinutes'),
-          newLateMinutes: attendance.lateMinutes
+          modified_by: attendance.last_modified_by,
+          old_status: attendance.previous('status'),
+          new_status: attendance.status,
+          old_remarks: attendance.previous('remarks'),
+          new_remarks: attendance.remarks,
+          old_late_minutes: attendance.previous('late_minutes'),
+          new_late_minutes: attendance.late_minutes
         });
-        attendance.modificationHistory = oldHistory;
+        attendance.modification_history = oldHistory;
       }
     },
     afterCreate: async (attendance) => {
       // Update attendance statistics in TimeSlot
-      const timeSlot = await sequelize.models.TimeSlot.findByPk(attendance.timeSlotId);
-      const stats = timeSlot.attendanceStats || {};
+      const timeSlot = await sequelize.models.TimeSlot.findByPk(attendance.time_slot_id);
+      const stats = timeSlot.attendance_stats || {};
       stats[attendance.status] = (stats[attendance.status] || 0) + 1;
-      await timeSlot.update({ attendanceStats: stats });
+      await timeSlot.update({ attendance_stats: stats });
     }
   }
 });

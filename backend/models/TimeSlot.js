@@ -1,5 +1,5 @@
 const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const { sequelize } = require('../config/database');
 
 class TimeSlot extends Model {}
 
@@ -9,52 +9,52 @@ TimeSlot.init({
     primaryKey: true,
     autoIncrement: true
   },
-  startTime: {
+  start_time: {
     type: DataTypes.TIME,
     allowNull: false
   },
-  endTime: {
+  end_time: {
     type: DataTypes.TIME,
     allowNull: false
   },
-  dayOfWeek: {
+  day_of_week: {
     type: DataTypes.ENUM('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'),
     allowNull: false
   },
-  subjectId: {
+  subject_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'Subjects',
+      model: 'subjects',
       key: 'id'
     }
   },
-  sectionId: {
+  section_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'Sections',
+      model: 'sections',
       key: 'id'
     }
   },
-  facultyId: {
+  faculty_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'Faculty',
+      model: 'faculties',
       key: 'id'
     }
   },
-  roomNumber: {
+  room_number: {
     type: DataTypes.STRING,
     allowNull: false
   },
-  effectiveDate: {
+  effective_date: {
     type: DataTypes.DATEONLY,
     allowNull: false,
     defaultValue: DataTypes.NOW
   },
-  endDate: {
+  end_date: {
     type: DataTypes.DATEONLY,
     allowNull: true,
     comment: 'End date for temporary schedule changes'
@@ -64,7 +64,7 @@ TimeSlot.init({
     defaultValue: {},
     comment: 'Recurrence pattern for the time slot'
   },
-  attendanceStats: {
+  attendance_stats: {
     type: DataTypes.JSONB,
     defaultValue: {},
     comment: 'Aggregated attendance statistics for this slot'
@@ -73,7 +73,7 @@ TimeSlot.init({
     type: DataTypes.ENUM('active', 'cancelled', 'rescheduled', 'holiday'),
     defaultValue: 'active'
   },
-  cancelReason: {
+  cancel_reason: {
     type: DataTypes.TEXT,
     allowNull: true
   },
@@ -82,7 +82,7 @@ TimeSlot.init({
     defaultValue: {},
     comment: 'Additional metadata about the time slot'
   },
-  searchVector: {
+  search_vector: {
     type: DataTypes.TSVECTOR,
     allowNull: true
   }
@@ -92,7 +92,7 @@ TimeSlot.init({
   timestamps: true,
   indexes: [
     {
-      fields: ['searchVector'],
+      fields: ['search_vector'],
       using: 'gin'
     },
     {
@@ -100,23 +100,23 @@ TimeSlot.init({
       using: 'gin'
     },
     {
-      fields: ['subjectId', 'sectionId', 'dayOfWeek']
+      fields: ['subject_id', 'section_id', 'day_of_week']
     },
     {
-      fields: ['facultyId', 'status']
+      fields: ['faculty_id', 'status']
     },
     {
-      fields: ['effectiveDate', 'endDate']
+      fields: ['effective_date', 'end_date']
     }
   ],
   validate: {
     timeOrder() {
-      if (this.startTime >= this.endTime) {
+      if (this.start_time >= this.end_time) {
         throw new Error('End time must be after start time');
       }
     },
     dateOrder() {
-      if (this.endDate && this.effectiveDate > this.endDate) {
+      if (this.end_date && this.effective_date > this.end_date) {
         throw new Error('End date must be after effective date');
       }
     }
@@ -126,30 +126,30 @@ TimeSlot.init({
       // Check for faculty time slot overlaps
       const overlappingSlot = await TimeSlot.findOne({
         where: {
-          facultyId: timeSlot.facultyId,
-          dayOfWeek: timeSlot.dayOfWeek,
+          faculty_id: timeSlot.faculty_id,
+          day_of_week: timeSlot.day_of_week,
           status: 'active',
           id: { [sequelize.Op.ne]: timeSlot.id },
           [sequelize.Op.or]: [
             {
               // New slot starts during an existing slot
-              startTime: {
-                [sequelize.Op.lt]: timeSlot.endTime,
-                [sequelize.Op.gte]: timeSlot.startTime
+              start_time: {
+                [sequelize.Op.lt]: timeSlot.end_time,
+                [sequelize.Op.gte]: timeSlot.start_time
               }
             },
             {
               // New slot ends during an existing slot
-              endTime: {
-                [sequelize.Op.gt]: timeSlot.startTime,
-                [sequelize.Op.lte]: timeSlot.endTime
+              end_time: {
+                [sequelize.Op.gt]: timeSlot.start_time,
+                [sequelize.Op.lte]: timeSlot.end_time
               }
             },
             {
               // New slot completely contains an existing slot
               [sequelize.Op.and]: [
-                { startTime: { [sequelize.Op.gte]: timeSlot.startTime } },
-                { endTime: { [sequelize.Op.lte]: timeSlot.endTime } }
+                { start_time: { [sequelize.Op.gte]: timeSlot.start_time } },
+                { end_time: { [sequelize.Op.lte]: timeSlot.end_time } }
               ]
             }
           ]
@@ -162,35 +162,35 @@ TimeSlot.init({
     },
     beforeUpdate: async (timeSlot) => {
       // Only check for overlaps if time-related fields are changed
-      if (timeSlot.changed('startTime') || timeSlot.changed('endTime') || 
-          timeSlot.changed('dayOfWeek') || timeSlot.changed('facultyId')) {
+      if (timeSlot.changed('start_time') || timeSlot.changed('end_time') || 
+          timeSlot.changed('day_of_week') || timeSlot.changed('faculty_id')) {
         // Check for faculty time slot overlaps
         const overlappingSlot = await TimeSlot.findOne({
           where: {
-            facultyId: timeSlot.facultyId,
-            dayOfWeek: timeSlot.dayOfWeek,
+            faculty_id: timeSlot.faculty_id,
+            day_of_week: timeSlot.day_of_week,
             status: 'active',
             id: { [sequelize.Op.ne]: timeSlot.id },
             [sequelize.Op.or]: [
               {
                 // New slot starts during an existing slot
-                startTime: {
-                  [sequelize.Op.lt]: timeSlot.endTime,
-                  [sequelize.Op.gte]: timeSlot.startTime
+                start_time: {
+                  [sequelize.Op.lt]: timeSlot.end_time,
+                  [sequelize.Op.gte]: timeSlot.start_time
                 }
               },
               {
                 // New slot ends during an existing slot
-                endTime: {
-                  [sequelize.Op.gt]: timeSlot.startTime,
-                  [sequelize.Op.lte]: timeSlot.endTime
+                end_time: {
+                  [sequelize.Op.gt]: timeSlot.start_time,
+                  [sequelize.Op.lte]: timeSlot.end_time
                 }
               },
               {
                 // New slot completely contains an existing slot
                 [sequelize.Op.and]: [
-                  { startTime: { [sequelize.Op.gte]: timeSlot.startTime } },
-                  { endTime: { [sequelize.Op.lte]: timeSlot.endTime } }
+                  { start_time: { [sequelize.Op.gte]: timeSlot.start_time } },
+                  { end_time: { [sequelize.Op.lte]: timeSlot.end_time } }
                 ]
               }
             ]
@@ -217,10 +217,10 @@ sequelize.query(`
   END;
   $$ LANGUAGE plpgsql;
 
-  DROP TRIGGER IF EXISTS time_slot_search_vector_trigger ON "TimeSlots";
+  DROP TRIGGER IF EXISTS time_slot_search_vector_trigger ON "time_slots";
   
   CREATE TRIGGER time_slot_search_vector_trigger
-  BEFORE INSERT OR UPDATE ON "TimeSlots"
+  BEFORE INSERT OR UPDATE ON "time_slots"
   FOR EACH ROW
   EXECUTE FUNCTION time_slot_search_vector_update();
 `).catch(err => console.log('Search vector trigger already exists'));

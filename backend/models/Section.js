@@ -1,5 +1,5 @@
 const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const { sequelize } = require('../config/database');
 
 class Section extends Model {}
 
@@ -16,19 +16,19 @@ Section.init({
       notEmpty: true
     }
   },
-  departmentId: {
+  department_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'Departments',
+      model: 'departments',
       key: 'id'
     }
   },
-  classRoomId: {
+  class_room_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'ClassRooms',
+      model: 'class_rooms',
       key: 'id'
     }
   },
@@ -40,7 +40,7 @@ Section.init({
       max: 8
     }
   },
-  academicYear: {
+  academic_year: {
     type: DataTypes.STRING,
     allowNull: false
   },
@@ -52,11 +52,11 @@ Section.init({
       min: 1
     }
   },
-  classTeacherId: {
+  class_teacher_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'Faculty',
+      model: 'faculties',
       key: 'id'
     }
   },
@@ -80,14 +80,14 @@ Section.init({
     defaultValue: [],
     comment: 'Section announcements'
   },
-  currentStrength: {
+  current_strength: {
     type: DataTypes.INTEGER,
     defaultValue: 0,
     validate: {
       min: 0
     }
   },
-  attendanceStats: {
+  attendance_stats: {
     type: DataTypes.JSONB,
     defaultValue: {},
     comment: 'Aggregated attendance statistics'
@@ -101,7 +101,7 @@ Section.init({
     defaultValue: {},
     comment: 'Additional metadata about the section'
   },
-  searchVector: {
+  search_vector: {
     type: DataTypes.TSVECTOR,
     allowNull: true
   }
@@ -111,7 +111,7 @@ Section.init({
   timestamps: true,
   indexes: [
     {
-      fields: ['searchVector'],
+      fields: ['search_vector'],
       using: 'gin'
     },
     {
@@ -119,16 +119,16 @@ Section.init({
       using: 'gin'
     },
     {
-      fields: ['departmentId', 'semester', 'academicYear']
+      fields: ['department_id', 'semester', 'academic_year']
     },
     {
-      fields: ['classTeacherId', 'status']
+      fields: ['class_teacher_id', 'status']
     }
   ],
   hooks: {
     beforeCreate: async (section) => {
       const ClassRoom = require('./ClassRoom');
-      const classroom = await ClassRoom.findByPk(section.classRoomId);
+      const classroom = await ClassRoom.findByPk(section.class_room_id);
       if (classroom && section.capacity > classroom.capacity) {
         throw new Error('Section capacity cannot exceed classroom capacity');
       }
@@ -147,10 +147,10 @@ sequelize.query(`
   END;
   $$ LANGUAGE plpgsql;
 
-  DROP TRIGGER IF EXISTS section_search_vector_trigger ON "Sections";
+  DROP TRIGGER IF EXISTS section_search_vector_trigger ON "sections";
   
   CREATE TRIGGER section_search_vector_trigger
-  BEFORE INSERT OR UPDATE ON "Sections"
+  BEFORE INSERT OR UPDATE ON "sections"
   FOR EACH ROW
   EXECUTE FUNCTION section_search_vector_update();
 `).catch(err => console.log('Search vector trigger already exists'));

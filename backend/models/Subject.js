@@ -1,5 +1,5 @@
 const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const { sequelize } = require('../config/database');
 
 class Subject extends Model {}
 
@@ -9,28 +9,28 @@ Subject.init({
     primaryKey: true,
     autoIncrement: true
   },
-  subjectCode: {
+  subject_code: {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true
   },
-  subjectName: {
+  subject_name: {
     type: DataTypes.STRING,
     allowNull: false
   },
-  sectionId: {
+  section_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'Sections',
+      model: 'sections',
       key: 'id'
     }
   },
-  facultyId: {
+  faculty_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'Faculty',
+      model: 'faculties',
       key: 'id'
     }
   },
@@ -73,7 +73,7 @@ Subject.init({
     defaultValue: [],
     comment: 'Study materials and resources'
   },
-  assessmentPattern: {
+  assessment_pattern: {
     type: DataTypes.JSONB,
     defaultValue: {},
     comment: 'Weightage of different assessments'
@@ -92,7 +92,7 @@ Subject.init({
     defaultValue: {},
     comment: 'Additional metadata about the subject'
   },
-  searchVector: {
+  search_vector: {
     type: DataTypes.TSVECTOR,
     allowNull: true
   }
@@ -102,7 +102,7 @@ Subject.init({
   timestamps: true,
   indexes: [
     {
-      fields: ['searchVector'],
+      fields: ['search_vector'],
       using: 'gin'
     },
     {
@@ -114,10 +114,10 @@ Subject.init({
       using: 'gin'
     },
     {
-      fields: ['sectionId', 'semester']
+      fields: ['section_id', 'semester']
     },
     {
-      fields: ['facultyId', 'status']
+      fields: ['faculty_id', 'status']
     }
   ]
 });
@@ -135,10 +135,10 @@ sequelize.query(`
   END;
   $$ LANGUAGE plpgsql;
 
-  DROP TRIGGER IF EXISTS subject_search_vector_trigger ON "Subjects";
+  DROP TRIGGER IF EXISTS subject_search_vector_trigger ON "subjects";
   
   CREATE TRIGGER subject_search_vector_trigger
-  BEFORE INSERT OR UPDATE ON "Subjects"
+  BEFORE INSERT OR UPDATE ON "subjects"
   FOR EACH ROW
   EXECUTE FUNCTION subject_search_vector_update();
 `).catch(err => console.log('Search vector trigger already exists'));

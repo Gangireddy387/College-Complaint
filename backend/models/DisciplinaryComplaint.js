@@ -1,5 +1,5 @@
 const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const { sequelize } = require('../config/database');
 
 class DisciplinaryComplaint extends Model {}
 
@@ -9,23 +9,23 @@ DisciplinaryComplaint.init({
     primaryKey: true,
     autoIncrement: true
   },
-  timeSlotId: {
+  time_slot_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'TimeSlots',
+      model: 'time_slots',
       key: 'id'
     }
   },
-  studentId: {
+  student_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'Students',
+      model: 'students',
       key: 'id'
     }
   },
-  complaintType: {
+  complaint_type: {
     type: DataTypes.ENUM(
       'late_arrival',
       'disturbance',
@@ -46,11 +46,11 @@ DisciplinaryComplaint.init({
     type: DataTypes.ENUM('low', 'medium', 'high', 'critical'),
     allowNull: false
   },
-  reportedBy: {
+  reported_by: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'Faculty',
+      model: 'faculties',
       key: 'id'
     }
   },
@@ -65,19 +65,19 @@ DisciplinaryComplaint.init({
     ),
     defaultValue: 'pending'
   },
-  actionTaken: {
+  action_taken: {
     type: DataTypes.TEXT,
     allowNull: true
   },
-  parentNotified: {
+  parent_notified: {
     type: DataTypes.BOOLEAN,
     defaultValue: false
   },
-  parentNotificationDate: {
+  parent_notification_date: {
     type: DataTypes.DATE,
     allowNull: true
   },
-  disciplinaryAction: {
+  disciplinary_action: {
     type: DataTypes.ENUM(
       'warning',
       'counseling',
@@ -88,31 +88,31 @@ DisciplinaryComplaint.init({
     ),
     allowNull: true
   },
-  principalRemarks: {
+  principal_remarks: {
     type: DataTypes.TEXT,
     allowNull: true
   },
-  principalId: {
+  principal_id: {
     type: DataTypes.INTEGER,
     allowNull: true,
     references: {
-      model: 'Principal',
+      model: 'principals',
       key: 'id'
     }
   },
-  escalatedToPrincipalAt: {
+  escalated_to_principal_at: {
     type: DataTypes.DATE,
     allowNull: true
   },
-  resolvedBy: {
+  resolved_by: {
     type: DataTypes.INTEGER,
     allowNull: true,
     references: {
-      model: 'Faculty',
+      model: 'faculties',
       key: 'id'
     }
   },
-  resolvedAt: {
+  resolved_at: {
     type: DataTypes.DATE,
     allowNull: true
   },
@@ -120,7 +120,7 @@ DisciplinaryComplaint.init({
     type: DataTypes.DATEONLY,
     allowNull: false
   },
-  previousIncidents: {
+  previous_incidents: {
     type: DataTypes.INTEGER,
     defaultValue: 0,
     comment: 'Count of previous similar incidents by this student'
@@ -135,7 +135,7 @@ DisciplinaryComplaint.init({
     defaultValue: {},
     comment: 'Additional metadata about the complaint'
   },
-  searchVector: {
+  search_vector: {
     type: DataTypes.TSVECTOR,
     allowNull: true
   }
@@ -145,7 +145,7 @@ DisciplinaryComplaint.init({
   timestamps: true,
   indexes: [
     {
-      fields: ['searchVector'],
+      fields: ['search_vector'],
       using: 'gin'
     },
     {
@@ -153,7 +153,7 @@ DisciplinaryComplaint.init({
       using: 'gin'
     },
     {
-      fields: ['studentId', 'date']
+      fields: ['student_id', 'date']
     },
     {
       fields: ['status', 'severity']
@@ -163,12 +163,12 @@ DisciplinaryComplaint.init({
     beforeCreate: async (complaint) => {
       if (complaint.severity === 'critical') {
         complaint.status = 'escalated_to_principal';
-        complaint.escalatedToPrincipalAt = new Date();
+        complaint.escalated_to_principal_at = new Date();
       }
     },
     beforeUpdate: async (complaint) => {
       if (complaint.changed('status') && complaint.status === 'escalated_to_principal') {
-        complaint.escalatedToPrincipalAt = new Date();
+        complaint.escalated_to_principal_at = new Date();
       }
     }
   }
@@ -186,10 +186,10 @@ sequelize.query(`
   END;
   $$ LANGUAGE plpgsql;
 
-  DROP TRIGGER IF EXISTS disciplinary_complaint_search_vector_trigger ON "DisciplinaryComplaints";
+  DROP TRIGGER IF EXISTS disciplinary_complaint_search_vector_trigger ON "disciplinary_complaints";
   
   CREATE TRIGGER disciplinary_complaint_search_vector_trigger
-  BEFORE INSERT OR UPDATE ON "DisciplinaryComplaints"
+  BEFORE INSERT OR UPDATE ON "disciplinary_complaints"
   FOR EACH ROW
   EXECUTE FUNCTION disciplinary_complaint_search_vector_update();
 `).catch(err => console.log('Search vector trigger already exists'));

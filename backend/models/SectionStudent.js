@@ -1,5 +1,5 @@
 const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const { sequelize } = require('../config/database');
 
 class SectionStudent extends Model {}
 
@@ -9,23 +9,23 @@ SectionStudent.init({
     primaryKey: true,
     autoIncrement: true
   },
-  sectionId: {
+  section_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'Sections',
+      model: 'sections',
       key: 'id'
     }
   },
-  studentId: {
+  student_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'Students',
+      model: 'students',
       key: 'id'
     }
   },
-  rollNumber: {
+  roll_number: {
     type: DataTypes.INTEGER,
     allowNull: false,
     comment: 'Roll number within the section'
@@ -34,12 +34,12 @@ SectionStudent.init({
     type: DataTypes.ENUM('active', 'transferred', 'completed', 'dropped'),
     defaultValue: 'active'
   },
-  joinDate: {
+  join_date: {
     type: DataTypes.DATE,
     allowNull: false,
     defaultValue: DataTypes.NOW
   },
-  endDate: {
+  end_date: {
     type: DataTypes.DATE,
     allowNull: true
   },
@@ -54,21 +54,21 @@ SectionStudent.init({
   indexes: [
     {
       unique: true,
-      fields: ['sectionId', 'studentId']
+      fields: ['section_id', 'student_id']
     },
     {
       unique: true,
-      fields: ['sectionId', 'rollNumber']
+      fields: ['section_id', 'roll_number']
     }
   ],
   hooks: {
     beforeCreate: async (sectionStudent) => {
       // Auto-generate roll number if not provided
-      if (!sectionStudent.rollNumber) {
-        const maxRoll = await SectionStudent.max('rollNumber', {
-          where: { sectionId: sectionStudent.sectionId }
+      if (!sectionStudent.roll_number) {
+        const maxRoll = await SectionStudent.max('roll_number', {
+          where: { section_id: sectionStudent.section_id }
         });
-        sectionStudent.rollNumber = (maxRoll || 0) + 1;
+        sectionStudent.roll_number = (maxRoll || 0) + 1;
       }
     }
   }
