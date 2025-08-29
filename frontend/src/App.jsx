@@ -9,7 +9,7 @@ import { MainLayout } from './layouts/MainLayout';
 import { Login } from './pages/auth/Login';
 import { StudentDashboard, StudentList, StudentProfile, StudentAttendance, StudentTimetable, StudentSubjects, StudentSections } from './pages/students';
 import { FacultyDashboard, FacultyForms, FacultyClasses, FacultyComplaints, FacultyTimetable, FacultyAttendance } from './pages/faculty';
-import { PrincipalDashboard, Management, PrincipalForms } from './pages/principal';
+import { PrincipalDashboard, Management, PrincipalForms, DepartmentManagement, FacultyManagement, AddDepartment, AddFaculty, AddStudent, Reports } from './pages/principal';
 import { checkAuthStatus } from './store/slices/authSlice';
 
 // Protected Route Component
@@ -107,8 +107,14 @@ const AppRoutes = () => {
                   <Route path="/" element={<Navigate to="/principal/dashboard" replace />} />
                   <Route path="/dashboard" element={<PrincipalDashboard />} />
                   <Route path="/management" element={<Management />} />
-                  <Route path="/students" element={<StudentList />} />
-                  <Route path="/forms" element={<PrincipalForms />} />
+                                      <Route path="/departments" element={<DepartmentManagement />} />
+                    <Route path="/departments/add" element={<AddDepartment />} />
+                    <Route path="/faculty" element={<FacultyManagement />} />
+                    <Route path="/faculty/add" element={<AddFaculty />} />
+                                                        <Route path="/students" element={<StudentList />} />
+                   <Route path="/students/add" element={<AddStudent />} />
+                   <Route path="/forms" element={<PrincipalForms />} />
+                   <Route path="/reports" element={<Reports />} />
                   {/* Add more principal routes here */}
                 </Routes>
               </MainLayout>

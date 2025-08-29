@@ -96,6 +96,16 @@ const getNavigationItems = (userRole) => {
       path: `/${userRole}/management`,
     },
     {
+      text: 'Departments',
+      icon: <BusinessIcon />,
+      path: `/${userRole}/departments`,
+    },
+    {
+      text: 'Faculty',
+      icon: <PeopleIcon />,
+      path: `/${userRole}/faculty`,
+    },
+    {
       text: 'Student Management',
       icon: <PeopleIcon />,
       path: `/${userRole}/students`,

@@ -40,6 +40,22 @@ export const DataTable = ({
     );
   }
 
+  if (!data || data.length === 0) {
+    return (
+      <Box sx={{ p: 3, textAlign: 'center' }}>
+        <Typography color="text.secondary">No data available</Typography>
+      </Box>
+    );
+  }
+
+  if (!columns || columns.length === 0) {
+    return (
+      <Box sx={{ p: 3, textAlign: 'center' }}>
+        <Typography color="text.secondary">No columns defined</Typography>
+      </Box>
+    );
+  }
+
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
       <TableContainer>
@@ -79,8 +95,8 @@ export const DataTable = ({
         count={totalCount}
         rowsPerPage={rowsPerPage}
         page={page}
-        onPageChange={onPageChange}
-        onRowsPerPageChange={onRowsPerPageChange}
+        onPageChange={(event, newPage) => onPageChange(newPage)}
+        onRowsPerPageChange={(event) => onRowsPerPageChange(parseInt(event.target.value, 10))}
       />
     </Paper>
   );

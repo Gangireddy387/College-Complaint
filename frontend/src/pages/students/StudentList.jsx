@@ -20,10 +20,6 @@ import {
   Card,
   CardContent,
   Avatar,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   FormControl,
   InputLabel,
   Select,
@@ -40,7 +36,7 @@ import {
   School as SchoolIcon,
   Person as PersonIcon,
 } from '@mui/icons-material';
-import { StudentForm } from '../../components/forms';
+import { useNavigate } from 'react-router-dom';
 
 
 // Mock data - replace with actual API calls
@@ -158,6 +154,7 @@ const mockDepartments = [
 ];
 
 export const StudentList = () => {
+  const navigate = useNavigate();
   const [students, setStudents] = useState(mockStudents);
   const [filteredStudents, setFilteredStudents] = useState(mockStudents);
   const [page, setPage] = useState(0);
@@ -166,9 +163,9 @@ export const StudentList = () => {
   const [departmentFilter, setDepartmentFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [semesterFilter, setSemesterFilter] = useState('');
-  const [openForm, setOpenForm] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState(null);
   const [viewMode, setViewMode] = useState('table'); // 'table' or 'card'
+  const [selectedStudent, setSelectedStudent] = useState(null);
+
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'info' });
 
   useEffect(() => {
@@ -234,13 +231,12 @@ export const StudentList = () => {
   };
 
   const handleAddStudent = () => {
-    setSelectedStudent(null);
-    setOpenForm(true);
+    navigate('/principal/students/add');
   };
 
   const handleEditStudent = (student) => {
-    setSelectedStudent(student);
-    setOpenForm(true);
+    // For now, just show an alert. You can implement edit functionality later
+    alert('Edit functionality will be implemented in a separate page');
   };
 
   const handleViewStudent = (student) => {
@@ -256,23 +252,7 @@ export const StudentList = () => {
     }
   };
 
-  const handleFormSubmit = (values) => {
-    if (selectedStudent) {
-      // Update existing student
-      setStudents(students.map(s => s.id === selectedStudent.id ? { ...s, ...values } : s));
-      showNotification('Student updated successfully', 'success');
-    } else {
-      // Add new student
-      const newStudent = {
-        ...values,
-        id: Math.max(...students.map(s => s.id)) + 1
-      };
-      setStudents([...students, newStudent]);
-      showNotification('Student added successfully', 'success');
-    }
-    setOpenForm(false);
-    setSelectedStudent(null);
-  };
+
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -632,18 +612,7 @@ export const StudentList = () => {
         </Grid>
       )}
 
-      {/* Student Form Dialog */}
-      <StudentForm
-        open={openForm}
-        onClose={() => {
-          setOpenForm(false);
-          setSelectedStudent(null);
-        }}
-        onSubmit={handleFormSubmit}
-        initialValues={selectedStudent}
-        departments={mockDepartments}
-        sections={[]}
-      />
+
     </Box>
   );
 };

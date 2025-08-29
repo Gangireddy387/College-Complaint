@@ -1,33 +1,47 @@
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
-  Tabs,
-  Tab,
   Typography,
   Button,
   Grid,
   Card,
   CardContent,
-  IconButton,
-  Chip,
+  CardActions,
   Alert,
   CircularProgress,
-  Snackbar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormHelperText,
+  IconButton,
+  Chip,
+
+  Paper,
+  Tabs,
+  Tab,
 } from '@mui/material';
 import {
+  Business as BusinessIcon,
+  People as PeopleIcon,
+  ArrowForward as ArrowForwardIcon,
+  School as SchoolIcon,
+  Group as GroupIcon,
   Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  Business as BusinessIcon,
-  People as PeopleIcon,
+  Save as SaveIcon,
+  Cancel as CancelIcon,
+
 } from '@mui/icons-material';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { PageHeader } from '../../components/shared/PageHeader';
-import { DataTable } from '../../components/shared/DataTable';
-import {
-  FacultyForm,
-  DepartmentForm,
-} from '../../components/forms';
 
 // Tab Panel Component
 function TabPanel({ children, value, index, ...other }) {
@@ -35,8 +49,8 @@ function TabPanel({ children, value, index, ...other }) {
     <div
       role="tabpanel"
       hidden={value !== index}
-      id={`management-tabpanel-${index}`}
-      aria-labelledby={`management-tab-${index}`}
+      id={`quick-actions-tabpanel-${index}`}
+      aria-labelledby={`quick-actions-tab-${index}`}
       {...other}
     >
       {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
@@ -45,109 +59,134 @@ function TabPanel({ children, value, index, ...other }) {
 }
 
 export const Management = () => {
-  const [activeTab, setActiveTab] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState('');
-  
-  // Form states
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [formType, setFormType] = useState(null);
-  const [editingItem, setEditingItem] = useState(null);
   
   // Data states - Only Principal management data
   const [departments, setDepartments] = useState([]);
   const [faculty, setFaculty] = useState([]);
+  
+  // Quick Actions states
+  const [activeTab, setActiveTab] = useState(0);
+  const [isAddDepartmentOpen, setIsAddDepartmentOpen] = useState(false);
+  const [isAddFacultyOpen, setIsAddFacultyOpen] = useState(false);
+  const [departmentFormData, setDepartmentFormData] = useState({
+    department_code: '',
+    name: '',
+    description: '',
+    established_year: '',
+    email: '',
+    phone_number: '',
+    building: '',
+    floor: '',
+    room: '',
+    campus: '',
+    status: 'active'
+  });
+  const [facultyFormData, setFacultyFormData] = useState({
+    employee_id: '',
+    first_name: '',
+    last_name: '',
+    designation: '',
+    department_id: '',
+    email: '',
+    phone_number: '',
+    specializations: '',
+    joining_date: '',
+    current_workload: '',
+    status: 'active'
+  });
+  const [formErrors, setFormErrors] = useState({});
 
   const { user } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
+
+  const handleNavigateToDepartments = () => {
+    navigate('/principal/departments');
+  };
+
+  const handleNavigateToFaculty = () => {
+    navigate('/principal/faculty');
+  };
+
+  const handleCloseError = () => {
+    setError(null);
+  };
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
   };
 
-  const handleAdd = (type) => {
-    setFormType(type);
-    setEditingItem(null);
-    setIsFormOpen(true);
+  // Department form handlers
+  const handleAddDepartment = () => {
+    setDepartmentFormData({
+      department_code: '',
+      name: '',
+      description: '',
+      established_year: '',
+      email: '',
+      phone_number: '',
+      building: '',
+      floor: '',
+      room: '',
+      campus: '',
+      status: 'active'
+    });
+    setFormErrors({});
+    setIsAddDepartmentOpen(true);
   };
 
-  const handleEdit = (item, type) => {
-    setFormType(type);
-    setEditingItem(item);
-    setIsFormOpen(true);
-  };
+  const handleDepartmentFormSubmit = async () => {
+    const errors = {};
+    if (!departmentFormData.department_code) errors.department_code = 'Department code is required';
+    if (!departmentFormData.name) errors.name = 'Department name is required';
+    if (!departmentFormData.description) errors.description = 'Description is required';
+    if (!departmentFormData.established_year) errors.established_year = 'Established year is required';
+    if (!departmentFormData.email) errors.email = 'Email is required';
+    if (!departmentFormData.phone_number) errors.phone_number = 'Phone number is required';
+    if (!departmentFormData.building) errors.building = 'Building is required';
+    if (!departmentFormData.floor) errors.floor = 'Floor is required';
+    if (!departmentFormData.room) errors.room = 'Room is required';
+    if (!departmentFormData.campus) errors.campus = 'Campus is required';
+    
+    setFormErrors(errors);
+    if (Object.keys(errors).length > 0) return;
 
-  const handleDelete = async (id, type) => {
-    if (window.confirm('Are you sure you want to delete this item?')) {
-      try {
-        setIsLoading(true);
-        
-        // Remove item from appropriate state
-        switch (type) {
-          case 'department':
-            setDepartments(prev => prev.filter(item => item.id !== id));
-            break;
-          case 'faculty':
-            setFaculty(prev => prev.filter(item => item.id !== id));
-            break;
-          default:
-            break;
-        }
-        
-        setSuccessMessage(`${type.charAt(0).toUpperCase() + type.slice(1)} deleted successfully`);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
-
-  const handleFormSubmit = async (values) => {
     try {
       setIsLoading(true);
+      const newDepartment = {
+        ...departmentFormData,
+        id: Date.now(),
+        location: {
+          building: departmentFormData.building,
+          floor: departmentFormData.floor,
+          room: departmentFormData.room,
+          campus: departmentFormData.campus
+        },
+        facilities: [],
+        programs: [],
+        research_areas: [],
+        total_students: 0,
+        total_faculty: 0,
+        budget: 0,
+        createdAt: new Date().toISOString()
+      };
       
-      if (editingItem) {
-        // Update existing item
-        const updatedItem = { ...editingItem, ...values };
-        
-        switch (formType) {
-          case 'department':
-            setDepartments(prev => prev.map(item => item.id === editingItem.id ? updatedItem : item));
-            break;
-          case 'faculty':
-            setFaculty(prev => prev.map(item => item.id === editingItem.id ? updatedItem : item));
-            break;
-          default:
-            break;
-        }
-        
-        setSuccessMessage(`${formType.charAt(0).toUpperCase() + formType.slice(1)} updated successfully`);
-      } else {
-        // Create new item
-        const newItem = { 
-          ...values, 
-          id: Date.now(),
-          createdAt: new Date().toISOString()
-        };
-        
-        switch (formType) {
-          case 'department':
-            setDepartments(prev => [...prev, newItem]);
-            break;
-          case 'faculty':
-            setFaculty(prev => [...prev, newItem]);
-            break;
-          default:
-            break;
-        }
-        
-        setSuccessMessage(`${formType.charAt(0).toUpperCase() + formType.slice(1)} created successfully`);
-      }
-      
-      setIsFormOpen(false);
-      setEditingItem(null);
-      setFormType(null);
+      setDepartments(prev => [...prev, newDepartment]);
+      setIsAddDepartmentOpen(false);
+      setDepartmentFormData({
+        department_code: '',
+        name: '',
+        description: '',
+        established_year: '',
+        email: '',
+        phone_number: '',
+        building: '',
+        floor: '',
+        room: '',
+        campus: '',
+        status: 'active'
+      });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -155,18 +194,90 @@ export const Management = () => {
     }
   };
 
-  const handleFormClose = () => {
-    setIsFormOpen(false);
-    setFormType(null);
-    setEditingItem(null);
+  // Faculty form handlers
+  const handleAddFaculty = () => {
+    setFacultyFormData({
+      employee_id: '',
+      first_name: '',
+      last_name: '',
+      designation: '',
+      department_id: '',
+      email: '',
+      phone_number: '',
+      specializations: '',
+      joining_date: '',
+      current_workload: '',
+      status: 'active'
+    });
+    setFormErrors({});
+    setIsAddFacultyOpen(true);
   };
 
-  const handleCloseSnackbar = () => {
-    setSuccessMessage('');
+  const handleFacultyFormSubmit = async () => {
+    const errors = {};
+    if (!facultyFormData.employee_id) errors.employee_id = 'Employee ID is required';
+    if (!facultyFormData.first_name) errors.first_name = 'First name is required';
+    if (!facultyFormData.last_name) errors.last_name = 'Last name is required';
+    if (!facultyFormData.designation) errors.designation = 'Designation is required';
+    if (!facultyFormData.department_id) errors.department_id = 'Department is required';
+    if (!facultyFormData.email) errors.email = 'Email is required';
+    if (!facultyFormData.phone_number) errors.phone_number = 'Phone number is required';
+    if (!facultyFormData.joining_date) errors.joining_date = 'Joining date is required';
+    if (!facultyFormData.current_workload) errors.current_workload = 'Current workload is required';
+    
+    setFormErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
+    try {
+      setIsLoading(true);
+      const newFaculty = {
+        ...facultyFormData,
+        id: Date.now(),
+        specializations: facultyFormData.specializations ? facultyFormData.specializations.split(',').map(s => s.trim()) : [],
+        current_workload: parseInt(facultyFormData.current_workload),
+        qualifications: [],
+        experience: [],
+        publications: [],
+        achievements: [],
+        createdAt: new Date().toISOString()
+      };
+      
+      setFaculty(prev => [...prev, newFaculty]);
+      setIsAddFacultyOpen(false);
+      setFacultyFormData({
+        employee_id: '',
+        first_name: '',
+        last_name: '',
+        designation: '',
+        department_id: '',
+        email: '',
+        phone_number: '',
+        specializations: '',
+        joining_date: '',
+        current_workload: '',
+        status: 'active'
+      });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleCloseError = () => {
-    setError(null);
+  const handleInputChange = (field, value, formType) => {
+    if (formType === 'department') {
+      setDepartmentFormData(prev => ({ ...prev, [field]: value }));
+    } else {
+      setFacultyFormData(prev => ({ ...prev, [field]: value }));
+    }
+    if (formErrors[field]) {
+      setFormErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const getDepartmentName = (departmentId) => {
+    const dept = departments.find(d => d.id === departmentId);
+    return dept ? dept.name : 'Unknown';
   };
 
   // Mock data for Principal management only - Updated to match backend model structure
@@ -222,41 +333,7 @@ export const Management = () => {
         total_students: 110,
         total_faculty: 7,
         budget: 450000
-      },
-      { 
-        id: 4, 
-        department_code: 'MATH', 
-        name: 'Mathematics', 
-        description: 'Mathematics Department offering pure and applied mathematics', 
-        established_year: 2020,
-        email: 'math@college.edu',
-        phone_number: '9876543213',
-        location: { building: 'Main Building', floor: '3rd Floor', room: 'Room 301', campus: 'Main Campus' },
-        facilities: ['Computer Lab', 'Library', 'Study Room'],
-        programs: [{ name: 'B.Sc Mathematics', duration: '3 Years', type: 'Undergraduate' }],
-        research_areas: ['Algebra', 'Analysis', 'Applied Mathematics'],
-        status: 'active',
-        total_students: 75,
-        total_faculty: 4,
-        budget: 200000
-      },
-      { 
-        id: 5, 
-        department_code: 'PHY', 
-        name: 'Physics', 
-        description: 'Physics Department with research in quantum mechanics', 
-        established_year: 2020,
-        email: 'phy@college.edu',
-        phone_number: '9876543214',
-        location: { building: 'Science Building', floor: '1st Floor', room: 'Room 101', campus: 'Main Campus' },
-        facilities: ['Physics Lab', 'Research Lab', 'Seminar Hall'],
-        programs: [{ name: 'B.Sc Physics', duration: '3 Years', type: 'Undergraduate' }],
-        research_areas: ['Quantum Mechanics', 'Condensed Matter', 'Optics'],
-        status: 'active',
-        total_students: 60,
-        total_faculty: 3,
-        budget: 150000
-      },
+      }
     ]);
     
     setFaculty([
@@ -299,131 +376,23 @@ export const Management = () => {
       { 
         id: 3, 
         employee_id: 'EE001', 
-        first_name: 'Robert', 
+        first_name: 'Michael', 
         last_name: 'Johnson', 
         designation: 'Professor', 
         department_id: 2, 
-        email: 'robert.johnson@college.edu', 
+        email: 'michael.johnson@college.edu', 
         phone_number: '9876543203', 
-        specializations: ['Power Systems', 'Control Engineering'],
-        qualifications: [{ degree: 'Ph.D.', institution: 'IIT Bombay', year: 2015, percentage: '88%' }],
-        joining_date: '2019-01-01', 
-        experience: [{ position: 'Associate Professor', organization: 'IIT Madras', from_date: '2015-01-01', to_date: '2018-12-31', description: 'Research in power systems' }],
-        publications: [{ title: 'Power System Analysis', journal: 'Electrical Engineering Journal', year: 2019, doi: '10.1000/ghi789' }],
+        specializations: ['Power Systems', 'Control Systems'],
+        qualifications: [{ degree: 'Ph.D.', institution: 'IIT Bombay', year: 2015, percentage: '90%' }],
+        joining_date: '2018-06-01', 
+        experience: [{ position: 'Associate Professor', organization: 'NIT Trichy', from_date: '2015-01-01', to_date: '2018-05-31', description: 'Teaching power systems engineering' }],
+        publications: [{ title: 'Modern Power Systems', journal: 'Electrical Engineering Journal', year: 2019, doi: '10.1000/ghi789' }],
         achievements: [{ title: 'Excellence in Teaching', year: 2019, description: 'Awarded for outstanding teaching' }],
         current_workload: 20,
         status: 'active'
-      },
-      { 
-        id: 4, 
-        employee_id: 'MATH001', 
-        first_name: 'Sarah', 
-        last_name: 'Wilson', 
-        designation: 'Assistant Professor', 
-        department_id: 4, 
-        email: 'sarah.wilson@college.edu', 
-        phone_number: '9876543204', 
-        specializations: ['Algebra', 'Number Theory'],
-        qualifications: [{ degree: 'Ph.D.', institution: 'ISI Kolkata', year: 2022, percentage: '90%' }],
-        joining_date: '2022-01-01', 
-        experience: [{ position: 'Research Fellow', organization: 'ISI Kolkata', from_date: '2019-01-01', to_date: '2021-12-31', description: 'Research in number theory' }],
-        publications: [{ title: 'Modern Algebra', journal: 'Mathematics Journal', year: 2022, doi: '10.1000/jkl012' }],
-        achievements: [{ title: 'Research Fellowship', year: 2022, description: 'Awarded for mathematical research' }],
-        current_workload: 14,
-        status: 'active'
-      },
+      }
     ]);
   }, []);
-
-  // Only Principal management tabs
-  const tabs = [
-    { label: 'Departments', icon: <BusinessIcon />, data: departments, type: 'department' },
-    { label: 'Faculty', icon: <PeopleIcon />, data: faculty, type: 'faculty' },
-  ];
-
-  const getColumns = (type) => {
-    const baseColumns = [
-      {
-        id: 'actions',
-        label: 'Actions',
-        minWidth: 120,
-        format: (value, row) => (
-          <Box>
-            <IconButton
-              size="small"
-              onClick={() => handleEdit(row, type)}
-              title="Edit"
-              color="primary"
-            >
-              <EditIcon />
-            </IconButton>
-            <IconButton
-              size="small"
-              onClick={() => handleDelete(row.id, type)}
-              title="Delete"
-              color="error"
-            >
-              <DeleteIcon />
-            </IconButton>
-          </Box>
-        ),
-      },
-    ];
-
-    switch (type) {
-      case 'department':
-        return [
-          { id: 'department_code', label: 'Code', minWidth: 100 },
-          { id: 'name', label: 'Name', minWidth: 150 },
-          { id: 'description', label: 'Description', minWidth: 200 },
-          { id: 'established_year', label: 'Established', minWidth: 120 },
-          { id: 'email', label: 'Email', minWidth: 200 },
-          { id: 'total_students', label: 'Students', minWidth: 100 },
-          { id: 'total_faculty', label: 'Faculty', minWidth: 100 },
-          { id: 'status', label: 'Status', minWidth: 100, format: (value) => (
-            <Chip label={value} color={value === 'active' ? 'success' : 'default'} size="small" />
-          )},
-          ...baseColumns,
-        ];
-      case 'faculty':
-        return [
-          { id: 'employee_id', label: 'Employee ID', minWidth: 120 },
-          { id: 'first_name', label: 'First Name', minWidth: 120 },
-          { id: 'last_name', label: 'Last Name', minWidth: 120 },
-          { id: 'designation', label: 'Designation', minWidth: 150 },
-          { id: 'email', label: 'Email', minWidth: 200 },
-          { id: 'department_id', label: 'Department', minWidth: 150, format: (value) => departments.find(d => d.id === value)?.name || value },
-          { id: 'specializations', label: 'Specializations', minWidth: 200, format: (value) => value?.slice(0, 2).join(', ') + (value?.length > 2 ? '...' : '') },
-          { id: 'status', label: 'Status', minWidth: 100, format: (value) => (
-            <Chip label={value} color={value === 'active' ? 'success' : 'warning'} size="small" />
-          )},
-          ...baseColumns,
-        ];
-      default:
-        return baseColumns;
-    }
-  };
-
-  const renderForm = () => {
-    if (!isFormOpen || !formType) return null;
-
-    const commonProps = {
-      open: isFormOpen,
-      onClose: handleFormClose,
-      onSubmit: handleFormSubmit,
-      initialValues: editingItem,
-      isLoading,
-    };
-
-    switch (formType) {
-      case 'department':
-        return <DepartmentForm {...commonProps} faculty={faculty} />;
-      case 'faculty':
-        return <FacultyForm {...commonProps} departments={departments} />;
-      default:
-        return null;
-    }
-  };
 
   if (isLoading && !departments.length) {
     return (
@@ -437,7 +406,7 @@ export const Management = () => {
     <Box>
       <PageHeader
         title="Principal Management"
-        subtitle="Manage departments and faculty members"
+        subtitle="Manage academic departments and faculty members"
         breadcrumbs={[
           { label: 'Home', path: '/principal/dashboard' },
           { label: 'Management', path: '/principal/management' },
@@ -450,73 +419,530 @@ export const Management = () => {
         </Alert>
       )}
 
-      <Card>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs value={activeTab} onChange={handleTabChange} aria-label="principal management tabs">
-            {tabs.map((tab, index) => (
-              <Tab
-                key={tab.type}
-                label={
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    {tab.icon}
-                    {tab.label}
-                  </Box>
-                }
-                id={`management-tab-${index}`}
-                aria-controls={`management-tabpanel-${index}`}
-              />
-            ))}
-          </Tabs>
-        </Box>
-
-        {tabs.map((tab, index) => (
-          <TabPanel key={tab.type} value={activeTab} index={index}>
-            <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography variant="h6">
-                {tab.label} ({tab.data?.length || 0})
+      <Grid container spacing={3}>
+        {/* Department Management Card */}
+        <Grid item xs={12} md={6}>
+          <Card 
+            sx={{ 
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              transition: 'all 0.3s ease-in-out',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: 4,
+              }
+            }}
+          >
+            <CardContent sx={{ flexGrow: 1, textAlign: 'center', py: 4 }}>
+              <BusinessIcon sx={{ fontSize: 64, color: 'primary.main', mb: 2 }} />
+              <Typography variant="h5" component="h2" gutterBottom>
+                Department Management
               </Typography>
+              <Typography variant="body1" color="text.secondary" paragraph>
+                Manage academic departments, their locations, facilities, and academic programs.
+              </Typography>
+              
+              <Box sx={{ mt: 3, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+                <Typography variant="h6" color="primary.main" gutterBottom>
+                  Current Status
+                </Typography>
+                <Grid container spacing={2} justifyContent="center">
+                  <Grid item>
+                    <Box sx={{ textAlign: 'center' }}>
+                      <Typography variant="h4" color="primary.main" fontWeight="bold">
+                        {departments.length}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Departments
+                      </Typography>
+                    </Box>
+                  </Grid>
+                  <Grid item>
+                    <Box sx={{ textAlign: 'center' }}>
+                      <Typography variant="h4" color="secondary.main" fontWeight="bold">
+                        {departments.reduce((sum, dept) => sum + dept.total_students, 0)}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Total Students
+                      </Typography>
+                    </Box>
+                  </Grid>
+                  <Grid item>
+                    <Box sx={{ textAlign: 'center' }}>
+                      <Typography variant="h4" color="success.main" fontWeight="bold">
+                        {departments.reduce((sum, dept) => sum + dept.total_faculty, 0)}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Total Faculty
+                      </Typography>
+                    </Box>
+                  </Grid>
+                </Grid>
+              </Box>
+            </CardContent>
+            <CardActions sx={{ justifyContent: 'center', pb: 3 }}>
               <Button
                 variant="contained"
-                startIcon={<AddIcon />}
-                onClick={() => handleAdd(tab.type)}
+                size="large"
+                startIcon={<ArrowForwardIcon />}
+                onClick={handleNavigateToDepartments}
+                sx={{ minWidth: 200 }}
               >
-                Add {tab.label.slice(0, -1)}
+                Manage Departments
               </Button>
+            </CardActions>
+          </Card>
+        </Grid>
+
+        {/* Faculty Management Card */}
+        <Grid item xs={12} md={6}>
+          <Card 
+            sx={{ 
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              transition: 'all 0.3s ease-in-out',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: 4,
+              }
+            }}
+          >
+            <CardContent sx={{ flexGrow: 1, textAlign: 'center', py: 4 }}>
+              <PeopleIcon sx={{ fontSize: 64, color: 'secondary.main', mb: 2 }} />
+              <Typography variant="h5" component="h2" gutterBottom>
+                Faculty Management
+              </Typography>
+              <Typography variant="body1" color="text.secondary" paragraph>
+                Manage faculty members, their specializations, workload, and academic profiles.
+              </Typography>
+              
+              <Box sx={{ mt: 3, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+                <Typography variant="h6" color="secondary.main" gutterBottom>
+                  Current Status
+                </Typography>
+                <Grid container spacing={2} justifyContent="center">
+                  <Grid item>
+                    <Box sx={{ textAlign: 'center' }}>
+                      <Typography variant="h4" color="secondary.main" fontWeight="bold">
+                        {faculty.length}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Faculty Members
+                      </Typography>
+                    </Box>
+                  </Grid>
+                  <Grid item>
+                    <Box sx={{ textAlign: 'center' }}>
+                      <Typography variant="h4" color="info.main" fontWeight="bold">
+                        {faculty.filter(f => f.status === 'active').length}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Active Members
+                      </Typography>
+                    </Box>
+                  </Grid>
+                  <Grid item>
+                    <Box sx={{ textAlign: 'center' }}>
+                      <Typography variant="h4" color="warning.main" fontWeight="bold">
+                        {faculty.reduce((sum, f) => sum + f.current_workload, 0)}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Total Workload (hrs/week)
+                      </Typography>
+                    </Box>
+                  </Grid>
+                </Grid>
+              </Box>
+            </CardContent>
+            <CardActions sx={{ justifyContent: 'center', pb: 3 }}>
+              <Button
+                variant="contained"
+                size="large"
+                startIcon={<ArrowForwardIcon />}
+                onClick={handleNavigateToFaculty}
+                sx={{ minWidth: 200 }}
+                color="secondary"
+              >
+                Manage Faculty
+              </Button>
+            </CardActions>
+          </Card>
+        </Grid>
+
+        {/* Quick Actions Card with Tabs */}
+        <Grid item xs={12}>
+          <Card>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+              <Tabs value={activeTab} onChange={handleTabChange} aria-label="quick actions tabs">
+                <Tab
+                  label={
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <AddIcon />
+                      Add Department
+                    </Box>
+                  }
+                  id="quick-actions-tab-0"
+                  aria-controls="quick-actions-tabpanel-0"
+                />
+                <Tab
+                  label={
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <AddIcon />
+                      Add Faculty
+                    </Box>
+                  }
+                  id="quick-actions-tab-1"
+                  aria-controls="quick-actions-tabpanel-1"
+                />
+              </Tabs>
             </Box>
 
-            {tab.data?.length > 0 ? (
-              <DataTable
-                columns={getColumns(tab.type)}
-                data={tab.data}
-                totalCount={tab.data.length}
-                page={0}
-                rowsPerPage={10}
-                onPageChange={() => {}}
-                onRowsPerPageChange={() => {}}
-                isLoading={isLoading}
-                error={error}
-              />
-            ) : (
-              <Box sx={{ textAlign: 'center', py: 4 }}>
-                <Typography variant="body1" color="text.secondary">
-                  No {tab.label.toLowerCase()} found. Click "Add {tab.label.slice(0, -1)}" to get started.
+
+
+
+
+            {/* Add Department Tab */}
+            <TabPanel value={activeTab} index={0}>
+              <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="h6">
+                  Add New Department
                 </Typography>
+                <Button
+                  variant="outlined"
+                  startIcon={<ArrowForwardIcon />}
+                  onClick={handleNavigateToDepartments}
+                >
+                  Full Management
+                </Button>
               </Box>
-            )}
-          </TabPanel>
-        ))}
-      </Card>
+              
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Department Code"
+                    value={departmentFormData.department_code}
+                    onChange={(e) => handleInputChange('department_code', e.target.value, 'department')}
+                    error={!!formErrors.department_code}
+                    helperText={formErrors.department_code}
+                    placeholder="e.g., CS, EE, ME"
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Department Name"
+                    value={departmentFormData.name}
+                    onChange={(e) => handleInputChange('name', e.target.value, 'department')}
+                    error={!!formErrors.name}
+                    helperText={formErrors.name}
+                    placeholder="e.g., Computer Science"
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Description"
+                    value={departmentFormData.description}
+                    onChange={(e) => handleInputChange('description', e.target.value, 'department')}
+                    error={!!formErrors.description}
+                    helperText={formErrors.description}
+                    multiline
+                    rows={3}
+                    placeholder="Brief description of the department"
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Established Year"
+                    value={departmentFormData.established_year}
+                    onChange={(e) => handleInputChange('established_year', e.target.value, 'department')}
+                    error={!!formErrors.established_year}
+                    helperText={formErrors.established_year}
+                    type="number"
+                    placeholder="e.g., 2020"
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth error={!!formErrors.status}>
+                    <InputLabel>Status</InputLabel>
+                    <Select
+                      value={departmentFormData.status}
+                      onChange={(e) => handleInputChange('status', e.target.value, 'department')}
+                      label="Status"
+                    >
+                      <MenuItem value="active">Active</MenuItem>
+                      <MenuItem value="inactive">Inactive</MenuItem>
+                      <MenuItem value="suspended">Suspended</MenuItem>
+                    </Select>
+                    {formErrors.status && <FormHelperText>{formErrors.status}</FormHelperText>}
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Email"
+                    value={departmentFormData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value, 'department')}
+                    error={!!formErrors.email}
+                    helperText={formErrors.email}
+                    type="email"
+                    placeholder="department@college.edu"
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Phone Number"
+                    value={departmentFormData.phone_number}
+                    onChange={(e) => handleInputChange('phone_number', e.target.value, 'department')}
+                    error={!!formErrors.phone_number}
+                    helperText={formErrors.phone_number}
+                    placeholder="9876543210"
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Building"
+                    value={departmentFormData.building}
+                    onChange={(e) => handleInputChange('building', e.target.value, 'department')}
+                    error={!!formErrors.building}
+                    helperText={formErrors.building}
+                    placeholder="e.g., Main Building"
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Floor"
+                    value={departmentFormData.floor}
+                    onChange={(e) => handleInputChange('floor', e.target.value, 'department')}
+                    error={!!formErrors.floor}
+                    helperText={formErrors.floor}
+                    placeholder="e.g., 2nd Floor"
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Room"
+                    value={departmentFormData.room}
+                    onChange={(e) => handleInputChange('room', e.target.value, 'department')}
+                    error={!!formErrors.room}
+                    helperText={formErrors.room}
+                    placeholder="e.g., Room 201"
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Campus"
+                    value={departmentFormData.campus}
+                    onChange={(e) => handleInputChange('campus', e.target.value, 'department')}
+                    error={!!formErrors.campus}
+                    helperText={formErrors.campus}
+                    placeholder="e.g., Main Campus"
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+                    <Button
+                      variant="outlined"
+                      startIcon={<CancelIcon />}
+                      onClick={() => setActiveTab(0)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="contained"
+                      startIcon={<SaveIcon />}
+                      onClick={handleDepartmentFormSubmit}
+                      disabled={isLoading}
+                    >
+                      {isLoading ? <CircularProgress size={20} /> : 'Create Department'}
+                    </Button>
+                  </Box>
+                </Grid>
+              </Grid>
+            </TabPanel>
 
-      {renderForm()}
-
-      {/* Success Snackbar */}
-      <Snackbar
-        open={!!successMessage}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-        message={successMessage}
-        severity="success"
-      />
+            {/* Add Faculty Tab */}
+            <TabPanel value={activeTab} index={1}>
+              <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="h6">
+                  Add New Faculty Member
+                </Typography>
+                <Button
+                  variant="outlined"
+                  startIcon={<ArrowForwardIcon />}
+                  onClick={handleNavigateToFaculty}
+                >
+                  Full Management
+                </Button>
+              </Box>
+              
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Employee ID"
+                    value={facultyFormData.employee_id}
+                    onChange={(e) => handleInputChange('employee_id', e.target.value, 'faculty')}
+                    error={!!formErrors.employee_id}
+                    helperText={formErrors.employee_id}
+                    placeholder="e.g., CS001, EE001"
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="First Name"
+                    value={facultyFormData.first_name}
+                    onChange={(e) => handleInputChange('first_name', e.target.value, 'faculty')}
+                    error={!!formErrors.first_name}
+                    helperText={formErrors.first_name}
+                    placeholder="e.g., John"
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Last Name"
+                    value={facultyFormData.last_name}
+                    onChange={(e) => handleInputChange('last_name', e.target.value, 'faculty')}
+                    error={!!formErrors.last_name}
+                    helperText={formErrors.last_name}
+                    placeholder="e.g., Doe"
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Designation"
+                    value={facultyFormData.designation}
+                    onChange={(e) => handleInputChange('designation', e.target.value, 'faculty')}
+                    error={!!formErrors.designation}
+                    helperText={formErrors.designation}
+                    placeholder="e.g., Assistant Professor"
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth error={!!formErrors.department_id}>
+                    <InputLabel>Department</InputLabel>
+                    <Select
+                      value={facultyFormData.department_id}
+                      onChange={(e) => handleInputChange('department_id', e.target.value, 'faculty')}
+                      label="Department"
+                    >
+                      {departments.map((dept) => (
+                        <MenuItem key={dept.id} value={dept.id}>
+                          {dept.name} ({dept.department_code})
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    {formErrors.department_id && <FormHelperText>{formErrors.department_id}</FormHelperText>}
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth error={!!formErrors.status}>
+                    <InputLabel>Status</InputLabel>
+                    <Select
+                      value={facultyFormData.status}
+                      onChange={(e) => handleInputChange('status', e.target.value, 'faculty')}
+                      label="Status"
+                    >
+                      <MenuItem value="active">Active</MenuItem>
+                      <MenuItem value="inactive">Inactive</MenuItem>
+                      <MenuItem value="on_leave">On Leave</MenuItem>
+                    </Select>
+                    {formErrors.status && <FormHelperText>{formErrors.status}</FormHelperText>}
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Email"
+                    value={facultyFormData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value, 'faculty')}
+                    error={!!formErrors.email}
+                    helperText={formErrors.email}
+                    type="email"
+                    placeholder="faculty@college.edu"
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Phone Number"
+                    value={facultyFormData.phone_number}
+                    onChange={(e) => handleInputChange('phone_number', e.target.value, 'faculty')}
+                    error={!!formErrors.phone_number}
+                    helperText={formErrors.phone_number}
+                    placeholder="9876543210"
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Specializations"
+                    value={facultyFormData.specializations}
+                    onChange={(e) => handleInputChange('specializations', e.target.value, 'faculty')}
+                    placeholder="e.g., Software Engineering, Database Systems (comma separated)"
+                    helperText="Enter specializations separated by commas"
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Joining Date"
+                    value={facultyFormData.joining_date}
+                    onChange={(e) => handleInputChange('joining_date', e.target.value, 'faculty')}
+                    error={!!formErrors.joining_date}
+                    helperText={formErrors.joining_date}
+                    type="date"
+                    InputLabelProps={{ shrink: true }}
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Current Workload (hrs/week)"
+                    value={facultyFormData.current_workload}
+                    onChange={(e) => handleInputChange('current_workload', e.target.value, 'faculty')}
+                    error={!!formErrors.current_workload}
+                    helperText={formErrors.current_workload}
+                    type="number"
+                    placeholder="16"
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+                    <Button
+                      variant="outlined"
+                      startIcon={<CancelIcon />}
+                      onClick={() => setActiveTab(0)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="contained"
+                      startIcon={<SaveIcon />}
+                      onClick={handleFacultyFormSubmit}
+                      disabled={isLoading}
+                    >
+                      {isLoading ? <CircularProgress size={20} /> : 'Create Faculty Member'}
+                    </Button>
+                  </Box>
+                </Grid>
+              </Grid>
+            </TabPanel>
+          </Card>
+        </Grid>
+      </Grid>
     </Box>
   );
 };
