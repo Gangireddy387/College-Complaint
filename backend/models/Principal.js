@@ -14,16 +14,16 @@ Principal.init({
     primaryKey: true,
     autoIncrement: true
   },
-  employeeId: {
+  employee_id: {
     type: DataTypes.STRING,
     unique: true,
     allowNull: false
   },
-  firstName: {
+  first_name: {
     type: DataTypes.STRING,
     allowNull: false
   },
-  lastName: {
+  last_name: {
     type: DataTypes.STRING,
     allowNull: false
   },
@@ -39,13 +39,13 @@ Principal.init({
     type: DataTypes.STRING,
     allowNull: false
   },
-  phoneNumber: {
+  phone_number: {
     type: DataTypes.STRING,
     validate: {
       is: /^[0-9]{10}$/
     }
   },
-  joiningDate: {
+  joining_date: {
     type: DataTypes.DATE,
     allowNull: false
   },

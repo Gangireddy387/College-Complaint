@@ -142,10 +142,10 @@ sequelize.query(`
   END;
   $$ LANGUAGE plpgsql;
 
-  DROP TRIGGER IF EXISTS department_search_vector_trigger ON "Departments";
+  DROP TRIGGER IF EXISTS department_search_vector_trigger ON "departments";
   
   CREATE TRIGGER department_search_vector_trigger
-  BEFORE INSERT OR UPDATE ON "Departments"
+  BEFORE INSERT OR UPDATE ON "departments"
   FOR EACH ROW
   EXECUTE FUNCTION department_search_vector_update();
 `).catch(err => console.log('Search vector trigger already exists'));
