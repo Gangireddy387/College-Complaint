@@ -1,0 +1,11 @@
+export { FacultyForm } from './FacultyForm';
+export { StudentForm } from './StudentForm';
+export { TimeSlotForm } from './TimeSlotForm';
+export { DepartmentForm } from './DepartmentForm';
+export { SubjectForm } from './SubjectForm';
+export { SectionForm } from './SectionForm';
+export { ClassroomForm } from './ClassroomForm';
+export { PrincipalForm } from './PrincipalForm';
+export { AttendanceForm } from './AttendanceForm';
+export { ComplaintForm } from './ComplaintForm';
+export { SectionStudentForm } from './SectionStudentForm';
