@@ -1,9 +1,7 @@
 export { PrincipalDashboard } from './Dashboard';
 export { Management } from './Management';
-export { PrincipalForms } from './PrincipalForms';
 export { DepartmentManagement } from './DepartmentManagement';
 export { FacultyManagement } from './FacultyManagement';
 export { AddDepartment } from './AddDepartment';
 export { AddFaculty } from './AddFaculty';
 export { AddStudent } from './AddStudent';
-export { Reports } from './Reports';

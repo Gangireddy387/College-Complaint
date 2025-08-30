@@ -50,9 +50,28 @@ let theme = createTheme({
         },
       },
     },
+    MuiDrawer: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: '#ffffff',
+          borderRight: '1px solid rgba(0, 0, 0, 0.12)',
+        },
+      },
+    },
   },
   // Add custom properties
-  drawerWidth: 240,
+  drawerWidth: 280,
+  // Z-index configuration
+  zIndex: {
+    mobileStepper: 1000,
+    fab: 1050,
+    speedDial: 1050,
+    appBar: 1100,
+    drawer: 1200,
+    modal: 1300,
+    snackbar: 1400,
+    tooltip: 1500,
+  },
 });
 
 // Make typography responsive

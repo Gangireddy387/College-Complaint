@@ -27,11 +27,14 @@ import {
   Warning as WarningIcon,
   Edit as EditIcon,
   Visibility as ViewIcon,
+  Group as GroupIcon,
 } from '@mui/icons-material';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 export const StudentDashboard = () => {
   const { user } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
   const [attendanceData, setAttendanceData] = useState({
     totalClasses: 45,
     attendedClasses: 42,
@@ -118,6 +121,26 @@ export const StudentDashboard = () => {
       </Box>
 
       <Grid container spacing={3}>
+        {/* Section Overview */}
+        <Grid item xs={12}>
+          <Card sx={{ bgcolor: 'primary.light', color: 'primary.contrastText' }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <GroupIcon sx={{ mr: 1, fontSize: '2rem' }} />
+                <Typography variant="h5">
+                  My Section: {user?.section_id || 'A'} - Computer Science
+                </Typography>
+              </Box>
+              <Typography variant="body1" sx={{ mb: 1 }}>
+                Academic Year: 2024-2025 | Semester: {user?.semester || 3} | Section Advisor: Prof. Jane Smith
+              </Typography>
+              <Typography variant="body2">
+                You are enrolled in this section with 28 other students. All your classes, attendance, and academic activities are managed within this section.
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
         {/* Profile Card */}
         <Grid item xs={12} md={4}>
           <Card>
@@ -144,7 +167,7 @@ export const StudentDashboard = () => {
                 Department: Computer Science
               </Typography>
               <Typography variant="body2" color="text.secondary" gutterBottom>
-                Section: A
+                Student ID: {user?.student_id || 'CS001'}
               </Typography>
               <Box sx={{ mt: 2 }}>
                 <Button
@@ -159,8 +182,9 @@ export const StudentDashboard = () => {
                   variant="outlined"
                   size="small"
                   startIcon={<ViewIcon />}
+                  onClick={() => navigate('/student/profile')}
                 >
-                  View Details
+                  View Profile
                 </Button>
               </Box>
             </CardContent>
@@ -303,6 +327,8 @@ export const StudentDashboard = () => {
           </Card>
         </Grid>
 
+
+
         {/* Upcoming Classes */}
         <Grid item xs={12} md={6}>
           <Card>
@@ -363,7 +389,7 @@ export const StudentDashboard = () => {
         <Grid item xs={12}>
           <Paper sx={{ p: 2, bgcolor: 'grey.50' }}>
             <Typography variant="h6" gutterBottom>
-              Quick Actions
+              Quick Actions for Section {user?.section_id || 'A'}
             </Typography>
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
               <Button
@@ -378,21 +404,22 @@ export const StudentDashboard = () => {
                 startIcon={<CalendarIcon />}
                 size="medium"
               >
-                View Attendance Report
+                View My Attendance
               </Button>
               <Button
                 variant="outlined"
                 startIcon={<SchoolIcon />}
                 size="medium"
               >
-                Academic Calendar
+                Section Timetable
               </Button>
               <Button
                 variant="outlined"
                 startIcon={<PersonIcon />}
                 size="medium"
+                onClick={() => navigate('/student/profile')}
               >
-                Contact Faculty
+                View My Profile
               </Button>
             </Box>
           </Paper>

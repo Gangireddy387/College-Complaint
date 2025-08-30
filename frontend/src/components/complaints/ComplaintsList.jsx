@@ -18,13 +18,16 @@ import {
   MenuItem,
   Alert,
   CircularProgress,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import {
   Edit as EditIcon,
   Visibility as ViewIcon,
   CheckCircle as ResolveIcon,
+  Info as InfoIcon,
 } from '@mui/icons-material';
-import { DataTable } from '../shared/DataTable';
+import { ResponsiveTable } from '../shared/ResponsiveTable';
 import { ComplaintForm } from './ComplaintForm';
 
 const getStatusColor = (status) => {
@@ -67,6 +70,9 @@ export const ComplaintsList = ({
   userRole,
   showActions = true,
 }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isResolveDialogOpen, setIsResolveDialogOpen] = useState(false);
@@ -98,112 +104,178 @@ export const ComplaintsList = ({
     }
   };
 
+  const handleRowClick = (complaint) => {
+    console.log('Complaint clicked:', complaint);
+    // Show detailed complaint information
+  };
+
+  // Convert complaints data for ResponsiveTable
   const columns = [
     {
-      id: 'complaintType',
-      label: 'Type',
-      minWidth: 100,
-      format: (value) => (
+      field: 'id',
+      headerName: 'ID',
+      bold: true,
+      hideOnMobile: false,
+      hideOnTablet: false,
+    },
+    {
+      field: 'title',
+      headerName: 'Title',
+      bold: true,
+      hideOnMobile: false,
+      hideOnTablet: false,
+    },
+    {
+      field: 'type',
+      headerName: 'Type',
+      hideOnMobile: false,
+      hideOnTablet: false,
+    },
+    {
+      field: 'priority',
+      headerName: 'Priority',
+      render: (value) => (
         <Chip
-          label={value.charAt(0).toUpperCase() + value.slice(1)}
+          label={value}
           size="small"
-          color="primary"
+          color={getPriorityColor(value)}
+          variant="filled"
+        />
+      ),
+      hideOnMobile: false,
+      hideOnTablet: false,
+    },
+    {
+      field: 'status',
+      headerName: 'Status',
+      render: (value) => (
+        <Chip
+          label={value}
+          size="small"
+          color={getStatusColor(value)}
           variant="outlined"
         />
       ),
+      hideOnMobile: false,
+      hideOnTablet: false,
     },
     {
-      id: 'description',
-      label: 'Description',
-      minWidth: 200,
-      format: (value) => (
-        <Typography variant="body2" noWrap>
-          {value.length > 50 ? `${value.substring(0, 50)}...` : value}
-        </Typography>
-      ),
+      field: 'date',
+      headerName: 'Date',
+      hideOnMobile: true,
+      hideOnTablet: false,
     },
     {
-      id: 'priority',
-      label: 'Priority',
-      minWidth: 100,
-      format: (value) => (
-        <Chip
-          label={value.toUpperCase()}
-          size="small"
-          color={getPriorityColor(value)}
-        />
-      ),
-    },
-    {
-      id: 'status',
-      label: 'Status',
-      minWidth: 120,
-      format: (value) => (
-        <Chip
-          label={value.replace('_', ' ').toUpperCase()}
-          size="small"
-          color={getStatusColor(value)}
-        />
-      ),
-    },
-    {
-      id: 'createdAt',
-      label: 'Created',
-      minWidth: 120,
-      format: (value) => new Date(value).toLocaleDateString(),
+      field: 'description',
+      headerName: 'Description',
+      hideOnMobile: true,
+      hideOnTablet: false,
     },
   ];
 
-  if (showActions) {
-    columns.push({
-      id: 'actions',
-      label: 'Actions',
-      minWidth: 120,
-      format: (value, row) => (
-        <Box>
-          <IconButton
-            size="small"
-            onClick={() => handleView(row)}
-            title="View Details"
-          >
-            <ViewIcon />
-          </IconButton>
-          {userRole === 'student' && row.status === 'pending' && (
-            <IconButton
-              size="small"
-              onClick={() => handleEdit(row)}
-              title="Edit Complaint"
-            >
-              <EditIcon />
-            </IconButton>
-          )}
-          {(userRole === 'faculty' || userRole === 'principal') && row.status !== 'resolved' && (
-            <IconButton
-              size="small"
-              onClick={() => handleResolve(row)}
-              title="Resolve Complaint"
-              color="success"
-            >
-              <ResolveIcon />
-            </IconButton>
-          )}
-        </Box>
-      ),
-    });
+  const expandableComplaintContent = (complaint) => (
+    <Box>
+      <Typography variant="subtitle2" gutterBottom>
+        Complaint Details
+      </Typography>
+      <Box sx={{ mb: 2 }}>
+        <Typography variant="body2">
+          <strong>Title:</strong> {complaint.title}
+        </Typography>
+        <Typography variant="body2">
+          <strong>Type:</strong> {complaint.type}
+        </Typography>
+        <Typography variant="body2">
+          <strong>Priority:</strong> {complaint.priority}
+        </Typography>
+        <Typography variant="body2">
+          <strong>Status:</strong> {complaint.status}
+        </Typography>
+        <Typography variant="body2">
+          <strong>Date:</strong> {complaint.date}
+        </Typography>
+      </Box>
+      <Typography variant="body2">
+        <strong>Description:</strong> {complaint.description}
+      </Typography>
+    </Box>
+  );
+
+  if (isLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert severity="error" sx={{ mb: 2 }}>
+        {error}
+      </Alert>
+    );
   }
 
   return (
     <Box>
-      <DataTable
+      {/* Current View Mode Indicator */}
+      <Alert 
+        severity="info" 
+        icon={<InfoIcon />}
+        sx={{ mb: 2 }}
+      >
+        <Typography variant="body2">
+          <strong>Current View:</strong> {
+            isMobile ? 'Mobile Grid View (Single Column Cards)' :
+            isTablet && !isMobile ? 'Tablet Grid View (2-Column Cards)' :
+            'Desktop Table View (Full Table)'
+          }
+        </Typography>
+        <Typography variant="caption" display="block" sx={{ mt: 0.5 }}>
+          Resize your browser window to see the complaints data transform into different layouts!
+        </Typography>
+      </Alert>
+
+      <ResponsiveTable
         columns={columns}
-        data={complaints}
-        totalCount={complaints?.length || 0}
-        page={0}
-        rowsPerPage={10}
-        onPageChange={() => {}}
-        onRowsPerPageChange={() => {}}
-        isLoading={isLoading}
-        error={error}
+        data={complaints || []}
+        onRowClick={handleRowClick}
+        onEdit={showActions ? handleEdit : undefined}
+        onDelete={undefined} // No delete action for complaints
+        expandable={true}
+        expandableContent={expandableComplaintContent}
+        emptyMessage="No complaints found"
+        customActions={(row) => (
+          <Box sx={{ display: 'flex', gap: 0.5 }}>
+            <IconButton
+              size="small"
+              onClick={() => handleView(row)}
+              title="View Complaint"
+            >
+              <ViewIcon />
+            </IconButton>
+            {userRole === 'student' && row.status === 'pending' && (
+              <IconButton
+                size="small"
+                onClick={() => handleEdit(row)}
+                title="Edit Complaint"
+              >
+                <EditIcon />
+              </IconButton>
+            )}
+            {(userRole === 'faculty' || userRole === 'principal') && row.status !== 'resolved' && (
+              <IconButton
+                size="small"
+                onClick={() => handleResolve(row)}
+                title="Resolve Complaint"
+                color="success"
+              >
+                <ResolveIcon />
+              </IconButton>
+            )}
+          </Box>
+        )}
       />
 
       {/* Edit/Add Complaint Form */}

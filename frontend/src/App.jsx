@@ -8,8 +8,8 @@ import { theme } from './theme';
 import { MainLayout } from './layouts/MainLayout';
 import { Login } from './pages/auth/Login';
 import { StudentDashboard, StudentList, StudentProfile, StudentAttendance, StudentTimetable, StudentSubjects, StudentSections } from './pages/students';
-import { FacultyDashboard, FacultyForms, FacultyClasses, FacultyComplaints, FacultyTimetable, FacultyAttendance } from './pages/faculty';
-import { PrincipalDashboard, Management, PrincipalForms, DepartmentManagement, FacultyManagement, AddDepartment, AddFaculty, AddStudent, Reports } from './pages/principal';
+import { FacultyDashboard, FacultyClasses, FacultyComplaints, FacultyTimetable, FacultyAttendance } from './pages/faculty';
+import { PrincipalDashboard, Management, DepartmentManagement, FacultyManagement, AddDepartment, AddFaculty, AddStudent } from './pages/principal';
 import { checkAuthStatus } from './store/slices/authSlice';
 
 // Protected Route Component
@@ -65,6 +65,7 @@ const AppRoutes = () => {
                 <Routes>
                                      <Route path="/" element={<Navigate to="/student/dashboard" replace />} />
                    <Route path="/dashboard" element={<StudentDashboard />} />
+                   <Route path="/profile" element={<StudentProfile />} />
                    <Route path="/profile/:id" element={<StudentProfile />} />
                    <Route path="/attendance" element={<StudentAttendance />} />
                    <Route path="/timetable" element={<StudentTimetable />} />
@@ -85,7 +86,6 @@ const AppRoutes = () => {
                 <Routes>
                                      <Route path="/" element={<Navigate to="/faculty/dashboard" replace />} />
                    <Route path="/dashboard" element={<FacultyDashboard />} />
-                   <Route path="/forms" element={<FacultyForms />} />
                    <Route path="/classes" element={<FacultyClasses />} />
                    <Route path="/complaints" element={<FacultyComplaints />} />
                    <Route path="/timetable" element={<FacultyTimetable />} />
@@ -113,8 +113,6 @@ const AppRoutes = () => {
                     <Route path="/faculty/add" element={<AddFaculty />} />
                                                         <Route path="/students" element={<StudentList />} />
                    <Route path="/students/add" element={<AddStudent />} />
-                   <Route path="/forms" element={<PrincipalForms />} />
-                   <Route path="/reports" element={<Reports />} />
                   {/* Add more principal routes here */}
                 </Routes>
               </MainLayout>

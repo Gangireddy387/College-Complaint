@@ -389,13 +389,7 @@ export const PrincipalDashboard = () => {
                 >
                   View Complaints
                 </Button>
-                <Button
-                  variant="outlined"
-                  startIcon={<TrendingUpIcon />}
-                  onClick={() => navigate('/principal/management')}
-                >
-                  View Reports
-                </Button>
+
               </Box>
             </CardContent>
           </Card>

@@ -2,482 +2,377 @@ import React, { useState, useEffect } from 'react';
 import {
   Box,
   Paper,
-  Grid,
   Typography,
-  Avatar,
-  Chip,
+  Grid,
   Card,
   CardContent,
   CardHeader,
-  Divider,
+  Avatar,
+  Chip,
+  Button,
+  Tabs,
+  Tab,
+  LinearProgress,
   List,
   ListItem,
   ListItemText,
   ListItemIcon,
-  Button,
-  IconButton,
-  Tooltip,
+  Divider,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  LinearProgress,
+  useTheme,
+  useMediaQuery,
   Alert,
-  Tabs,
-  Tab,
-  Box as MuiBox,
 } from '@mui/material';
 import {
-  Edit as EditIcon,
-  School as SchoolIcon,
   Person as PersonIcon,
-  LocationOn as LocationIcon,
+  School as SchoolIcon,
+  Timeline as TimelineIcon,
+  EmojiEvents as EmojiEventsIcon,
+  Edit as EditIcon,
   Phone as PhoneIcon,
   Email as EmailIcon,
-  Cake as CakeIcon,
-  Grade as GradeIcon,
-  EmojiEvents as TrophyIcon,
-  Timeline as TimelineIcon,
-  Home as HomeIcon,
-  Work as WorkIcon,
+  LocationOn as LocationIcon,
+  CalendarToday as CalendarIcon,
+  Info as InfoIcon,
 } from '@mui/icons-material';
-import { StudentForm } from '../../components/forms';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { ResponsiveTable } from '../../components/shared/ResponsiveTable';
 
-// Mock data - replace with actual API calls
-const mockStudent = {
-  id: 1,
-  student_id: 'STU001',
-  first_name: 'John',
-  last_name: 'Doe',
-  email: 'john.doe@college.edu',
-  department: { id: 1, name: 'Computer Science' },
-  semester: 3,
-  phone_number: '9876543210',
-  date_of_birth: '2000-05-15',
-  gender: 'male',
-  status: 'active',
-  address: {
-    street: '123 Main St',
-    city: 'New York',
-    state: 'NY',
-    pincode: '10001'
-  },
-  guardian_info: {
-    name: 'Robert Doe',
-    phone: '9876543211',
-    relationship: 'Father',
-    email: 'robert.doe@email.com'
-  },
-  academic_history: [
-    { year: '2022-2023', semester: 1, cgpa: 8.5, subjects: ['Data Structures', 'Algorithms', 'Database'] },
-    { year: '2022-2023', semester: 2, cgpa: 8.7, subjects: ['Web Development', 'Machine Learning', 'Networks'] },
-    { year: '2023-2024', semester: 1, cgpa: 8.9, subjects: ['Software Engineering', 'AI', 'Cloud Computing'] }
-  ],
-  achievements: [
-    { title: 'Dean\'s List', year: 2023, description: 'Academic Excellence - Top 10% of class' },
-    { title: 'Best Project Award', year: 2023, description: 'Outstanding final year project' },
-    { title: 'Hackathon Winner', year: 2022, description: 'First place in college hackathon' }
-  ],
-  attendance: {
-    total_classes: 120,
-    present: 108,
-    absent: 8,
-    late: 4,
-    percentage: 90.0
-  },
-  complaints: [
-    { id: 1, type: 'late_arrival', date: '2023-10-15', status: 'resolved', severity: 'low' },
-    { id: 2, type: 'disturbance', date: '2023-09-20', status: 'pending', severity: 'medium' }
-  ]
-};
-
-const mockTimeSlots = [
-  { id: 1, day: 'Monday', start_time: '09:00', end_time: '10:00', subject: 'Data Structures', faculty: 'Dr. Smith' },
-  { id: 2, day: 'Monday', start_time: '10:15', end_time: '11:15', subject: 'Algorithms', faculty: 'Dr. Johnson' },
-  { id: 3, day: 'Tuesday', start_time: '09:00', end_time: '10:00', subject: 'Database Systems', faculty: 'Dr. Brown' },
-  { id: 4, day: 'Wednesday', start_time: '14:00', end_time: '15:00', subject: 'Web Development', faculty: 'Dr. Davis' }
-];
-
+// Tab Panel Component
 function TabPanel({ children, value, index, ...other }) {
   return (
     <div
       role="tabpanel"
       hidden={value !== index}
-      id={`student-tabpanel-${index}`}
-      aria-labelledby={`student-tab-${index}`}
+      id={`student-profile-tabpanel-${index}`}
+      aria-labelledby={`student-profile-tab-${index}`}
       {...other}
     >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          {children}
-        </Box>
-      )}
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
   );
 }
 
 export const StudentProfile = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const [student, setStudent] = useState(mockStudent);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
+  const { user } = useSelector((state) => state.auth);
   const [tabValue, setTabValue] = useState(0);
-  const [openEditForm, setOpenEditForm] = useState(false);
-  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    // Fetch student data based on ID
-    // setLoading(true);
-    // fetchStudent(id).then(data => {
-    //   setStudent(data);
-    //   setLoading(false);
-    // });
-  }, [id]);
-
-  const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
-  };
-
-  const handleEditProfile = () => {
-    setOpenEditForm(true);
-  };
-
-  const handleFormSubmit = (values) => {
-    setStudent({ ...student, ...values });
-    setOpenEditForm(false);
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'active': return 'success';
-      case 'inactive': return 'warning';
-      case 'alumni': return 'info';
-      case 'suspended': return 'error';
-      default: return 'default';
-    }
-  };
-
-  const getGenderIcon = (gender) => {
-    return gender === 'male' ? '👨' : gender === 'female' ? '👩' : '👤';
-  };
-
-  const getComplaintTypeLabel = (type) => {
-    const labels = {
-      late_arrival: 'Late Arrival',
-      disturbance: 'Disturbance',
-      misbehavior: 'Misbehavior',
-      unauthorized_device_usage: 'Unauthorized Device Usage',
-      inappropriate_conduct: 'Inappropriate Conduct',
-      academic_dishonesty: 'Academic Dishonesty',
-      bullying: 'Bullying',
-      other: 'Other'
-    };
-    return labels[type] || type;
-  };
-
-  const getComplaintSeverityColor = (severity) => {
-    switch (severity) {
-      case 'low': return 'success';
-      case 'medium': return 'warning';
-      case 'high': return 'error';
-      case 'critical': return 'error';
-      default: return 'default';
-    }
-  };
-
-  const getComplaintStatusColor = (status) => {
-    switch (status) {
-      case 'pending': return 'warning';
-      case 'under_review': return 'info';
-      case 'resolved': return 'success';
-      case 'dismissed': return 'default';
-      default: return 'default';
-    }
-  };
-
-  const calculateOverallCGPA = () => {
-    if (!student.academic_history || student.academic_history.length === 0) return 0;
-    const totalCGPA = student.academic_history.reduce((sum, record) => sum + record.cgpa, 0);
-    return (totalCGPA / student.academic_history.length).toFixed(2);
-  };
+  // Mock student data - replace with actual API calls
+  const [student] = useState({
+    id: 1,
+    name: 'John Doe',
+    email: 'john.doe@college.edu',
+    phone: '+1 (555) 123-4567',
+    student_id: 'STU001',
+    department: 'Computer Science',
+    semester: 3,
+    cgpa: 8.5,
+    avatar: 'JD',
+    address: '123 Main Street, New York, NY 10001',
+    date_of_birth: '2000-05-15',
+    joining_date: '2022-09-01',
+    academic_history: [
+      {
+        year: '2022-2023',
+        semester: 1,
+        cgpa: 8.2,
+        subjects: ['Introduction to Programming', 'Mathematics', 'Physics']
+      },
+      {
+        year: '2022-2023',
+        semester: 2,
+        cgpa: 8.7,
+        subjects: ['Data Structures', 'Calculus', 'Chemistry']
+      },
+      {
+        year: '2023-2024',
+        semester: 1,
+        cgpa: 8.5,
+        subjects: ['Algorithms', 'Database Systems', 'Computer Networks']
+      }
+    ],
+    attendance: {
+      total_classes: 120,
+      present: 108,
+      absent: 8,
+      late: 4,
+      percentage: 90.0
+    },
+    achievements: [
+      {
+        title: 'Dean\'s List',
+        year: 2023,
+        description: 'Academic excellence award'
+      },
+      {
+        title: 'Best Project Award',
+        year: 2023,
+        description: 'Outstanding project in Database Systems'
+      },
+      {
+        title: 'Programming Competition Winner',
+        year: 2022,
+        description: 'First place in college programming contest'
+      }
+    ],
+    skills: ['Java', 'Python', 'JavaScript', 'SQL', 'React', 'Node.js'],
+    languages: ['English', 'Spanish'],
+    hobbies: ['Reading', 'Programming', 'Gaming', 'Traveling']
+  });
 
   const getProgressColor = (percentage) => {
     if (percentage >= 90) return 'success';
-    if (percentage >= 75) return 'warning';
+    if (percentage >= 80) return 'warning';
     return 'error';
   };
 
-  if (loading) {
-    return (
-      <Box sx={{ p: 3 }}>
-        <LinearProgress />
-        <Typography variant="h6" sx={{ mt: 2 }}>Loading student profile...</Typography>
-      </Box>
-    );
-  }
+  const getCGPAColor = (cgpa) => {
+    if (cgpa >= 8.5) return 'success';
+    if (cgpa >= 7.0) return 'warning';
+    return 'error';
+  };
 
-  if (!student) {
-    return (
-      <Box sx={{ p: 3 }}>
-        <Alert severity="error">Student not found</Alert>
-        <Button onClick={() => navigate('/students')} sx={{ mt: 2 }}>
-          Back to Students
-        </Button>
-      </Box>
-    );
-  }
-
-  return (
-    <Box sx={{ p: 3 }}>
-      {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Avatar sx={{ width: 80, height: 80, fontSize: '2rem' }}>
-            {getGenderIcon(student.gender)}
-          </Avatar>
-          <Box>
-            <Typography variant="h3" component="h1" gutterBottom>
-              {student.first_name} {student.last_name}
-            </Typography>
-            <Typography variant="h6" color="text.secondary" gutterBottom>
-              {student.student_id} • {student.department.name}
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-              <Chip
-                label={student.status}
-                color={getStatusColor(student.status)}
-                size="small"
-              />
-              <Chip
-                label={`Semester ${student.semester}`}
-                color="primary"
-                variant="outlined"
-                size="small"
-              />
-              <Chip
-                label={`CGPA: ${calculateOverallCGPA()}`}
-                color="secondary"
-                variant="outlined"
-                size="small"
-                icon={<GradeIcon />}
-              />
-            </Box>
-          </Box>
+  // Convert academic history data for ResponsiveTable
+  const academicHistoryColumns = [
+    {
+      field: 'year',
+      headerName: 'Academic Year',
+      bold: true,
+      hideOnMobile: false,
+      hideOnTablet: false,
+    },
+    {
+      field: 'semester',
+      headerName: 'Semester',
+      render: (value) => `Semester ${value}`,
+      hideOnMobile: false,
+      hideOnTablet: false,
+    },
+    {
+      field: 'cgpa',
+      headerName: 'CGPA',
+      render: (value) => (
+        <Chip
+          label={value}
+          size="small"
+          color={value >= 8.5 ? 'success' : value >= 7.0 ? 'warning' : 'error'}
+          variant="filled"
+        />
+      ),
+      hideOnMobile: false,
+      hideOnTablet: false,
+    },
+    {
+      field: 'subjects',
+      headerName: 'Subjects',
+      render: (value) => (
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+          {value.map((subject, idx) => (
+            <Chip
+              key={idx}
+              label={subject}
+              size="small"
+              variant="outlined"
+            />
+          ))}
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<EditIcon />}
-          onClick={handleEditProfile}
-        >
-          Edit Profile
-        </Button>
-      </Box>
+      ),
+      hideOnMobile: true,
+      hideOnTablet: false,
+    },
+  ];
 
-      {/* Quick Stats */}
-      <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h4" color="primary" gutterBottom>
-                {calculateOverallCGPA()}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Overall CGPA
-              </Typography>
-            </CardContent>
-          </Card>
+  const handleAcademicHistoryRowClick = (record) => {
+    console.log('Academic record clicked:', record);
+    // Show detailed academic record
+  };
+
+  const expandableAcademicContent = (record) => (
+    <Box>
+      <Typography variant="subtitle2" gutterBottom>
+        Academic Details
+      </Typography>
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={6}>
+          <Typography variant="body2">
+            <strong>Academic Year:</strong> {record.year}
+          </Typography>
+          <Typography variant="body2">
+            <strong>Semester:</strong> {record.semester}
+          </Typography>
+          <Typography variant="body2">
+            <strong>CGPA:</strong> {record.cgpa}
+          </Typography>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h4" color="success.main" gutterBottom>
-                {student.attendance.percentage}%
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Attendance Rate
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h4" color="info.main" gutterBottom>
-                {student.academic_history.length}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Semesters Completed
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h4" color="warning.main" gutterBottom>
-                {student.achievements.length}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Achievements
-              </Typography>
-            </CardContent>
-          </Card>
+        <Grid item xs={12} sm={6}>
+          <Typography variant="body2">
+            <strong>Performance:</strong> {
+              record.cgpa >= 8.5 ? 'Excellent' :
+              record.cgpa >= 7.0 ? 'Good' : 'Needs Improvement'
+            }
+          </Typography>
         </Grid>
       </Grid>
+      <Box sx={{ mt: 2 }}>
+        <Typography variant="body2">
+          <strong>Subjects Enrolled:</strong>
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
+          {record.subjects.map((subject, idx) => (
+            <Chip key={idx} label={subject} size="small" variant="outlined" />
+          ))}
+        </Box>
+      </Box>
+    </Box>
+  );
+
+  return (
+    <Box sx={{ flexGrow: 1 }}>
+      {/* Header */}
+      <Box sx={{ mb: isMobile ? 2 : 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant={isMobile ? "h5" : "h4"} gutterBottom>
+            Student Profile
+          </Typography>
+          <Button
+            variant="outlined"
+            startIcon={<EditIcon />}
+            size={isMobile ? "small" : "medium"}
+          >
+            Edit Profile
+          </Button>
+        </Box>
+        <Typography variant={isMobile ? "body2" : "body1"} color="text.secondary">
+          View and manage student information, academic records, and achievements.
+        </Typography>
+      </Box>
+
+      {/* Current View Mode Indicator */}
+      <Alert 
+        severity="info" 
+        icon={<InfoIcon />}
+        sx={{ mb: 2 }}
+      >
+        <Typography variant="body2">
+          <strong>Current View:</strong> {
+            isMobile ? 'Mobile Grid View (Single Column Cards)' :
+            isTablet && !isMobile ? 'Tablet Grid View (2-Column Cards)' :
+            'Desktop Table View (Full Table)'
+          }
+        </Typography>
+        <Typography variant="caption" display="block" sx={{ mt: 0.5 }}>
+          Resize your browser window to see the profile data transform into different layouts!
+        </Typography>
+      </Alert>
+
+      {/* Student Info Card */}
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={3}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                <Avatar
+                  sx={{
+                    width: 120,
+                    height: 120,
+                    fontSize: '2rem',
+                    bgcolor: theme.palette.primary.main,
+                    mb: 2,
+                  }}
+                >
+                  {student.avatar}
+                </Avatar>
+                <Typography variant="h6" gutterBottom>
+                  {student.name}
+                </Typography>
+                <Chip
+                  label={`CGPA: ${student.cgpa}`}
+                  color={getCGPAColor(student.cgpa)}
+                  size="small"
+                  sx={{ mb: 1 }}
+                />
+                <Typography variant="body2" color="text.secondary">
+                  {student.department}
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={9}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <EmailIcon fontSize="small" color="action" />
+                    <Typography variant="body2">{student.email}</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <PhoneIcon fontSize="small" color="action" />
+                    <Typography variant="body2">{student.phone}</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <SchoolIcon fontSize="small" color="action" />
+                    <Typography variant="body2">Student ID: {student.student_id}</Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <CalendarIcon fontSize="small" color="action" />
+                    <Typography variant="body2">Semester {student.semester}</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <LocationIcon fontSize="small" color="action" />
+                    <Typography variant="body2">{student.address}</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <PersonIcon fontSize="small" color="action" />
+                    <Typography variant="body2">DOB: {student.date_of_birth}</Typography>
+                  </Box>
+                </Grid>
+              </Grid>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
 
       {/* Tabs */}
       <Paper sx={{ width: '100%' }}>
-        <Tabs value={tabValue} onChange={handleTabChange} aria-label="student profile tabs">
-          <Tab label="Overview" />
+        <Tabs
+          value={tabValue}
+          onChange={(e, newValue) => setTabValue(newValue)}
+          variant={isMobile ? "scrollable" : "fullWidth"}
+          scrollButtons={isMobile ? "auto" : false}
+        >
           <Tab label="Academic History" />
           <Tab label="Attendance" />
           <Tab label="Achievements" />
-          <Tab label="Complaints" />
-          <Tab label="Schedule" />
+          <Tab label="Skills & Interests" />
         </Tabs>
 
-        {/* Overview Tab */}
-        <TabPanel value={tabValue} index={0}>
-          <Grid container spacing={3}>
-            {/* Personal Information */}
-            <Grid item xs={12} md={6}>
-              <Card>
-                <CardHeader title="Personal Information" avatar={<PersonIcon />} />
-                <CardContent>
-                  <List dense>
-                    <ListItem>
-                      <ListItemIcon><EmailIcon /></ListItemIcon>
-                      <ListItemText primary="Email" secondary={student.email} />
-                    </ListItem>
-                    <ListItem>
-                      <ListItemIcon><PhoneIcon /></ListItemIcon>
-                      <ListItemText primary="Phone" secondary={student.phone_number} />
-                    </ListItem>
-                    <ListItem>
-                      <ListItemIcon><CakeIcon /></ListItemIcon>
-                      <ListItemText primary="Date of Birth" secondary={student.date_of_birth} />
-                    </ListItem>
-                    <ListItem>
-                      <ListItemIcon><PersonIcon /></ListItemIcon>
-                      <ListItemText primary="Gender" secondary={student.gender} />
-                    </ListItem>
-                  </List>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            {/* Address Information */}
-            <Grid item xs={12} md={6}>
-              <Card>
-                <CardHeader title="Address Information" avatar={<LocationIcon />} />
-                <CardContent>
-                  <Typography variant="body2" paragraph>
-                    <strong>Street:</strong> {student.address.street}
-                  </Typography>
-                  <Typography variant="body2" paragraph>
-                    <strong>City:</strong> {student.address.city}
-                  </Typography>
-                  <Typography variant="body2" paragraph>
-                    <strong>State:</strong> {student.address.state}
-                  </Typography>
-                  <Typography variant="body2" paragraph>
-                    <strong>Pincode:</strong> {student.address.pincode}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            {/* Guardian Information */}
-            <Grid item xs={12}>
-              <Card>
-                <CardHeader title="Guardian Information" avatar={<PersonIcon />} />
-                <CardContent>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <Typography variant="body2">
-                        <strong>Name:</strong> {student.guardian_info.name}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <Typography variant="body2">
-                        <strong>Phone:</strong> {student.guardian_info.phone}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <Typography variant="body2">
-                        <strong>Relationship:</strong> {student.guardian_info.relationship}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <Typography variant="body2">
-                        <strong>Email:</strong> {student.guardian_info.email}
-                      </Typography>
-                    </Grid>
-                  </Grid>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-        </TabPanel>
-
         {/* Academic History Tab */}
-        <TabPanel value={tabValue} index={1}>
-          <Card>
-            <CardHeader title="Academic History" avatar={<SchoolIcon />} />
-            <CardContent>
-              <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Academic Year</TableCell>
-                      <TableCell>Semester</TableCell>
-                      <TableCell>CGPA</TableCell>
-                      <TableCell>Subjects</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {student.academic_history.map((record, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{record.year}</TableCell>
-                        <TableCell>Semester {record.semester}</TableCell>
-                        <TableCell>
-                          <Chip
-                            label={record.cgpa}
-                            color={record.cgpa >= 8.5 ? 'success' : record.cgpa >= 7.0 ? 'warning' : 'error'}
-                            size="small"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                            {record.subjects.map((subject, idx) => (
-                              <Chip
-                                key={idx}
-                                label={subject}
-                                size="small"
-                                variant="outlined"
-                              />
-                            ))}
-                          </Box>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </CardContent>
-          </Card>
+        <TabPanel value={tabValue} index={0}>
+          <ResponsiveTable
+            columns={academicHistoryColumns}
+            data={student.academic_history}
+            onRowClick={handleAcademicHistoryRowClick}
+            expandable={true}
+            expandableContent={expandableAcademicContent}
+            emptyMessage="No academic history found"
+          />
         </TabPanel>
 
         {/* Attendance Tab */}
-        <TabPanel value={tabValue} index={2}>
-          <Card>
-            <CardHeader title="Attendance Overview" avatar={<TimelineIcon />} />
-            <CardContent>
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
-                  <Typography variant="h6" gutterBottom>Attendance Statistics</Typography>
+        <TabPanel value={tabValue} index={1}>
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <Card>
+                <CardHeader title="Attendance Statistics" avatar={<TimelineIcon />} />
+                <CardContent>
                   <Box sx={{ mb: 2 }}>
                     <Typography variant="body2" gutterBottom>
                       Total Classes: {student.attendance.total_classes}
@@ -492,9 +387,13 @@ export const StudentProfile = () => {
                       Late: {student.attendance.late}
                     </Typography>
                   </Box>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <Typography variant="h6" gutterBottom>Attendance Rate</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Card>
+                <CardHeader title="Attendance Rate" avatar={<TimelineIcon />} />
+                <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     <Box sx={{ flexGrow: 1 }}>
                       <LinearProgress
@@ -508,128 +407,82 @@ export const StudentProfile = () => {
                       {student.attendance.percentage}%
                     </Typography>
                   </Box>
-                </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
         </TabPanel>
 
         {/* Achievements Tab */}
-        <TabPanel value={tabValue} index={3}>
-          <Card>
-            <CardHeader title="Achievements & Awards" avatar={<TrophyIcon />} />
-            <CardContent>
-              <Grid container spacing={2}>
-                {student.achievements.map((achievement, index) => (
-                  <Grid item xs={12} sm={6} md={4} key={index}>
-                    <Card variant="outlined">
-                      <CardContent>
-                        <Typography variant="h6" color="primary" gutterBottom>
+        <TabPanel value={tabValue} index={2}>
+          <Grid container spacing={2}>
+            {student.achievements.map((achievement, index) => (
+              <Grid item xs={12} sm={6} md={4} key={index}>
+                <Card>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                      <EmojiEventsIcon color="primary" />
+                      <Box>
+                        <Typography variant="h6" gutterBottom>
                           {achievement.title}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                        <Typography variant="body2" color="text.secondary">
                           {achievement.year}
                         </Typography>
-                        <Typography variant="body2">
-                          {achievement.description}
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))}
+                      </Box>
+                    </Box>
+                    <Typography variant="body2">
+                      {achievement.description}
+                    </Typography>
+                  </CardContent>
+                </Card>
               </Grid>
-            </CardContent>
-          </Card>
+            ))}
+          </Grid>
         </TabPanel>
 
-        {/* Complaints Tab */}
-        <TabPanel value={tabValue} index={4}>
-          <Card>
-            <CardHeader title="Disciplinary Record" avatar={<WorkIcon />} />
-            <CardContent>
-              {student.complaints.length === 0 ? (
-                <Alert severity="info">No disciplinary complaints on record.</Alert>
-              ) : (
-                <TableContainer>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Date</TableCell>
-                        <TableCell>Type</TableCell>
-                        <TableCell>Severity</TableCell>
-                        <TableCell>Status</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {student.complaints.map((complaint) => (
-                        <TableRow key={complaint.id}>
-                          <TableCell>{complaint.date}</TableCell>
-                          <TableCell>{getComplaintTypeLabel(complaint.type)}</TableCell>
-                          <TableCell>
-                            <Chip
-                              label={complaint.severity}
-                              color={getComplaintSeverityColor(complaint.severity)}
-                              size="small"
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Chip
-                              label={complaint.status}
-                              color={getComplaintStatusColor(complaint.status)}
-                              size="small"
-                            />
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              )}
-            </CardContent>
-          </Card>
-        </TabPanel>
-
-        {/* Schedule Tab */}
-        <TabPanel value={tabValue} index={5}>
-          <Card>
-            <CardHeader title="Class Schedule" avatar={<SchoolIcon />} />
-            <CardContent>
-              <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Day</TableCell>
-                      <TableCell>Time</TableCell>
-                      <TableCell>Subject</TableCell>
-                      <TableCell>Faculty</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {mockTimeSlots.map((slot) => (
-                      <TableRow key={slot.id}>
-                        <TableCell>{slot.day}</TableCell>
-                        <TableCell>{slot.start_time} - {slot.end_time}</TableCell>
-                        <TableCell>{slot.subject}</TableCell>
-                        <TableCell>{slot.faculty}</TableCell>
-                      </TableRow>
+        {/* Skills & Interests Tab */}
+        <TabPanel value={tabValue} index={3}>
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <Card>
+                <CardHeader title="Skills" avatar={<SchoolIcon />} />
+                <CardContent>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {student.skills.map((skill, index) => (
+                      <Chip key={index} label={skill} color="primary" variant="outlined" />
                     ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </CardContent>
-          </Card>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Card>
+                <CardHeader title="Languages" avatar={<PersonIcon />} />
+                <CardContent>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {student.languages.map((language, index) => (
+                      <Chip key={index} label={language} color="secondary" variant="outlined" />
+                    ))}
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12}>
+              <Card>
+                <CardHeader title="Hobbies & Interests" avatar={<PersonIcon />} />
+                <CardContent>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {student.hobbies.map((hobby, index) => (
+                      <Chip key={index} label={hobby} color="info" variant="outlined" />
+                    ))}
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
         </TabPanel>
       </Paper>
-
-      {/* Edit Form Dialog */}
-      <StudentForm
-        open={openEditForm}
-        onClose={() => setOpenEditForm(false)}
-        onSubmit={handleFormSubmit}
-        initialValues={student}
-        departments={[student.department]}
-        sections={[]}
-      />
     </Box>
   );
 };

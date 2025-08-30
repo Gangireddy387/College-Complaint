@@ -4,564 +4,479 @@ import {
   Grid,
   Card,
   CardContent,
-  CardHeader,
   Typography,
   Avatar,
   Chip,
-  Button,
   List,
   ListItem,
   ListItemText,
   ListItemIcon,
-  ListItemButton,
   Divider,
-  LinearProgress,
-  Alert,
+  Button,
   Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
+  LinearProgress,
   IconButton,
   Tooltip,
-  Badge,
+  useTheme,
+  useMediaQuery,
+  Fade,
+  Collapse,
 } from '@mui/material';
 import {
-  School as SchoolIcon,
   Person as PersonIcon,
-  Timeline as TimelineIcon,
-  EmojiEvents as TrophyIcon,
-  Work as WorkIcon,
-  Schedule as ScheduleIcon,
-  Grade as GradeIcon,
-  TrendingUp as TrendingUpIcon,
-  Notifications as NotificationsIcon,
+  School as SchoolIcon,
+  CalendarToday as CalendarIcon,
   Assignment as AssignmentIcon,
-  Event as EventIcon,
-  Book as BookIcon,
+  CheckCircle as CheckCircleIcon,
+  Warning as WarningIcon,
   Edit as EditIcon,
   Visibility as ViewIcon,
+  Group as GroupIcon,
+  TrendingUp as TrendingUpIcon,
+  Schedule as ScheduleIcon,
+  Book as BookIcon,
 } from '@mui/icons-material';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-
-// Mock data - replace with actual API calls
-const mockStudent = {
-  id: 1,
-  student_id: 'STU001',
-  first_name: 'John',
-  last_name: 'Doe',
-  email: 'john.doe@college.edu',
-  department: { id: 1, name: 'Computer Science' },
-  semester: 3,
-  phone_number: '9876543210',
-  date_of_birth: '2000-05-15',
-  gender: 'male',
-  status: 'active',
-  address: {
-    street: '123 Main St',
-    city: 'New York',
-    state: 'NY',
-    pincode: '10001'
-  },
-  guardian_info: {
-    name: 'Robert Doe',
-    phone: '9876543211',
-    relationship: 'Father',
-    email: 'robert.doe@email.com'
-  },
-  academic_history: [
-    { year: '2022-2023', semester: 1, cgpa: 8.5, subjects: ['Data Structures', 'Algorithms', 'Database'] },
-    { year: '2022-2023', semester: 2, cgpa: 8.7, subjects: ['Web Development', 'Machine Learning', 'Networks'] },
-    { year: '2023-2024', semester: 1, cgpa: 8.9, subjects: ['Software Engineering', 'AI', 'Cloud Computing'] }
-  ],
-  achievements: [
-    { title: 'Dean\'s List', year: 2023, description: 'Academic Excellence - Top 10% of class' },
-    { title: 'Best Project Award', year: 2023, description: 'Outstanding final year project' },
-    { title: 'Hackathon Winner', year: 2022, description: 'First place in college hackathon' }
-  ],
-  attendance: {
-    total_classes: 120,
-    present: 108,
-    absent: 8,
-    late: 4,
-    percentage: 90.0
-  },
-  complaints: [
-    { id: 1, type: 'late_arrival', date: '2023-10-15', status: 'resolved', severity: 'low' },
-    { id: 2, type: 'disturbance', date: '2023-09-20', status: 'pending', severity: 'medium' }
-  ],
-  upcoming_classes: [
-    { id: 1, day: 'Today', time: '09:00 - 10:00', subject: 'Data Structures', faculty: 'Dr. Smith', room: 'A101' },
-    { id: 2, day: 'Today', time: '10:15 - 11:15', subject: 'Algorithms', faculty: 'Dr. Johnson', room: 'A102' },
-    { id: 3, day: 'Tomorrow', time: '09:00 - 10:00', subject: 'Database Systems', faculty: 'Dr. Brown', room: 'A103' }
-  ],
-  recent_assignments: [
-    { id: 1, subject: 'Data Structures', title: 'Binary Tree Implementation', due_date: '2023-12-20', status: 'pending' },
-    { id: 2, subject: 'Algorithms', title: 'Sorting Algorithm Analysis', due_date: '2023-12-18', status: 'submitted' },
-    { id: 3, subject: 'Web Development', title: 'React Portfolio Project', due_date: '2023-12-25', status: 'pending' }
-  ],
-  notifications: [
-    { id: 1, message: 'New assignment posted in Data Structures', time: '2 hours ago', read: false },
-    { id: 2, message: 'Attendance marked for today\'s classes', time: '4 hours ago', read: true },
-    { id: 3, message: 'Exam schedule updated for Semester 3', time: '1 day ago', read: false }
-  ]
-};
+import { StatsCard } from '../../components/shared/StatsCard';
 
 export const StudentDashboard = () => {
+  const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
-  const [student, setStudent] = useState(mockStudent);
-  const [loading, setLoading] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isSmallMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  useEffect(() => {
-    // Fetch student data
-    // setLoading(true);
-    // fetchStudentDashboard().then(data => {
-    //   setStudent(data);
-    //   setLoading(false);
-    // });
-  }, []);
+  const [attendanceData, setAttendanceData] = useState({
+    totalClasses: 45,
+    attendedClasses: 42,
+    attendancePercentage: 93.3,
+    subjects: [
+      { name: 'Computer Science', attended: 15, total: 16, percentage: 93.8 },
+      { name: 'Mathematics', attended: 14, total: 15, percentage: 93.3 },
+      { name: 'Physics', attended: 13, total: 14, percentage: 92.9 },
+    ]
+  });
 
-  const calculateOverallCGPA = () => {
-    if (!student.academic_history || student.academic_history.length === 0) return 0;
-    const totalCGPA = student.academic_history.reduce((sum, record) => sum + record.cgpa, 0);
-    return (totalCGPA / student.academic_history.length).toFixed(2);
-  };
+  const [recentComplaints, setRecentComplaints] = useState([
+    {
+      id: 1,
+      subject: 'Infrastructure Issue',
+      description: 'Air conditioning not working in Computer Lab',
+      status: 'pending',
+      submittedDate: '2024-01-15',
+      priority: 'medium'
+    },
+    {
+      id: 2,
+      subject: 'Academic Concern',
+      description: 'Need clarification on assignment submission deadline',
+      status: 'resolved',
+      submittedDate: '2024-01-10',
+      priority: 'low'
+    }
+  ]);
+
+  const [upcomingClasses, setUpcomingClasses] = useState([
+    {
+      id: 1,
+      subject: 'Computer Science',
+      faculty: 'Prof. Jane Smith',
+      time: '09:00 AM',
+      room: 'Lab 101',
+      date: '2024-01-20'
+    },
+    {
+      id: 2,
+      subject: 'Mathematics',
+      faculty: 'Prof. Robert Johnson',
+      time: '11:00 AM',
+      room: 'Room 205',
+      date: '2024-01-20'
+    }
+  ]);
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'active': return 'success';
-      case 'inactive': return 'warning';
-      case 'alumni': return 'info';
-      case 'suspended': return 'error';
+      case 'resolved': return 'success';
+      case 'pending': return 'warning';
+      case 'in_progress': return 'info';
       default: return 'default';
     }
   };
 
-  const getGenderIcon = (gender) => {
-    return gender === 'male' ? '👨' : gender === 'female' ? '👩' : '👤';
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case 'high': return 'error';
+      case 'medium': return 'warning';
+      case 'low': return 'success';
+      default: return 'default';
+    }
   };
 
-  const getProgressColor = (percentage) => {
+  const getAttendanceColor = (percentage) => {
     if (percentage >= 90) return 'success';
     if (percentage >= 75) return 'warning';
     return 'error';
   };
 
-  const getAssignmentStatusColor = (status) => {
-    switch (status) {
-      case 'pending': return 'warning';
-      case 'submitted': return 'success';
-      case 'late': return 'error';
-      default: return 'default';
-    }
-  };
-
-  const handleViewProfile = () => {
-    navigate(`/students/profile/${student.id}`);
-  };
-
-  const handleViewAssignments = () => {
-    navigate('/students/assignments');
-  };
-
-  const handleViewAttendance = () => {
-    navigate('/students/attendance');
-  };
-
-  const handleViewSchedule = () => {
-    navigate('/students/schedule');
-  };
-
-  const handleViewComplaints = () => {
-    navigate('/students/complaints');
-  };
-
-  const handleMarkNotificationRead = (notificationId) => {
-    setStudent(prev => ({
-      ...prev,
-      notifications: prev.notifications.map(n => 
-        n.id === notificationId ? { ...n, read: true } : n
-      )
-    }));
-  };
-
-  const unreadNotifications = student.notifications.filter(n => !n.read).length;
-
-  if (loading) {
-    return (
-      <Box sx={{ p: 3 }}>
-        <LinearProgress />
-        <Typography variant="h6" sx={{ mt: 2 }}>Loading dashboard...</Typography>
-      </Box>
-    );
-  }
-
   return (
-    <Box sx={{ p: 3 }}>
-      {/* Welcome Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Avatar sx={{ width: 64, height: 64, fontSize: '1.5rem' }}>
-            {getGenderIcon(student.gender)}
+    <Box sx={{ flexGrow: 1 }}>
+      {/* Header */}
+      <Box sx={{ mb: isMobile ? 2 : 3 }}>
+        <Typography 
+          variant={isMobile ? "h5" : "h4"} 
+          gutterBottom
+          sx={{ fontWeight: 600 }}
+        >
+          Welcome back, {user?.firstName || user?.first_name}!
+        </Typography>
+        <Typography 
+          variant={isMobile ? "body2" : "body1"} 
+          color="text.secondary"
+        >
+          Here's what's happening with your academic journey today.
+        </Typography>
+      </Box>
+
+      <Grid container spacing={isMobile ? 2 : 3}>
+        {/* Section Overview */}
+        <Grid item xs={12}>
+          <Fade in timeout={500}>
+            <Card sx={{ 
+              bgcolor: 'primary.light', 
+              color: 'primary.contrastText',
+              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+            }}>
+              <CardContent sx={{ p: isMobile ? 2 : 3 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <GroupIcon sx={{ 
+                    mr: 1, 
+                    fontSize: isMobile ? '1.5rem' : '2rem' 
+                  }} />
+                  <Typography variant={isMobile ? "h6" : "h5"}>
+                    My Section: {user?.section_id || 'A'} - Computer Science
+                  </Typography>
+      </Box>
+                <Typography variant={isMobile ? "body2" : "body1"} sx={{ mb: 1 }}>
+                  Academic Year: 2024-2025 | Semester: {user?.semester || 3} | Section Advisor: Prof. Jane Smith
+                </Typography>
+                <Typography variant={isMobile ? "caption" : "body2"}>
+                  You are enrolled in this section with 28 other students. All your classes, attendance, and academic activities are managed within this section.
+                </Typography>
+              </CardContent>
+            </Card>
+          </Fade>
+        </Grid>
+
+        {/* Profile Card */}
+        <Grid item xs={12} md={4}>
+          <Fade in timeout={600}>
+            <Card sx={{ height: '100%' }}>
+              <CardContent sx={{ 
+                textAlign: 'center', 
+                p: isMobile ? 2 : 3,
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+              }}>
+                <Box>
+                  <Avatar
+                    sx={{
+                      width: isMobile ? 60 : 80,
+                      height: isMobile ? 60 : 80,
+                      mx: 'auto',
+                      mb: 2,
+                      bgcolor: 'primary.main',
+                      fontSize: isMobile ? '1.5rem' : '2rem'
+                    }}
+                  >
+                    {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
           </Avatar>
-          <Box>
-            <Typography variant="h4" component="h1" gutterBottom>
-              Welcome back, {student.first_name}!
+                  <Typography variant={isMobile ? "h6" : "h6"} gutterBottom>
+                    {user?.firstName} {user?.lastName}
+                  </Typography>
+                  <Typography variant={isMobile ? "caption" : "body2"} color="text.secondary" gutterBottom>
+                    Roll Number: {user?.rollNumber}
+                  </Typography>
+                  <Typography variant={isMobile ? "caption" : "body2"} color="text.secondary" gutterBottom>
+                    Department: Computer Science
             </Typography>
-            <Typography variant="h6" color="text.secondary">
-              {student.student_id} • {student.department.name} • Semester {student.semester}
+                  <Typography variant={isMobile ? "caption" : "body2"} color="text.secondary" gutterBottom>
+                    Student ID: {user?.student_id || 'CS001'}
             </Typography>
           </Box>
-        </Box>
-        <Box sx={{ display: 'flex', gap: 1 }}>
+                <Box sx={{ mt: 2 }}>
           <Button
             variant="outlined"
+                    size={isMobile ? "small" : "small"}
             startIcon={<EditIcon />}
-            onClick={handleViewProfile}
+                    sx={{ mr: 1, mb: isMobile ? 1 : 0 }}
+                  >
+                    Edit Profile
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size={isMobile ? "small" : "small"}
+                    startIcon={<ViewIcon />}
+                    onClick={() => navigate('/student/profile')}
           >
             View Profile
           </Button>
-          <Tooltip title={`${unreadNotifications} unread notifications`}>
-            <IconButton color="primary">
-              <Badge badgeContent={unreadNotifications} color="error">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
-          </Tooltip>
-        </Box>
-      </Box>
+              </Box>
+            </CardContent>
+          </Card>
+          </Fade>
+        </Grid>
 
-      {/* Quick Stats */}
-      <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Avatar sx={{ bgcolor: 'primary.main' }}>
-                  <GradeIcon />
-                </Avatar>
-                <Box>
-                  <Typography variant="h4" color="primary">
-                    {calculateOverallCGPA()}
+        {/* Attendance Summary */}
+        <Grid item xs={12} md={8}>
+          <Fade in timeout={700}>
+            <Card sx={{ height: '100%' }}>
+              <CardContent sx={{ p: isMobile ? 2 : 3 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <CalendarIcon sx={{ mr: 1, color: 'primary.main' }} />
+                  <Typography variant={isMobile ? "h6" : "h6"}>Attendance Summary</Typography>
+                </Box>
+                
+                <Grid container spacing={2}>
+                  <Grid item xs={4}>
+                    <Box sx={{ textAlign: 'center' }}>
+                      <Typography variant={isMobile ? "h5" : "h4"} color="primary.main">
+                        {attendanceData.attendancePercentage}%
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Overall CGPA
+                      <Typography variant={isMobile ? "caption" : "body2"} color="text.secondary">
+                        Overall Attendance
                   </Typography>
                 </Box>
-              </Box>
-            </CardContent>
-          </Card>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Avatar sx={{ bgcolor: 'success.main' }}>
-                  <TimelineIcon />
-                </Avatar>
-                <Box>
-                  <Typography variant="h4" color="success.main">
-                    {student.attendance.percentage}%
+                  <Grid item xs={4}>
+                    <Box sx={{ textAlign: 'center' }}>
+                      <Typography variant={isMobile ? "h5" : "h4"} color="success.main">
+                        {attendanceData.attendedClasses}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Attendance Rate
+                      <Typography variant={isMobile ? "caption" : "body2"} color="text.secondary">
+                        Classes Attended
                   </Typography>
                 </Box>
-              </Box>
-            </CardContent>
-          </Card>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Avatar sx={{ bgcolor: 'info.main' }}>
-                  <SchoolIcon />
-                </Avatar>
-                <Box>
-                  <Typography variant="h4" color="info.main">
-                    {student.academic_history.length}
+                  <Grid item xs={4}>
+                    <Box sx={{ textAlign: 'center' }}>
+                      <Typography variant={isMobile ? "h5" : "h4"} color="text.secondary">
+                        {attendanceData.totalClasses}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Semesters Completed
+                      <Typography variant={isMobile ? "caption" : "body2"} color="text.secondary">
+                        Total Classes
                   </Typography>
                 </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Avatar sx={{ bgcolor: 'warning.main' }}>
-                  <TrophyIcon />
-                </Avatar>
-                <Box>
-                  <Typography variant="h4" color="warning.main">
-                    {student.achievements.length}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Achievements
-                  </Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
         </Grid>
       </Grid>
 
-      {/* Main Content */}
-      <Grid container spacing={3}>
-        {/* Left Column */}
-        <Grid item xs={12} lg={8}>
-          {/* Upcoming Classes */}
-          <Card sx={{ mb: 3 }}>
-            <CardHeader 
-              title="Upcoming Classes" 
-              avatar={<ScheduleIcon />}
-              action={
-                <Button size="small" onClick={handleViewSchedule}>
-                  View All
-                </Button>
-              }
-            />
-            <CardContent>
-              <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Day</TableCell>
-                      <TableCell>Time</TableCell>
-                      <TableCell>Subject</TableCell>
-                      <TableCell>Faculty</TableCell>
-                      <TableCell>Room</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {student.upcoming_classes.map((classItem) => (
-                      <TableRow key={classItem.id}>
-                        <TableCell>
-                          <Chip 
-                            label={classItem.day} 
-                            color={classItem.day === 'Today' ? 'primary' : 'default'}
-                            size="small"
-                          />
-                        </TableCell>
-                        <TableCell>{classItem.time}</TableCell>
-                        <TableCell>{classItem.subject}</TableCell>
-                        <TableCell>{classItem.faculty}</TableCell>
-                        <TableCell>{classItem.room}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                <Divider sx={{ my: 2 }} />
+                
+                <Typography variant={isMobile ? "caption" : "subtitle2"} gutterBottom>
+                  Subject-wise Attendance
+                </Typography>
+                
+                {attendanceData.subjects.map((subject, index) => (
+                  <Box key={index} sx={{ mb: 2 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant={isMobile ? "caption" : "body2"}>{subject.name}</Typography>
+                      <Typography variant={isMobile ? "caption" : "body2"} color="text.secondary">
+                        {subject.attended}/{subject.total} ({subject.percentage}%)
+                      </Typography>
+                    </Box>
+                    <LinearProgress
+                      variant="determinate"
+                      value={subject.percentage}
+                      color={getAttendanceColor(subject.percentage)}
+                      sx={{ height: isMobile ? 6 : 8, borderRadius: 4 }}
+                    />
+                  </Box>
+                ))}
             </CardContent>
           </Card>
+          </Fade>
+        </Grid>
 
-          {/* Recent Assignments */}
-          <Card sx={{ mb: 3 }}>
-            <CardHeader 
-              title="Recent Assignments" 
-              avatar={<AssignmentIcon />}
-              action={
-                <Button size="small" onClick={handleViewAssignments}>
+        {/* Recent Complaints */}
+        <Grid item xs={12} md={6}>
+          <Fade in timeout={800}>
+            <Card sx={{ height: '100%' }}>
+              <CardContent sx={{ p: isMobile ? 2 : 3 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <AssignmentIcon sx={{ mr: 1, color: 'primary.main' }} />
+                    <Typography variant={isMobile ? "h6" : "h6"}>Recent Complaints</Typography>
+                  </Box>
+                  <Button size={isMobile ? "small" : "small"} variant="outlined">
                   View All
                 </Button>
-              }
-            />
-            <CardContent>
-              <List>
-                {student.recent_assignments.map((assignment, index) => (
-                  <React.Fragment key={assignment.id}>
-                    <ListItem>
+                </Box>
+                
+                <List sx={{ p: 0 }}>
+                  {recentComplaints.map((complaint, index) => (
+                    <React.Fragment key={complaint.id}>
+                      <ListItem sx={{ px: 0 }}>
                       <ListItemIcon>
-                        <BookIcon />
+                          {complaint.status === 'resolved' ? (
+                            <CheckCircleIcon color="success" />
+                          ) : (
+                            <WarningIcon color="warning" />
+                          )}
                       </ListItemIcon>
                       <ListItemText
-                        primary={assignment.title}
-                        secondary={`${assignment.subject} • Due: ${assignment.due_date}`}
+                          primary={
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                              <Typography variant={isMobile ? "caption" : "subtitle2"}>
+                                {complaint.subject}
+                              </Typography>
+                              <Chip
+                                label={complaint.status}
+                                size="small"
+                                color={getStatusColor(complaint.status)}
                       />
                       <Chip
-                        label={assignment.status}
-                        color={getAssignmentStatusColor(assignment.status)}
+                                label={complaint.priority}
                         size="small"
-                      />
+                                color={getPriorityColor(complaint.priority)}
+                              />
+                            </Box>
+                          }
+                          secondary={
+                            <Box>
+                              <Typography variant={isMobile ? "caption" : "body2"} color="text.secondary">
+                                {complaint.description}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                Submitted: {complaint.submittedDate}
+                              </Typography>
+                            </Box>
+                          }
+                        />
+                        <Tooltip title="View Details">
+                          <IconButton size="small">
+                            <ViewIcon />
+                          </IconButton>
+                        </Tooltip>
                     </ListItem>
-                    {index < student.recent_assignments.length - 1 && <Divider />}
+                      {index < recentComplaints.length - 1 && <Divider />}
                   </React.Fragment>
                 ))}
               </List>
             </CardContent>
           </Card>
-
-          {/* Attendance Overview */}
-          <Card>
-            <CardHeader 
-              title="Attendance Overview" 
-              avatar={<TimelineIcon />}
-              action={
-                <Button size="small" onClick={handleViewAttendance}>
-                  View Details
-                </Button>
-              }
-            />
-            <CardContent>
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
-                  <Typography variant="h6" gutterBottom>Statistics</Typography>
-                  <Box sx={{ mb: 2 }}>
-                    <Typography variant="body2" gutterBottom>
-                      Total Classes: {student.attendance.total_classes}
-                    </Typography>
-                    <Typography variant="body2" gutterBottom>
-                      Present: {student.attendance.present}
-                    </Typography>
-                    <Typography variant="body2" gutterBottom>
-                      Absent: {student.attendance.absent}
-                    </Typography>
-                    <Typography variant="body2" gutterBottom>
-                      Late: {student.attendance.late}
-                    </Typography>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <Typography variant="h6" gutterBottom>Progress</Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Box sx={{ flexGrow: 1 }}>
-                      <LinearProgress
-                        variant="determinate"
-                        value={student.attendance.percentage}
-                        color={getProgressColor(student.attendance.percentage)}
-                        sx={{ height: 10, borderRadius: 5 }}
-                      />
-                    </Box>
-                    <Typography variant="h6" color="primary">
-                      {student.attendance.percentage}%
-                    </Typography>
-                  </Box>
-                </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
+          </Fade>
         </Grid>
 
-        {/* Right Column */}
-        <Grid item xs={12} lg={4}>
-          {/* Quick Actions */}
-          <Card sx={{ mb: 3 }}>
-            <CardHeader title="Quick Actions" />
-            <CardContent>
-              <List>
-                <ListItem disablePadding>
-                  <ListItemButton onClick={handleViewProfile}>
-                    <ListItemIcon><PersonIcon /></ListItemIcon>
-                    <ListItemText primary="View Profile" />
-                  </ListItemButton>
-                </ListItem>
-                <ListItem disablePadding>
-                  <ListItemButton onClick={handleViewAssignments}>
-                    <ListItemIcon><AssignmentIcon /></ListItemIcon>
-                    <ListItemText primary="View Assignments" />
-                  </ListItemButton>
-                </ListItem>
-                <ListItem disablePadding>
-                  <ListItemButton onClick={handleViewAttendance}>
-                    <ListItemIcon><TimelineIcon /></ListItemIcon>
-                    <ListItemText primary="View Attendance" />
-                  </ListItemButton>
-                </ListItem>
-                <ListItem disablePadding>
-                  <ListItemButton onClick={handleViewSchedule}>
-                    <ListItemIcon><ScheduleIcon /></ListItemIcon>
-                    <ListItemText primary="View Schedule" />
-                  </ListItemButton>
-                </ListItem>
-                <ListItem disablePadding>
-                  <ListItemButton onClick={handleViewComplaints}>
-                    <ListItemIcon><WorkIcon /></ListItemIcon>
-                    <ListItemText primary="View Complaints" />
-                  </ListItemButton>
-                </ListItem>
-              </List>
-            </CardContent>
-          </Card>
-
-          {/* Notifications */}
-          <Card sx={{ mb: 3 }}>
-            <CardHeader 
-              title="Recent Notifications" 
-              avatar={<NotificationsIcon />}
-            />
-            <CardContent>
-              <List dense>
-                {student.notifications.slice(0, 5).map((notification) => (
-                  <ListItem key={notification.id} disablePadding>
-                    <ListItemButton 
-                      onClick={() => handleMarkNotificationRead(notification.id)}
-                      sx={{ 
-                        bgcolor: notification.read ? 'transparent' : 'action.hover',
-                        borderRadius: 1,
-                        mb: 0.5
-                      }}
-                    >
-                      <ListItemText
-                        primary={notification.message}
-                        secondary={notification.time}
-                        primaryTypographyProps={{
-                          variant: 'body2',
-                          fontWeight: notification.read ? 'normal' : 'medium'
-                        }}
-                      />
-                    </ListItemButton>
-                  </ListItem>
-                ))}
-              </List>
-            </CardContent>
-          </Card>
-
-          {/* Academic Progress */}
-          <Card>
-            <CardHeader title="Academic Progress" avatar={<TrendingUpIcon />} />
-            <CardContent>
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" gutterBottom>
-                  Current Semester: {student.semester}
-                </Typography>
-                <Typography variant="body2" gutterBottom>
-                  Department: {student.department.name}
-                </Typography>
-                <Typography variant="body2" gutterBottom>
-                  Status: 
-                  <Chip
-                    label={student.status}
-                    color={getStatusColor(student.status)}
-                    size="small"
-                    sx={{ ml: 1 }}
-                  />
-                </Typography>
-              </Box>
-              
-              <Typography variant="h6" gutterBottom>CGPA Trend</Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                {student.academic_history.slice(-3).map((record, index) => (
-                  <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="body2">
-                      Sem {record.semester}
+        {/* Upcoming Classes */}
+                <Grid item xs={12} md={6}>
+          <Fade in timeout={900}>
+            <Card sx={{ height: '100%' }}>
+              <CardContent sx={{ p: isMobile ? 2 : 3 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <SchoolIcon sx={{ mr: 1, color: 'primary.main' }} />
+                  <Typography variant={isMobile ? "h6" : "h6"}>Today's Classes</Typography>
+                </Box>
+                
+                <List sx={{ p: 0 }}>
+                  {upcomingClasses.map((classItem, index) => (
+                    <React.Fragment key={classItem.id}>
+                      <ListItem sx={{ px: 0 }}>
+                        <ListItemIcon>
+                          <Avatar sx={{ bgcolor: 'primary.main', width: isMobile ? 28 : 32, height: isMobile ? 28 : 32 }}>
+                            <SchoolIcon />
+                          </Avatar>
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={
+                            <Typography variant={isMobile ? "caption" : "subtitle2"}>
+                              {classItem.subject}
                     </Typography>
-                    <Chip
-                      label={record.cgpa}
-                      color={record.cgpa >= 8.5 ? 'success' : record.cgpa >= 7.0 ? 'warning' : 'error'}
-                      size="small"
-                    />
+                          }
+                          secondary={
+                            <Box>
+                              <Typography variant={isMobile ? "caption" : "body2"} color="text.secondary">
+                                {classItem.faculty}
+                    </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                {classItem.time} • Room {classItem.room}
+                    </Typography>
                   </Box>
+                          }
+                        />
+                        <Chip
+                          label={classItem.time}
+                          size="small"
+                          variant="outlined"
+                          color="primary"
+                        />
+                  </ListItem>
+                      {index < upcomingClasses.length - 1 && <Divider />}
+                    </React.Fragment>
                 ))}
+              </List>
+                
+                <Box sx={{ mt: 2, textAlign: 'center' }}>
+                  <Button variant="outlined" size={isMobile ? "small" : "small"}>
+                    View Full Schedule
+                  </Button>
               </Box>
             </CardContent>
           </Card>
+          </Fade>
+        </Grid>
+
+        {/* Quick Actions */}
+        <Grid item xs={12}>
+          <Fade in timeout={1000}>
+            <Paper sx={{ 
+              p: isMobile ? 2 : 2, 
+              bgcolor: 'grey.50',
+              borderRadius: 2,
+            }}>
+              <Typography variant={isMobile ? "h6" : "h6"} gutterBottom>
+                Quick Actions for Section {user?.section_id || 'A'}
+              </Typography>
+              <Box sx={{ 
+                display: 'flex', 
+                gap: isMobile ? 1 : 2, 
+                flexWrap: 'wrap',
+                justifyContent: isMobile ? 'center' : 'flex-start',
+              }}>
+                <Button
+                  variant="contained"
+                  startIcon={<AssignmentIcon />}
+                  size={isMobile ? "small" : "medium"}
+                >
+                  Submit New Complaint
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<CalendarIcon />}
+                  size={isMobile ? "small" : "medium"}
+                >
+                  View My Attendance
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<ScheduleIcon />}
+                  size={isMobile ? "small" : "medium"}
+                >
+                  Section Timetable
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<PersonIcon />}
+                  size={isMobile ? "small" : "medium"}
+                  onClick={() => navigate('/student/profile')}
+                >
+                  View My Profile
+                </Button>
+              </Box>
+            </Paper>
+          </Fade>
         </Grid>
       </Grid>
     </Box>

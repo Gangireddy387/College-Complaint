@@ -10,6 +10,10 @@ import {
   Box,
   useTheme,
   Typography,
+  useMediaQuery,
+  Collapse,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
@@ -24,10 +28,12 @@ import {
   Person as PersonIcon,
   Timeline as TimelineIcon,
   Group as GroupIcon,
+  ExpandLess,
+  ExpandMore,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-const drawerWidth = 240;
+const drawerWidth = 280;
 
 const getNavigationItems = (userRole) => {
   const baseItems = [
@@ -39,6 +45,11 @@ const getNavigationItems = (userRole) => {
   ];
 
   const studentItems = [
+    {
+      text: 'Profile',
+      icon: <PersonIcon />,
+      path: `/${userRole}/profile`,
+    },
     {
       text: 'Attendance',
       icon: <TimelineIcon />,
@@ -73,11 +84,6 @@ const getNavigationItems = (userRole) => {
       path: `/${userRole}/attendance`,
     },
     {
-      text: 'Forms',
-      icon: <AssignmentIcon />,
-      path: `/${userRole}/forms`,
-    },
-    {
       text: 'Complaints',
       icon: <AssignmentIcon />,
       path: `/${userRole}/complaints`,
@@ -110,16 +116,6 @@ const getNavigationItems = (userRole) => {
       icon: <PeopleIcon />,
       path: `/${userRole}/students`,
     },
-    {
-      text: 'Forms',
-      icon: <AssignmentIcon />,
-      path: `/${userRole}/forms`,
-    },
-    {
-      text: 'Reports',
-      icon: <AssessmentIcon />,
-      path: `/${userRole}/reports`,
-    },
   ];
 
   switch (userRole) {
@@ -141,6 +137,7 @@ export const Sidebar = ({ open, onClose, userRole, isMobile }) => {
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   const navigationItems = getNavigationItems(userRole);
 
@@ -152,29 +149,106 @@ export const Sidebar = ({ open, onClose, userRole, isMobile }) => {
   };
 
   const drawer = (
-    <Box>
-      <Box sx={{ p: 2 }}>
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      {/* Header */}
+      <Box 
+        sx={{ 
+          p: isSmallScreen ? 1.5 : 2,
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          backgroundColor: 'background.paper',
+        }}
+      >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <SchoolIcon color="primary" />
-          <Typography variant="h6" color="primary">
+          <SchoolIcon 
+            color="primary" 
+            sx={{ 
+              fontSize: isSmallScreen ? '1.5rem' : '2rem',
+            }} 
+          />
+          <Typography 
+            variant={isSmallScreen ? "subtitle1" : "h6"} 
+            color="primary"
+            sx={{ fontWeight: 600 }}
+          >
             {userRole?.charAt(0).toUpperCase() + userRole?.slice(1)} Portal
           </Typography>
         </Box>
       </Box>
-      <Divider />
-      <List>
-        {navigationItems.map((item) => (
-          <ListItem key={item.text} disablePadding>
-            <ListItemButton
-              selected={location.pathname === item.path}
-              onClick={() => handleNavigation(item.path)}
-            >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
+
+      {/* Navigation Items */}
+      <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
+        <List sx={{ p: 0 }}>
+          {navigationItems.map((item, index) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <ListItem 
+                key={item.text} 
+                disablePadding
+                sx={{ mb: 0.5 }}
+              >
+                <ListItemButton
+                  selected={isActive}
+                  onClick={() => handleNavigation(item.path)}
+                  sx={{
+                    mx: isSmallScreen ? 1 : 2,
+                    borderRadius: 2,
+                    minHeight: isSmallScreen ? 48 : 56,
+                    '&.Mui-selected': {
+                      backgroundColor: 'primary.main',
+                      color: 'primary.contrastText',
+                      '&:hover': {
+                        backgroundColor: 'primary.dark',
+                      },
+                      '& .MuiListItemIcon-root': {
+                        color: 'primary.contrastText',
+                      },
+                    },
+                    '&:hover': {
+                      backgroundColor: 'action.hover',
+                    },
+                    transition: 'all 0.2s ease-in-out',
+                  }}
+                >
+                  <ListItemIcon 
+                    sx={{ 
+                      minWidth: isSmallScreen ? 36 : 40,
+                      color: isActive ? 'inherit' : 'text.secondary',
+                    }}
+                  >
+                    {item.icon}
+                  </ListItemIcon>
+                  <ListItemText 
+                    primary={item.text}
+                    primaryTypographyProps={{
+                      fontSize: isSmallScreen ? '0.875rem' : '1rem',
+                      fontWeight: isActive ? 600 : 400,
+                    }}
+                  />
+                </ListItemButton>
+              </ListItem>
+            );
+          })}
+        </List>
+      </Box>
+
+      {/* Footer */}
+      <Box 
+        sx={{ 
+          p: isSmallScreen ? 1.5 : 2,
+          borderTop: '1px solid',
+          borderColor: 'divider',
+          backgroundColor: 'background.paper',
+        }}
+      >
+        <Typography 
+          variant="caption" 
+          color="text.secondary"
+          sx={{ textAlign: 'center', display: 'block' }}
+        >
+          College Management System
+        </Typography>
+      </Box>
     </Box>
   );
 
@@ -184,7 +258,7 @@ export const Sidebar = ({ open, onClose, userRole, isMobile }) => {
       open={open}
       onClose={onClose}
       ModalProps={{
-        keepMounted: isMobile, // Better open performance on mobile.
+        keepMounted: isMobile,
       }}
       sx={{
         width: drawerWidth,
@@ -192,7 +266,20 @@ export const Sidebar = ({ open, onClose, userRole, isMobile }) => {
         '& .MuiDrawer-paper': {
           width: drawerWidth,
           boxSizing: 'border-box',
+          backgroundColor: 'background.paper',
+          borderRight: '1px solid',
+          borderColor: 'divider',
+          boxShadow: isMobile ? 3 : 1,
+          ...(isMobile && {
+            width: '100%',
+            maxWidth: '320px',
+          }),
         },
+        ...(isMobile && {
+          '& .MuiBackdrop-root': {
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          },
+        }),
       }}
     >
       {drawer}

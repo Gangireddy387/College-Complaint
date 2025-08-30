@@ -21,10 +21,11 @@ import {
   FormHelperText,
   IconButton,
   Chip,
-
   Paper,
   Tabs,
   Tab,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import {
   Business as BusinessIcon,
@@ -37,11 +38,12 @@ import {
   Delete as DeleteIcon,
   Save as SaveIcon,
   Cancel as CancelIcon,
-
+  Info as InfoIcon,
 } from '@mui/icons-material';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { PageHeader } from '../../components/shared/PageHeader';
+import { ResponsiveTable } from '../../components/shared/ResponsiveTable';
 
 // Tab Panel Component
 function TabPanel({ children, value, index, ...other }) {
@@ -59,12 +61,233 @@ function TabPanel({ children, value, index, ...other }) {
 }
 
 export const Management = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   
   // Data states - Only Principal management data
-  const [departments, setDepartments] = useState([]);
-  const [faculty, setFaculty] = useState([]);
+  const [departments, setDepartments] = useState([
+    {
+      id: 1,
+      department_code: 'CS',
+      name: 'Computer Science',
+      description: 'Department of Computer Science and Engineering',
+      established_year: '2010',
+      email: 'cs@college.edu',
+      phone_number: '+1 (555) 123-4567',
+      building: 'Engineering Building',
+      floor: '2nd Floor',
+      room: '201',
+      campus: 'Main Campus',
+      status: 'active',
+      faculty_count: 15,
+      student_count: 120,
+    },
+    {
+      id: 2,
+      department_code: 'EE',
+      name: 'Electrical Engineering',
+      description: 'Department of Electrical and Electronics Engineering',
+      established_year: '2008',
+      email: 'ee@college.edu',
+      phone_number: '+1 (555) 234-5678',
+      building: 'Engineering Building',
+      floor: '3rd Floor',
+      room: '301',
+      campus: 'Main Campus',
+      status: 'active',
+      faculty_count: 12,
+      student_count: 95,
+    },
+    {
+      id: 3,
+      department_code: 'ME',
+      name: 'Mechanical Engineering',
+      description: 'Department of Mechanical Engineering',
+      established_year: '2012',
+      email: 'me@college.edu',
+      phone_number: '+1 (555) 345-6789',
+      building: 'Engineering Building',
+      floor: '1st Floor',
+      room: '101',
+      campus: 'Main Campus',
+      status: 'active',
+      faculty_count: 18,
+      student_count: 150,
+    },
+    {
+      id: 4,
+      department_code: 'CE',
+      name: 'Civil Engineering',
+      description: 'Department of Civil Engineering and Construction',
+      established_year: '2005',
+      email: 'ce@college.edu',
+      phone_number: '+1 (555) 456-7890',
+      building: 'Engineering Building',
+      floor: '4th Floor',
+      room: '401',
+      campus: 'Main Campus',
+      status: 'active',
+      faculty_count: 14,
+      student_count: 110,
+    },
+    {
+      id: 5,
+      department_code: 'IT',
+      name: 'Information Technology',
+      description: 'Department of Information Technology and Systems',
+      established_year: '2015',
+      email: 'it@college.edu',
+      phone_number: '+1 (555) 567-8901',
+      building: 'Technology Building',
+      floor: '2nd Floor',
+      room: '205',
+      campus: 'Main Campus',
+      status: 'active',
+      faculty_count: 10,
+      student_count: 85,
+    },
+    {
+      id: 6,
+      department_code: 'AI',
+      name: 'Artificial Intelligence',
+      description: 'Department of AI and Machine Learning',
+      established_year: '2020',
+      email: 'ai@college.edu',
+      phone_number: '+1 (555) 678-9012',
+      building: 'Innovation Center',
+      floor: '1st Floor',
+      room: '105',
+      campus: 'Main Campus',
+      status: 'active',
+      faculty_count: 8,
+      student_count: 60,
+    }
+  ]);
+  const [faculty, setFaculty] = useState([
+    {
+      id: 1,
+      employee_id: 'FAC001',
+      first_name: 'Dr. John',
+      last_name: 'Smith',
+      designation: 'Professor',
+      department_id: 1,
+      department_name: 'Computer Science',
+      email: 'john.smith@college.edu',
+      phone_number: '+1 (555) 111-2222',
+      specializations: 'Data Structures, Algorithms',
+      joining_date: '2015-08-15',
+      current_workload: '12 hours/week',
+      status: 'active',
+    },
+    {
+      id: 2,
+      employee_id: 'FAC002',
+      first_name: 'Dr. Sarah',
+      last_name: 'Johnson',
+      designation: 'Associate Professor',
+      department_id: 1,
+      department_name: 'Computer Science',
+      email: 'sarah.johnson@college.edu',
+      phone_number: '+1 (555) 222-3333',
+      specializations: 'Database Systems, Web Development',
+      joining_date: '2018-01-10',
+      current_workload: '10 hours/week',
+      status: 'active',
+    },
+    {
+      id: 3,
+      employee_id: 'FAC003',
+      first_name: 'Dr. Michael',
+      last_name: 'Brown',
+      designation: 'Assistant Professor',
+      department_id: 2,
+      department_name: 'Electrical Engineering',
+      email: 'michael.brown@college.edu',
+      phone_number: '+1 (555) 333-4444',
+      specializations: 'Circuit Design, Electronics',
+      joining_date: '2020-06-01',
+      current_workload: '8 hours/week',
+      status: 'active',
+    },
+    {
+      id: 4,
+      employee_id: 'FAC004',
+      first_name: 'Dr. Emily',
+      last_name: 'Davis',
+      designation: 'Professor',
+      department_id: 2,
+      department_name: 'Electrical Engineering',
+      email: 'emily.davis@college.edu',
+      phone_number: '+1 (555) 444-5555',
+      specializations: 'Power Systems, Control Theory',
+      joining_date: '2012-03-20',
+      current_workload: '14 hours/week',
+      status: 'active',
+    },
+    {
+      id: 5,
+      employee_id: 'FAC005',
+      first_name: 'Dr. Robert',
+      last_name: 'Wilson',
+      designation: 'Associate Professor',
+      department_id: 3,
+      department_name: 'Mechanical Engineering',
+      email: 'robert.wilson@college.edu',
+      phone_number: '+1 (555) 555-6666',
+      specializations: 'Thermodynamics, Fluid Mechanics',
+      joining_date: '2016-09-15',
+      current_workload: '11 hours/week',
+      status: 'active',
+    },
+    {
+      id: 6,
+      employee_id: 'FAC006',
+      first_name: 'Dr. Lisa',
+      last_name: 'Anderson',
+      designation: 'Assistant Professor',
+      department_id: 3,
+      department_name: 'Mechanical Engineering',
+      email: 'lisa.anderson@college.edu',
+      phone_number: '+1 (555) 666-7777',
+      specializations: 'Robotics, Automation',
+      joining_date: '2021-01-10',
+      current_workload: '9 hours/week',
+      status: 'active',
+    },
+    {
+      id: 7,
+      employee_id: 'FAC007',
+      first_name: 'Dr. David',
+      last_name: 'Martinez',
+      designation: 'Professor',
+      department_id: 4,
+      department_name: 'Civil Engineering',
+      email: 'david.martinez@college.edu',
+      phone_number: '+1 (555) 777-8888',
+      specializations: 'Structural Engineering, Construction',
+      joining_date: '2010-07-01',
+      current_workload: '13 hours/week',
+      status: 'active',
+    },
+    {
+      id: 8,
+      employee_id: 'FAC008',
+      first_name: 'Dr. Jennifer',
+      last_name: 'Taylor',
+      designation: 'Associate Professor',
+      department_id: 5,
+      department_name: 'Information Technology',
+      email: 'jennifer.taylor@college.edu',
+      phone_number: '+1 (555) 888-9999',
+      specializations: 'Network Security, Cloud Computing',
+      joining_date: '2017-11-05',
+      current_workload: '10 hours/week',
+      status: 'active',
+    }
+  ]);
   
   // Quick Actions states
   const [activeTab, setActiveTab] = useState(0);
@@ -98,851 +321,466 @@ export const Management = () => {
   });
   const [formErrors, setFormErrors] = useState({});
 
-  const { user } = useSelector((state) => state.auth);
-  const navigate = useNavigate();
+  // Convert departments data for ResponsiveTable
+  const departmentColumns = [
+    {
+      field: 'name',
+      headerName: 'Department Name',
+      bold: true,
+      hideOnMobile: false,
+      hideOnTablet: false,
+    },
+    {
+      field: 'department_code',
+      headerName: 'Code',
+      hideOnMobile: false,
+      hideOnTablet: false,
+    },
+    {
+      field: 'description',
+      headerName: 'Description',
+      hideOnMobile: true,
+      hideOnTablet: false,
+    },
+    {
+      field: 'established_year',
+      headerName: 'Established',
+      hideOnMobile: false,
+      hideOnTablet: false,
+    },
+    {
+      field: 'email',
+      headerName: 'Email',
+      hideOnMobile: true,
+      hideOnTablet: false,
+    },
+    {
+      field: 'phone_number',
+      headerName: 'Phone',
+      hideOnMobile: true,
+      hideOnTablet: false,
+    },
+    {
+      field: 'building',
+      headerName: 'Building',
+      hideOnMobile: false,
+      hideOnTablet: false,
+    },
+    {
+      field: 'status',
+      headerName: 'Status',
+      render: (value) => (
+        <Chip
+          label={value}
+          size="small"
+          color={value === 'active' ? 'success' : 'error'}
+          variant="outlined"
+        />
+      ),
+      hideOnMobile: false,
+      hideOnTablet: false,
+    },
+  ];
 
-  const handleNavigateToDepartments = () => {
-    navigate('/principal/departments');
+  // Convert faculty data for ResponsiveTable
+  const facultyColumns = [
+    {
+      field: 'first_name',
+      headerName: 'First Name',
+      bold: true,
+      hideOnMobile: false,
+      hideOnTablet: false,
+    },
+    {
+      field: 'last_name',
+      headerName: 'Last Name',
+      hideOnMobile: false,
+      hideOnTablet: false,
+    },
+    {
+      field: 'employee_id',
+      headerName: 'Employee ID',
+      hideOnMobile: false,
+      hideOnTablet: false,
+    },
+    {
+      field: 'designation',
+      headerName: 'Designation',
+      hideOnMobile: false,
+      hideOnTablet: false,
+    },
+    {
+      field: 'department_name',
+      headerName: 'Department',
+      hideOnMobile: true,
+      hideOnTablet: false,
+    },
+    {
+      field: 'email',
+      headerName: 'Email',
+      hideOnMobile: true,
+      hideOnTablet: false,
+    },
+    {
+      field: 'phone_number',
+      headerName: 'Phone',
+      hideOnMobile: true,
+      hideOnTablet: false,
+    },
+    {
+      field: 'joining_date',
+      headerName: 'Joining Date',
+      hideOnMobile: false,
+      hideOnTablet: false,
+    },
+    {
+      field: 'current_workload',
+      headerName: 'Workload',
+      hideOnMobile: false,
+      hideOnTablet: false,
+    },
+    {
+      field: 'status',
+      headerName: 'Status',
+      render: (value) => (
+        <Chip
+          label={value}
+          size="small"
+          color={value === 'active' ? 'success' : 'error'}
+          variant="outlined"
+        />
+      ),
+      hideOnMobile: false,
+      hideOnTablet: false,
+    },
+  ];
+
+  const handleDepartmentRowClick = (department) => {
+    console.log('Department clicked:', department);
+    // Navigate to department details
   };
 
-  const handleNavigateToFaculty = () => {
-    navigate('/principal/faculty');
+  const handleFacultyRowClick = (faculty) => {
+    console.log('Faculty clicked:', faculty);
+    // Navigate to faculty details
   };
 
-  const handleCloseError = () => {
-    setError(null);
+  const handleEditDepartment = (department) => {
+    console.log('Edit department:', department);
+    // Open edit dialog
   };
 
-  const handleTabChange = (event, newValue) => {
-    setActiveTab(newValue);
+  const handleDeleteDepartment = (department) => {
+    console.log('Delete department:', department);
+    // Show confirmation dialog
   };
 
-  // Department form handlers
-  const handleAddDepartment = () => {
-    setDepartmentFormData({
-      department_code: '',
-      name: '',
-      description: '',
-      established_year: '',
-      email: '',
-      phone_number: '',
-      building: '',
-      floor: '',
-      room: '',
-      campus: '',
-      status: 'active'
-    });
-    setFormErrors({});
-    setIsAddDepartmentOpen(true);
+  const handleEditFaculty = (faculty) => {
+    console.log('Edit faculty:', faculty);
+    // Open edit dialog
   };
 
-  const handleDepartmentFormSubmit = async () => {
-    const errors = {};
-    if (!departmentFormData.department_code) errors.department_code = 'Department code is required';
-    if (!departmentFormData.name) errors.name = 'Department name is required';
-    if (!departmentFormData.description) errors.description = 'Description is required';
-    if (!departmentFormData.established_year) errors.established_year = 'Established year is required';
-    if (!departmentFormData.email) errors.email = 'Email is required';
-    if (!departmentFormData.phone_number) errors.phone_number = 'Phone number is required';
-    if (!departmentFormData.building) errors.building = 'Building is required';
-    if (!departmentFormData.floor) errors.floor = 'Floor is required';
-    if (!departmentFormData.room) errors.room = 'Room is required';
-    if (!departmentFormData.campus) errors.campus = 'Campus is required';
-    
-    setFormErrors(errors);
-    if (Object.keys(errors).length > 0) return;
-
-    try {
-      setIsLoading(true);
-      const newDepartment = {
-        ...departmentFormData,
-        id: Date.now(),
-        location: {
-          building: departmentFormData.building,
-          floor: departmentFormData.floor,
-          room: departmentFormData.room,
-          campus: departmentFormData.campus
-        },
-        facilities: [],
-        programs: [],
-        research_areas: [],
-        total_students: 0,
-        total_faculty: 0,
-        budget: 0,
-        createdAt: new Date().toISOString()
-      };
-      
-      setDepartments(prev => [...prev, newDepartment]);
-      setIsAddDepartmentOpen(false);
-      setDepartmentFormData({
-        department_code: '',
-        name: '',
-        description: '',
-        established_year: '',
-        email: '',
-        phone_number: '',
-        building: '',
-        floor: '',
-        room: '',
-        campus: '',
-        status: 'active'
-      });
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
+  const handleDeleteFaculty = (faculty) => {
+    console.log('Delete faculty:', faculty);
+    // Show confirmation dialog
   };
 
-  // Faculty form handlers
-  const handleAddFaculty = () => {
-    setFacultyFormData({
-      employee_id: '',
-      first_name: '',
-      last_name: '',
-      designation: '',
-      department_id: '',
-      email: '',
-      phone_number: '',
-      specializations: '',
-      joining_date: '',
-      current_workload: '',
-      status: 'active'
-    });
-    setFormErrors({});
-    setIsAddFacultyOpen(true);
-  };
+  const expandableDepartmentContent = (department) => (
+    <Box>
+      <Typography variant="subtitle2" gutterBottom>
+        Department Details
+                </Typography>
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={6}>
+          <Typography variant="body2">
+            <strong>Description:</strong> {department.description}
+                      </Typography>
+          <Typography variant="body2">
+            <strong>Email:</strong> {department.email}
+                      </Typography>
+          <Typography variant="body2">
+            <strong>Phone:</strong> {department.phone_number}
+          </Typography>
+                  </Grid>
+        <Grid item xs={12} sm={6}>
+          <Typography variant="body2">
+            <strong>Location:</strong> {department.building}, {department.floor}, Room {department.room}
+                      </Typography>
+          <Typography variant="body2">
+            <strong>Campus:</strong> {department.campus}
+                      </Typography>
+          <Typography variant="body2">
+            <strong>Faculty Count:</strong> {department.faculty_count}
+                      </Typography>
+          <Typography variant="body2">
+            <strong>Student Count:</strong> {department.student_count}
+                      </Typography>
+                  </Grid>
+                </Grid>
+              </Box>
+  );
 
-  const handleFacultyFormSubmit = async () => {
-    const errors = {};
-    if (!facultyFormData.employee_id) errors.employee_id = 'Employee ID is required';
-    if (!facultyFormData.first_name) errors.first_name = 'First name is required';
-    if (!facultyFormData.last_name) errors.last_name = 'Last name is required';
-    if (!facultyFormData.designation) errors.designation = 'Designation is required';
-    if (!facultyFormData.department_id) errors.department_id = 'Department is required';
-    if (!facultyFormData.email) errors.email = 'Email is required';
-    if (!facultyFormData.phone_number) errors.phone_number = 'Phone number is required';
-    if (!facultyFormData.joining_date) errors.joining_date = 'Joining date is required';
-    if (!facultyFormData.current_workload) errors.current_workload = 'Current workload is required';
-    
-    setFormErrors(errors);
-    if (Object.keys(errors).length > 0) return;
-
-    try {
-      setIsLoading(true);
-      const newFaculty = {
-        ...facultyFormData,
-        id: Date.now(),
-        specializations: facultyFormData.specializations ? facultyFormData.specializations.split(',').map(s => s.trim()) : [],
-        current_workload: parseInt(facultyFormData.current_workload),
-        qualifications: [],
-        experience: [],
-        publications: [],
-        achievements: [],
-        createdAt: new Date().toISOString()
-      };
-      
-      setFaculty(prev => [...prev, newFaculty]);
-      setIsAddFacultyOpen(false);
-      setFacultyFormData({
-        employee_id: '',
-        first_name: '',
-        last_name: '',
-        designation: '',
-        department_id: '',
-        email: '',
-        phone_number: '',
-        specializations: '',
-        joining_date: '',
-        current_workload: '',
-        status: 'active'
-      });
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleInputChange = (field, value, formType) => {
-    if (formType === 'department') {
-      setDepartmentFormData(prev => ({ ...prev, [field]: value }));
-    } else {
-      setFacultyFormData(prev => ({ ...prev, [field]: value }));
-    }
-    if (formErrors[field]) {
-      setFormErrors(prev => ({ ...prev, [field]: '' }));
-    }
-  };
-
-  const getDepartmentName = (departmentId) => {
-    const dept = departments.find(d => d.id === departmentId);
-    return dept ? dept.name : 'Unknown';
-  };
-
-  // Mock data for Principal management only - Updated to match backend model structure
-  useEffect(() => {
-    setDepartments([
-      { 
-        id: 1, 
-        department_code: 'CS', 
-        name: 'Computer Science', 
-        description: 'Computer Science Department focusing on software engineering and AI', 
-        established_year: 2020,
-        email: 'cs@college.edu',
-        phone_number: '9876543210',
-        location: { building: 'Main Building', floor: '2nd Floor', room: 'Room 201', campus: 'Main Campus' },
-        facilities: ['Computer Lab', 'Library', 'Conference Room'],
-        programs: [{ name: 'B.Tech Computer Science', duration: '4 Years', type: 'Undergraduate' }],
-        research_areas: ['Artificial Intelligence', 'Machine Learning', 'Data Science'],
-        status: 'active',
-        total_students: 120,
-        total_faculty: 8,
-        budget: 500000
-      },
-      { 
-        id: 2, 
-        department_code: 'EE', 
-        name: 'Electrical Engineering', 
-        description: 'Electrical Engineering Department with focus on power systems', 
-        established_year: 2020,
-        email: 'ee@college.edu',
-        phone_number: '9876543211',
-        location: { building: 'Engineering Building', floor: '1st Floor', room: 'Room 101', campus: 'Main Campus' },
-        facilities: ['Electronics Lab', 'Power Lab', 'Seminar Hall'],
-        programs: [{ name: 'B.Tech Electrical Engineering', duration: '4 Years', type: 'Undergraduate' }],
-        research_areas: ['Power Systems', 'Control Systems', 'Electronics'],
-        status: 'active',
-        total_students: 95,
-        total_faculty: 6,
-        budget: 400000
-      },
-      { 
-        id: 3, 
-        department_code: 'ME', 
-        name: 'Mechanical Engineering', 
-        description: 'Mechanical Engineering Department specializing in manufacturing', 
-        established_year: 2020,
-        email: 'me@college.edu',
-        phone_number: '9876543212',
-        location: { building: 'Engineering Building', floor: '2nd Floor', room: 'Room 201', campus: 'Main Campus' },
-        facilities: ['Machine Shop', 'CAD Lab', 'Workshop'],
-        programs: [{ name: 'B.Tech Mechanical Engineering', duration: '4 Years', type: 'Undergraduate' }],
-        research_areas: ['Manufacturing', 'Thermal Engineering', 'Robotics'],
-        status: 'active',
-        total_students: 110,
-        total_faculty: 7,
-        budget: 450000
-      }
-    ]);
-    
-    setFaculty([
-      { 
-        id: 1, 
-        employee_id: 'CS001', 
-        first_name: 'John', 
-        last_name: 'Doe', 
-        designation: 'Assistant Professor', 
-        department_id: 1, 
-        email: 'john.doe@college.edu', 
-        phone_number: '9876543201', 
-        specializations: ['Software Engineering', 'Database Systems'],
-        qualifications: [{ degree: 'Ph.D.', institution: 'IIT Delhi', year: 2020, percentage: '95%' }],
-        joining_date: '2021-01-01', 
-        experience: [{ position: 'Research Scholar', organization: 'IIT Delhi', from_date: '2017-01-01', to_date: '2020-12-31', description: 'Research in database systems' }],
-        publications: [{ title: 'Advanced Database Design', journal: 'Computer Science Journal', year: 2021, doi: '10.1000/abc123' }],
-        achievements: [{ title: 'Best Paper Award', year: 2021, description: 'Awarded for research excellence' }],
-        current_workload: 16,
-        status: 'active'
-      },
-      { 
-        id: 2, 
-        employee_id: 'CS002', 
-        first_name: 'Jane', 
-        last_name: 'Smith', 
-        designation: 'Associate Professor', 
-        department_id: 1, 
-        email: 'jane.smith@college.edu', 
-        phone_number: '9876543202', 
-        specializations: ['Artificial Intelligence', 'Machine Learning'],
-        qualifications: [{ degree: 'Ph.D.', institution: 'IISc Bangalore', year: 2018, percentage: '92%' }],
-        joining_date: '2020-03-01', 
-        experience: [{ position: 'Assistant Professor', organization: 'NIT Surathkal', from_date: '2018-01-01', to_date: '2020-02-28', description: 'Teaching and research in AI' }],
-        publications: [{ title: 'Machine Learning Applications', journal: 'AI Research Journal', year: 2020, doi: '10.1000/def456' }],
-        achievements: [{ title: 'Young Scientist Award', year: 2020, description: 'Recognition for AI research' }],
-        current_workload: 18,
-        status: 'active'
-      },
-      { 
-        id: 3, 
-        employee_id: 'EE001', 
-        first_name: 'Michael', 
-        last_name: 'Johnson', 
-        designation: 'Professor', 
-        department_id: 2, 
-        email: 'michael.johnson@college.edu', 
-        phone_number: '9876543203', 
-        specializations: ['Power Systems', 'Control Systems'],
-        qualifications: [{ degree: 'Ph.D.', institution: 'IIT Bombay', year: 2015, percentage: '90%' }],
-        joining_date: '2018-06-01', 
-        experience: [{ position: 'Associate Professor', organization: 'NIT Trichy', from_date: '2015-01-01', to_date: '2018-05-31', description: 'Teaching power systems engineering' }],
-        publications: [{ title: 'Modern Power Systems', journal: 'Electrical Engineering Journal', year: 2019, doi: '10.1000/ghi789' }],
-        achievements: [{ title: 'Excellence in Teaching', year: 2019, description: 'Awarded for outstanding teaching' }],
-        current_workload: 20,
-        status: 'active'
-      }
-    ]);
-  }, []);
-
-  if (isLoading && !departments.length) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
+  const expandableFacultyContent = (faculty) => (
+    <Box>
+      <Typography variant="subtitle2" gutterBottom>
+        Faculty Details
+              </Typography>
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={6}>
+          <Typography variant="body2">
+            <strong>Email:</strong> {faculty.email}
+              </Typography>
+          <Typography variant="body2">
+            <strong>Phone:</strong> {faculty.phone_number}
+                </Typography>
+          <Typography variant="body2">
+            <strong>Department:</strong> {faculty.department_name}
+                      </Typography>
+                  </Grid>
+        <Grid item xs={12} sm={6}>
+          <Typography variant="body2">
+            <strong>Specializations:</strong> {faculty.specializations}
+                      </Typography>
+          <Typography variant="body2">
+            <strong>Joining Date:</strong> {faculty.joining_date}
+                      </Typography>
+          <Typography variant="body2">
+            <strong>Current Workload:</strong> {faculty.current_workload}
+                      </Typography>
+                  </Grid>
+                </Grid>
+              </Box>
+  );
 
   return (
-    <Box>
-      <PageHeader
-        title="Principal Management"
-        subtitle="Manage academic departments and faculty members"
-        breadcrumbs={[
-          { label: 'Home', path: '/principal/dashboard' },
-          { label: 'Management', path: '/principal/management' },
-        ]}
-      />
-
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }} onClose={handleCloseError}>
-          {error}
-        </Alert>
-      )}
-
-      <Grid container spacing={3}>
-        {/* Department Management Card */}
-        <Grid item xs={12} md={6}>
-          <Card 
-            sx={{ 
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              transition: 'all 0.3s ease-in-out',
-              '&:hover': {
-                transform: 'translateY(-4px)',
-                boxShadow: 4,
-              }
-            }}
-          >
-            <CardContent sx={{ flexGrow: 1, textAlign: 'center', py: 4 }}>
-              <BusinessIcon sx={{ fontSize: 64, color: 'primary.main', mb: 2 }} />
-              <Typography variant="h5" component="h2" gutterBottom>
-                Department Management
-              </Typography>
-              <Typography variant="body1" color="text.secondary" paragraph>
-                Manage academic departments, their locations, facilities, and academic programs.
-              </Typography>
-              
-              <Box sx={{ mt: 3, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
-                <Typography variant="h6" color="primary.main" gutterBottom>
-                  Current Status
-                </Typography>
-                <Grid container spacing={2} justifyContent="center">
-                  <Grid item>
-                    <Box sx={{ textAlign: 'center' }}>
-                      <Typography variant="h4" color="primary.main" fontWeight="bold">
-                        {departments.length}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Departments
-                      </Typography>
-                    </Box>
-                  </Grid>
-                  <Grid item>
-                    <Box sx={{ textAlign: 'center' }}>
-                      <Typography variant="h4" color="secondary.main" fontWeight="bold">
-                        {departments.reduce((sum, dept) => sum + dept.total_students, 0)}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Total Students
-                      </Typography>
-                    </Box>
-                  </Grid>
-                  <Grid item>
-                    <Box sx={{ textAlign: 'center' }}>
-                      <Typography variant="h4" color="success.main" fontWeight="bold">
-                        {departments.reduce((sum, dept) => sum + dept.total_faculty, 0)}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Total Faculty
-                      </Typography>
-                    </Box>
-                  </Grid>
-                </Grid>
-              </Box>
-            </CardContent>
-            <CardActions sx={{ justifyContent: 'center', pb: 3 }}>
+    <Box sx={{ flexGrow: 1 }}>
+      {/* Header */}
+      <Box sx={{ mb: isMobile ? 2 : 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant={isMobile ? "h5" : "h4"} gutterBottom>
+            College Management
+          </Typography>
               <Button
                 variant="contained"
-                size="large"
-                startIcon={<ArrowForwardIcon />}
-                onClick={handleNavigateToDepartments}
-                sx={{ minWidth: 200 }}
-              >
-                Manage Departments
-              </Button>
-            </CardActions>
-          </Card>
-        </Grid>
-
-        {/* Faculty Management Card */}
-        <Grid item xs={12} md={6}>
-          <Card 
-            sx={{ 
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              transition: 'all 0.3s ease-in-out',
-              '&:hover': {
-                transform: 'translateY(-4px)',
-                boxShadow: 4,
-              }
-            }}
+            startIcon={<AddIcon />}
+            size={isMobile ? "small" : "medium"}
+            onClick={() => setActiveTab(0)}
           >
-            <CardContent sx={{ flexGrow: 1, textAlign: 'center', py: 4 }}>
-              <PeopleIcon sx={{ fontSize: 64, color: 'secondary.main', mb: 2 }} />
-              <Typography variant="h5" component="h2" gutterBottom>
-                Faculty Management
-              </Typography>
-              <Typography variant="body1" color="text.secondary" paragraph>
-                Manage faculty members, their specializations, workload, and academic profiles.
-              </Typography>
-              
-              <Box sx={{ mt: 3, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
-                <Typography variant="h6" color="secondary.main" gutterBottom>
-                  Current Status
-                </Typography>
-                <Grid container spacing={2} justifyContent="center">
-                  <Grid item>
-                    <Box sx={{ textAlign: 'center' }}>
-                      <Typography variant="h4" color="secondary.main" fontWeight="bold">
-                        {faculty.length}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Faculty Members
-                      </Typography>
-                    </Box>
-                  </Grid>
-                  <Grid item>
-                    <Box sx={{ textAlign: 'center' }}>
-                      <Typography variant="h4" color="info.main" fontWeight="bold">
-                        {faculty.filter(f => f.status === 'active').length}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Active Members
-                      </Typography>
-                    </Box>
-                  </Grid>
-                  <Grid item>
-                    <Box sx={{ textAlign: 'center' }}>
-                      <Typography variant="h4" color="warning.main" fontWeight="bold">
-                        {faculty.reduce((sum, f) => sum + f.current_workload, 0)}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Total Workload (hrs/week)
-                      </Typography>
-                    </Box>
-                  </Grid>
-                </Grid>
-              </Box>
-            </CardContent>
-            <CardActions sx={{ justifyContent: 'center', pb: 3 }}>
-              <Button
-                variant="contained"
-                size="large"
-                startIcon={<ArrowForwardIcon />}
-                onClick={handleNavigateToFaculty}
-                sx={{ minWidth: 200 }}
-                color="secondary"
-              >
-                Manage Faculty
+            Quick Actions
               </Button>
-            </CardActions>
-          </Card>
-        </Grid>
+                    </Box>
+        <Typography variant={isMobile ? "body2" : "body1"} color="text.secondary">
+          Manage departments, faculty, and overall college administration.
+        </Typography>
+                    </Box>
 
-        {/* Quick Actions Card with Tabs */}
-        <Grid item xs={12}>
-          <Card>
-            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-              <Tabs value={activeTab} onChange={handleTabChange} aria-label="quick actions tabs">
-                <Tab
-                  label={
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <AddIcon />
-                      Add Department
-                    </Box>
-                  }
-                  id="quick-actions-tab-0"
-                  aria-controls="quick-actions-tabpanel-0"
-                />
-                <Tab
-                  label={
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <AddIcon />
-                      Add Faculty
-                    </Box>
-                  }
-                  id="quick-actions-tab-1"
-                  aria-controls="quick-actions-tabpanel-1"
-                />
+      {/* Current View Mode Indicator */}
+      <Alert 
+        severity="info" 
+        icon={<InfoIcon />}
+        sx={{ mb: 2 }}
+      >
+        <Typography variant="body2">
+          <strong>Current View:</strong> {
+            isMobile ? 'Mobile Grid View (Single Column Cards)' :
+            isTablet && !isMobile ? 'Tablet Grid View (2-Column Cards)' :
+            'Desktop Table View (Full Table)'
+          }
+        </Typography>
+        <Typography variant="caption" display="block" sx={{ mt: 0.5 }}>
+          Resize your browser window to see the management data transform into different layouts!
+        </Typography>
+        <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
+          <Chip 
+            label="Desktop (≥1200px)" 
+            size="small" 
+            color={!isTablet ? 'primary' : 'default'}
+            variant={!isTablet ? 'filled' : 'outlined'}
+          />
+          <Chip 
+            label="Tablet (900-1200px)" 
+            size="small" 
+            color={isTablet && !isMobile ? 'primary' : 'default'}
+            variant={isTablet && !isMobile ? 'filled' : 'outlined'}
+          />
+          <Chip 
+            label="Mobile (<900px)" 
+            size="small" 
+            color={isMobile ? 'primary' : 'default'}
+            variant={isMobile ? 'filled' : 'outlined'}
+          />
+        </Box>
+      </Alert>
+
+      {/* Tabs */}
+      <Paper sx={{ width: '100%' }}>
+        <Tabs
+          value={activeTab}
+          onChange={(e, newValue) => setActiveTab(newValue)}
+          variant={isMobile ? "scrollable" : "fullWidth"}
+          scrollButtons={isMobile ? "auto" : false}
+        >
+          <Tab label="Departments" />
+          <Tab label="Faculty" />
+          <Tab label="Quick Actions" />
               </Tabs>
+
+        {/* Departments Tab */}
+        <Box sx={{ p: 3 }}>
+          {activeTab === 0 && (
+            <Box>
+              <Box sx={{ mb: 2 }}>
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={() => setIsAddDepartmentOpen(true)}
+                  sx={{ mb: 2 }}
+                >
+                  Add Department
+                </Button>
+              </Box>
+              
+              <ResponsiveTable
+                columns={departmentColumns}
+                data={departments}
+                onRowClick={handleDepartmentRowClick}
+                onEdit={handleEditDepartment}
+                onDelete={handleDeleteDepartment}
+                expandable={true}
+                expandableContent={expandableDepartmentContent}
+                emptyMessage="No departments found"
+              />
+                  </Box>
+          )}
+
+          {/* Faculty Tab */}
+          {activeTab === 1 && (
+            <Box>
+              <Box sx={{ mb: 2 }}>
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={() => setIsAddFacultyOpen(true)}
+                  sx={{ mb: 2 }}
+                >
+                  Add Faculty
+                </Button>
+              </Box>
+              
+              <ResponsiveTable
+                columns={facultyColumns}
+                data={faculty}
+                onRowClick={handleFacultyRowClick}
+                onEdit={handleEditFaculty}
+                onDelete={handleDeleteFaculty}
+                expandable={true}
+                expandableContent={expandableFacultyContent}
+                emptyMessage="No faculty found"
+              />
             </Box>
+          )}
 
+          {/* Quick Actions Tab */}
+          {activeTab === 2 && (
+            <Box>
+              <Typography variant="h6" gutterBottom>
+                Quick Actions
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6} md={4}>
+                  <Card>
+                    <CardContent>
+                      <Typography variant="h6" gutterBottom>
+                        Add Department
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Create a new department with all necessary details.
+                      </Typography>
+                    </CardContent>
+                    <CardActions>
+                      <Button size="small" onClick={() => setIsAddDepartmentOpen(true)}>
+                        Add Department
+                      </Button>
+                    </CardActions>
+                  </Card>
+                </Grid>
+                <Grid item xs={12} sm={6} md={4}>
+                  <Card>
+                    <CardContent>
+                      <Typography variant="h6" gutterBottom>
+                        Add Faculty
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Register new faculty members to departments.
+                      </Typography>
+                    </CardContent>
+                    <CardActions>
+                      <Button size="small" onClick={() => setIsAddFacultyOpen(true)}>
+                        Add Faculty
+                      </Button>
+                    </CardActions>
+                  </Card>
+                </Grid>
+                <Grid item xs={12} sm={6} md={4}>
+                  <Card>
+                    <CardContent>
+                      <Typography variant="h6" gutterBottom>
+                        View Reports
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Generate and view various college reports.
+                      </Typography>
+                    </CardContent>
+                    <CardActions>
+                      <Button size="small">
+                        View Reports
+                      </Button>
+                    </CardActions>
+                  </Card>
+                </Grid>
+                </Grid>
+            </Box>
+          )}
+        </Box>
+      </Paper>
 
+      {/* Add Department Dialog */}
+      <Dialog
+        open={isAddDepartmentOpen}
+        onClose={() => setIsAddDepartmentOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>Add New Department</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary">
+            Department form will be implemented here.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsAddDepartmentOpen(false)}>Cancel</Button>
+          <Button variant="contained">Save</Button>
+        </DialogActions>
+      </Dialog>
 
-
-
-            {/* Add Department Tab */}
-            <TabPanel value={activeTab} index={0}>
-              <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="h6">
-                  Add New Department
-                </Typography>
-                <Button
-                  variant="outlined"
-                  startIcon={<ArrowForwardIcon />}
-                  onClick={handleNavigateToDepartments}
-                >
-                  Full Management
-                </Button>
-              </Box>
-              
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
-                  <TextField
+      {/* Add Faculty Dialog */}
+      <Dialog
+        open={isAddFacultyOpen}
+        onClose={() => setIsAddFacultyOpen(false)}
+        maxWidth="md"
                     fullWidth
-                    label="Department Code"
-                    value={departmentFormData.department_code}
-                    onChange={(e) => handleInputChange('department_code', e.target.value, 'department')}
-                    error={!!formErrors.department_code}
-                    helperText={formErrors.department_code}
-                    placeholder="e.g., CS, EE, ME"
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Department Name"
-                    value={departmentFormData.name}
-                    onChange={(e) => handleInputChange('name', e.target.value, 'department')}
-                    error={!!formErrors.name}
-                    helperText={formErrors.name}
-                    placeholder="e.g., Computer Science"
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    label="Description"
-                    value={departmentFormData.description}
-                    onChange={(e) => handleInputChange('description', e.target.value, 'department')}
-                    error={!!formErrors.description}
-                    helperText={formErrors.description}
-                    multiline
-                    rows={3}
-                    placeholder="Brief description of the department"
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Established Year"
-                    value={departmentFormData.established_year}
-                    onChange={(e) => handleInputChange('established_year', e.target.value, 'department')}
-                    error={!!formErrors.established_year}
-                    helperText={formErrors.established_year}
-                    type="number"
-                    placeholder="e.g., 2020"
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <FormControl fullWidth error={!!formErrors.status}>
-                    <InputLabel>Status</InputLabel>
-                    <Select
-                      value={departmentFormData.status}
-                      onChange={(e) => handleInputChange('status', e.target.value, 'department')}
-                      label="Status"
-                    >
-                      <MenuItem value="active">Active</MenuItem>
-                      <MenuItem value="inactive">Inactive</MenuItem>
-                      <MenuItem value="suspended">Suspended</MenuItem>
-                    </Select>
-                    {formErrors.status && <FormHelperText>{formErrors.status}</FormHelperText>}
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Email"
-                    value={departmentFormData.email}
-                    onChange={(e) => handleInputChange('email', e.target.value, 'department')}
-                    error={!!formErrors.email}
-                    helperText={formErrors.email}
-                    type="email"
-                    placeholder="department@college.edu"
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Phone Number"
-                    value={departmentFormData.phone_number}
-                    onChange={(e) => handleInputChange('phone_number', e.target.value, 'department')}
-                    error={!!formErrors.phone_number}
-                    helperText={formErrors.phone_number}
-                    placeholder="9876543210"
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Building"
-                    value={departmentFormData.building}
-                    onChange={(e) => handleInputChange('building', e.target.value, 'department')}
-                    error={!!formErrors.building}
-                    helperText={formErrors.building}
-                    placeholder="e.g., Main Building"
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Floor"
-                    value={departmentFormData.floor}
-                    onChange={(e) => handleInputChange('floor', e.target.value, 'department')}
-                    error={!!formErrors.floor}
-                    helperText={formErrors.floor}
-                    placeholder="e.g., 2nd Floor"
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Room"
-                    value={departmentFormData.room}
-                    onChange={(e) => handleInputChange('room', e.target.value, 'department')}
-                    error={!!formErrors.room}
-                    helperText={formErrors.room}
-                    placeholder="e.g., Room 201"
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Campus"
-                    value={departmentFormData.campus}
-                    onChange={(e) => handleInputChange('campus', e.target.value, 'department')}
-                    error={!!formErrors.campus}
-                    helperText={formErrors.campus}
-                    placeholder="e.g., Main Campus"
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-                    <Button
-                      variant="outlined"
-                      startIcon={<CancelIcon />}
-                      onClick={() => setActiveTab(0)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      variant="contained"
-                      startIcon={<SaveIcon />}
-                      onClick={handleDepartmentFormSubmit}
-                      disabled={isLoading}
-                    >
-                      {isLoading ? <CircularProgress size={20} /> : 'Create Department'}
-                    </Button>
-                  </Box>
-                </Grid>
-              </Grid>
-            </TabPanel>
-
-            {/* Add Faculty Tab */}
-            <TabPanel value={activeTab} index={1}>
-              <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="h6">
-                  Add New Faculty Member
-                </Typography>
-                <Button
-                  variant="outlined"
-                  startIcon={<ArrowForwardIcon />}
-                  onClick={handleNavigateToFaculty}
-                >
-                  Full Management
-                </Button>
-              </Box>
-              
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Employee ID"
-                    value={facultyFormData.employee_id}
-                    onChange={(e) => handleInputChange('employee_id', e.target.value, 'faculty')}
-                    error={!!formErrors.employee_id}
-                    helperText={formErrors.employee_id}
-                    placeholder="e.g., CS001, EE001"
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="First Name"
-                    value={facultyFormData.first_name}
-                    onChange={(e) => handleInputChange('first_name', e.target.value, 'faculty')}
-                    error={!!formErrors.first_name}
-                    helperText={formErrors.first_name}
-                    placeholder="e.g., John"
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Last Name"
-                    value={facultyFormData.last_name}
-                    onChange={(e) => handleInputChange('last_name', e.target.value, 'faculty')}
-                    error={!!formErrors.last_name}
-                    helperText={formErrors.last_name}
-                    placeholder="e.g., Doe"
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Designation"
-                    value={facultyFormData.designation}
-                    onChange={(e) => handleInputChange('designation', e.target.value, 'faculty')}
-                    error={!!formErrors.designation}
-                    helperText={formErrors.designation}
-                    placeholder="e.g., Assistant Professor"
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <FormControl fullWidth error={!!formErrors.department_id}>
-                    <InputLabel>Department</InputLabel>
-                    <Select
-                      value={facultyFormData.department_id}
-                      onChange={(e) => handleInputChange('department_id', e.target.value, 'faculty')}
-                      label="Department"
-                    >
-                      {departments.map((dept) => (
-                        <MenuItem key={dept.id} value={dept.id}>
-                          {dept.name} ({dept.department_code})
-                        </MenuItem>
-                      ))}
-                    </Select>
-                    {formErrors.department_id && <FormHelperText>{formErrors.department_id}</FormHelperText>}
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <FormControl fullWidth error={!!formErrors.status}>
-                    <InputLabel>Status</InputLabel>
-                    <Select
-                      value={facultyFormData.status}
-                      onChange={(e) => handleInputChange('status', e.target.value, 'faculty')}
-                      label="Status"
-                    >
-                      <MenuItem value="active">Active</MenuItem>
-                      <MenuItem value="inactive">Inactive</MenuItem>
-                      <MenuItem value="on_leave">On Leave</MenuItem>
-                    </Select>
-                    {formErrors.status && <FormHelperText>{formErrors.status}</FormHelperText>}
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Email"
-                    value={facultyFormData.email}
-                    onChange={(e) => handleInputChange('email', e.target.value, 'faculty')}
-                    error={!!formErrors.email}
-                    helperText={formErrors.email}
-                    type="email"
-                    placeholder="faculty@college.edu"
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Phone Number"
-                    value={facultyFormData.phone_number}
-                    onChange={(e) => handleInputChange('phone_number', e.target.value, 'faculty')}
-                    error={!!formErrors.phone_number}
-                    helperText={formErrors.phone_number}
-                    placeholder="9876543210"
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    label="Specializations"
-                    value={facultyFormData.specializations}
-                    onChange={(e) => handleInputChange('specializations', e.target.value, 'faculty')}
-                    placeholder="e.g., Software Engineering, Database Systems (comma separated)"
-                    helperText="Enter specializations separated by commas"
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Joining Date"
-                    value={facultyFormData.joining_date}
-                    onChange={(e) => handleInputChange('joining_date', e.target.value, 'faculty')}
-                    error={!!formErrors.joining_date}
-                    helperText={formErrors.joining_date}
-                    type="date"
-                    InputLabelProps={{ shrink: true }}
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Current Workload (hrs/week)"
-                    value={facultyFormData.current_workload}
-                    onChange={(e) => handleInputChange('current_workload', e.target.value, 'faculty')}
-                    error={!!formErrors.current_workload}
-                    helperText={formErrors.current_workload}
-                    type="number"
-                    placeholder="16"
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-                    <Button
-                      variant="outlined"
-                      startIcon={<CancelIcon />}
-                      onClick={() => setActiveTab(0)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      variant="contained"
-                      startIcon={<SaveIcon />}
-                      onClick={handleFacultyFormSubmit}
-                      disabled={isLoading}
-                    >
-                      {isLoading ? <CircularProgress size={20} /> : 'Create Faculty Member'}
-                    </Button>
-                  </Box>
-                </Grid>
-              </Grid>
-            </TabPanel>
-          </Card>
-        </Grid>
-      </Grid>
+      >
+        <DialogTitle>Add New Faculty</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary">
+            Faculty form will be implemented here.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsAddFacultyOpen(false)}>Cancel</Button>
+          <Button variant="contained">Save</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
