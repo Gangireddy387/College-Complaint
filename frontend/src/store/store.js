@@ -8,11 +8,8 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        // Ignore these action types
         ignoredActions: ['auth/login/fulfilled'],
-        // Ignore these field paths in all actions
         ignoredActionPaths: ['payload.token'],
-        // Ignore these paths in the state
         ignoredPaths: ['auth.token'],
       },
     }),

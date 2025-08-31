@@ -19,11 +19,10 @@ app.get('/', (req, res) => {
 });
 
 // Import routes
-// TODO: Add routes here
-// const authRoutes = require('./routes/auth.routes');
-// const studentRoutes = require('./routes/student.routes');
-// app.use('/api/auth', authRoutes);
-// app.use('/api/students', studentRoutes);
+const principalRoutes = require('./routes/principal.routes');
+
+// Use routes
+app.use('/api/principal', principalRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

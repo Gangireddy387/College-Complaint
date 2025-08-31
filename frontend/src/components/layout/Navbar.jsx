@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   AppBar,
   Toolbar,
@@ -8,30 +8,31 @@ import {
   Avatar,
   Menu,
   MenuItem,
+  Divider,
+  Chip,
   useTheme,
   useMediaQuery,
-  Chip,
-  Divider,
-  ListItemIcon,
-  ListItemText,
-  Badge,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
   AccountCircle,
-  Brightness4,
-  Brightness7,
-  Person,
-  Settings,
   Logout,
-  School,
+  Settings,
   Notifications,
+  School,
 } from '@mui/icons-material';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { logoutPrincipal } from '../../store/slices/authSlice';
 
-export const Navbar = ({ onSidebarToggle, onLogout, user, isMobile }) => {
-  const [anchorEl, setAnchorEl] = useState(null);
+const Navbar = ({ onSidebarToggle }) => {
   const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
+
+  const [anchorEl, setAnchorEl] = React.useState(null);
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -41,226 +42,251 @@ export const Navbar = ({ onSidebarToggle, onLogout, user, isMobile }) => {
     setAnchorEl(null);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await dispatch(logoutPrincipal()).unwrap();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
     handleClose();
-    onLogout();
   };
 
-  const getUserDisplayName = () => {
-    if (user?.firstName && user?.lastName) {
-      return `${user.firstName} ${user.lastName}`;
+  const handleProfile = () => {
+    console.log('Navigating to profile...');
+    try {
+      navigate('/profile');
+      console.log('Navigation successful');
+    } catch (error) {
+      console.error('Navigation error:', error);
     }
-    if (user?.first_name && user?.last_name) {
-      return `${user.first_name} ${user.last_name}`;
-    }
-    return user?.email || 'User';
+    handleClose();
   };
 
-  const getUserInitials = () => {
-    if (user?.firstName && user?.lastName) {
-      return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`;
-    }
-    if (user?.first_name && user?.last_name) {
-      return `${user.first_name.charAt(0)}${user.last_name.charAt(0)}`;
-    }
-    return user?.email?.charAt(0) || 'U';
+  const handleSettings = () => {
+    // Navigate to settings page
+    handleClose();
   };
 
   return (
     <AppBar
       position="fixed"
-      elevation={0}
       sx={{
-        width: '100%',
-        zIndex: 1100,
-        backgroundColor: 'background.paper',
-        color: 'text.primary',
-        borderBottom: '1px solid',
-        borderColor: 'divider',
-        backdropFilter: 'blur(8px)',
-        background: 'rgba(255, 255, 255, 0.95)',
+        width: { md: `calc(100% - 280px)` },
+        ml: { md: '280px' },
+        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+        color: 'white',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+        zIndex: theme.zIndex.drawer + 1,
+        backdropFilter: 'blur(10px)',
       }}
     >
-      <Toolbar 
-        sx={{ 
-          minHeight: isSmallScreen ? 64 : 72,
-          px: isSmallScreen ? 2 : 3,
-          py: 1,
-          justifyContent: 'flex-end', // Align everything to the right
-        }}
-      >
-        {/* User Info and Menu */}
+      <Toolbar>
+        {/* Mobile Menu Button */}
+        {isMobile && (
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            edge="start"
+            onClick={onSidebarToggle}
+            sx={{ mr: 2 }}
+          >
+            <MenuIcon />
+          </IconButton>
+        )}
+
+        {/* Logo and Title */}
+        <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+          <School sx={{ mr: 1, color: 'white', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }} />
+          <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', textShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
+            College Management System
+          </Typography>
+        </Box>
+
+        {/* Right side actions */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           {/* Notifications */}
           <IconButton
-            size="small"
-            sx={{
-              color: 'text.secondary',
+            size="large"
+            aria-label="show notifications"
+            color="inherit"
+            sx={{ 
+              color: 'white',
               '&:hover': {
-                backgroundColor: 'action.hover',
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                transform: 'scale(1.1)',
+                transition: 'all 0.3s ease',
               },
-              borderRadius: 2,
+              transition: 'all 0.3s ease',
             }}
           >
-            <Badge badgeContent={3} color="error" size="small">
-              <Notifications fontSize="small" />
-            </Badge>
+            <Notifications />
           </IconButton>
 
-          {/* User Role Chip */}
-          <Chip
-            label={user?.role?.toUpperCase() || 'USER'}
-            size="small"
-            color="primary"
-            variant="outlined"
-            sx={{ 
-              display: { xs: 'none', sm: 'flex' },
-              fontSize: '0.7rem',
-              height: 24,
-              fontWeight: 600,
-              borderWidth: 1.5,
-            }}
-          />
-
-          {/* User Name */}
-          <Typography 
-            variant="body2" 
-            sx={{ 
-              display: { xs: 'none', lg: 'block' },
-              fontWeight: 600,
-              color: 'text.primary',
-              mx: 1,
-            }}
-          >
-            {getUserDisplayName()}
-          </Typography>
-          
-          {/* User Avatar */}
-          <IconButton
-            size="medium"
-            aria-label="account of current user"
-            aria-controls="menu-appbar"
-            aria-haspopup="true"
-            onClick={handleMenu}
-            sx={{
-              '&:hover': {
-                backgroundColor: 'action.hover',
-              },
-              borderRadius: 2,
-              ml: 1,
-            }}
-          >
-            <Avatar 
-              sx={{ 
-                width: 36, 
-                height: 36,
-                bgcolor: 'primary.main',
-                fontSize: '0.875rem',
-                fontWeight: 600,
-                border: '2px solid',
-                borderColor: 'primary.light',
+          {/* User Menu */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box sx={{ textAlign: 'right', display: { xs: 'none', sm: 'block' } }}>
+              <Typography variant="body2" sx={{ fontWeight: 'bold', textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
+                {user?.first_name} {user?.last_name}
+              </Typography>
+                             <Chip
+                 label="Principal"
+                 size="small"
+                 sx={{
+                   background: 'linear-gradient(45deg, #e94560, #f39c12)',
+                   color: 'white',
+                   fontSize: '0.7rem',
+                   height: 20,
+                   boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                 }}
+               />
+            </Box>
+            
+            <IconButton
+              size="large"
+              aria-label="account of current user"
+              aria-controls="menu-appbar"
+              aria-haspopup="true"
+              onClick={handleMenu}
+              color="inherit"
+              sx={{
+                '&:hover': {
+                  backgroundColor: 'rgba(255,255,255,0.1)',
+                  transform: 'scale(1.05)',
+                  transition: 'all 0.3s ease',
+                },
+                transition: 'all 0.3s ease',
               }}
             >
-              {getUserInitials()}
+                             <Avatar
+                 sx={{
+                   width: 40,
+                   height: 40,
+                   background: 'linear-gradient(45deg, #e94560, #f39c12)',
+                   fontSize: '1rem',
+                   boxShadow: '0 3px 6px rgba(0,0,0,0.2)',
+                 }}
+               >
+                {user?.first_name?.charAt(0)?.toUpperCase()}
+              </Avatar>
+            </IconButton>
+          </Box>
+        </Box>
+
+        {/* User Menu Dropdown */}
+        <Menu
+          id="menu-appbar"
+          anchorEl={anchorEl}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          keepMounted
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+          open={Boolean(anchorEl)}
+          onClose={handleClose}
+          PaperProps={{
+            sx: {
+              mt: 1,
+              minWidth: 200,
+                             background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+              color: 'white',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+              borderRadius: 2,
+              backdropFilter: 'blur(10px)',
+            },
+          }}
+        >
+          {/* User Info */}
+          <Box sx={{ p: 2, textAlign: 'center' }}>
+                         <Avatar
+               sx={{
+                 width: 50,
+                 height: 50,
+                 background: 'linear-gradient(45deg, #e94560, #f39c12)',
+                 fontSize: '1.2rem',
+                 mx: 'auto',
+                 mb: 1,
+                 boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+               }}
+             >
+              {user?.first_name?.charAt(0)?.toUpperCase()}
             </Avatar>
-          </IconButton>
-          
-          {/* User Menu */}
-          <Menu
-            id="menu-appbar"
-            anchorEl={anchorEl}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'right',
-            }}
-            keepMounted
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
-            open={Boolean(anchorEl)}
-            onClose={handleClose}
-            PaperProps={{
-              sx: {
-                minWidth: 220,
+            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
+              {user?.first_name} {user?.last_name}
+            </Typography>
+            <Typography variant="body2" sx={{ opacity: 0.9, textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
+              {user?.email}
+            </Typography>
+            <Chip
+              label="Principal"
+              size="small"
+              sx={{
+                background: 'linear-gradient(45deg, #e94560, #f39c12)',
+                color: 'white',
                 mt: 1,
-                boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                borderRadius: 3,
-                border: '1px solid',
-                borderColor: 'divider',
+                fontSize: '0.7rem',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+              }}
+            />
+          </Box>
+          
+          <Divider sx={{ backgroundColor: 'rgba(255,255,255,0.2)' }} />
+          
+          <MenuItem 
+            onClick={handleProfile}
+            sx={{
+              '&:hover': {
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                transform: 'translateX(5px)',
+                transition: 'all 0.3s ease',
               },
+              transition: 'all 0.3s ease',
             }}
           >
-            {/* User Info Header */}
-            <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'background.default' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <Avatar 
-                  sx={{ 
-                    width: 48, 
-                    height: 48,
-                    bgcolor: 'primary.main',
-                    fontSize: '1.125rem',
-                    fontWeight: 600,
-                    mr: 2,
-                  }}
-                >
-                  {getUserInitials()}
-                </Avatar>
-                <Box>
-                  <Typography variant="subtitle1" fontWeight={700}>
-                    {getUserDisplayName()}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {user?.email || 'No email'}
-                  </Typography>
-                </Box>
-              </Box>
-              <Chip
-                label={user?.role?.toUpperCase() || 'USER'}
-                size="small"
-                color="primary"
-                variant="filled"
-                sx={{ 
-                  fontSize: '0.7rem',
-                  fontWeight: 600,
-                }}
-              />
-            </Box>
-
-            <MenuItem onClick={handleClose} sx={{ py: 2, px: 3 }}>
-              <ListItemIcon>
-                <Person fontSize="small" />
-              </ListItemIcon>
-              <ListItemText 
-                primary="My Profile" 
-                primaryTypographyProps={{ fontWeight: 500 }}
-              />
-            </MenuItem>
-
-            <MenuItem onClick={handleClose} sx={{ py: 2, px: 3 }}>
-              <ListItemIcon>
-                <Settings fontSize="small" />
-              </ListItemIcon>
-              <ListItemText 
-                primary="Settings" 
-                primaryTypographyProps={{ fontWeight: 500 }}
-              />
-            </MenuItem>
-
-            <Divider />
-
-            <MenuItem onClick={handleLogout} sx={{ py: 2, px: 3, color: 'error.main' }}>
-              <ListItemIcon>
-                <Logout fontSize="small" color="error" />
-              </ListItemIcon>
-              <ListItemText 
-                primary="Sign Out" 
-                primaryTypographyProps={{ fontWeight: 600 }}
-              />
-            </MenuItem>
-          </Menu>
-        </Box>
+            <AccountCircle sx={{ mr: 2 }} />
+            Profile
+          </MenuItem>
+          
+          <MenuItem 
+            onClick={handleSettings}
+            sx={{
+              '&:hover': {
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                transform: 'translateX(5px)',
+                transition: 'all 0.3s ease',
+              },
+              transition: 'all 0.3s ease',
+            }}
+          >
+            <Settings sx={{ mr: 2 }} />
+            Settings
+          </MenuItem>
+          
+          <Divider sx={{ backgroundColor: 'rgba(255,255,255,0.2)' }} />
+          
+          <MenuItem 
+            onClick={handleLogout} 
+                         sx={{ 
+               color: '#e94560',
+              '&:hover': {
+                                 backgroundColor: 'rgba(233,69,96,0.1)',
+                transform: 'translateX(5px)',
+                transition: 'all 0.3s ease',
+              },
+              transition: 'all 0.3s ease',
+            }}
+          >
+            <Logout sx={{ mr: 2 }} />
+            Logout
+          </MenuItem>
+        </Menu>
       </Toolbar>
     </AppBar>
   );
 };
+
+export default Navbar;

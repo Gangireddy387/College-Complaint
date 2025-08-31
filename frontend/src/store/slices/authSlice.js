@@ -1,55 +1,59 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { authService } from '../../services/auth.service';
+import { principalService } from '../../services/principal.service';
 
-// Async thunk for login
-export const login = createAsyncThunk(
-  'auth/login',
+// Async thunks
+export const loginPrincipal = createAsyncThunk(
+  'auth/loginPrincipal',
   async (credentials, { rejectWithValue }) => {
     try {
-      const response = await authService.login(credentials);
+      const response = await principalService.login(credentials);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(error.response?.data?.message || 'Login failed');
     }
   }
 );
 
-// Async thunk for logout
-export const logout = createAsyncThunk(
-  'auth/logout',
+export const logoutPrincipal = createAsyncThunk(
+  'auth/logoutPrincipal',
   async (_, { rejectWithValue }) => {
     try {
-      await authService.logout();
-      return { success: true };
+      await principalService.logout();
+      return null;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(error.response?.data?.message || 'Logout failed');
     }
   }
 );
 
-// Async thunk for checking authentication status
-export const checkAuthStatus = createAsyncThunk(
-  'auth/checkStatus',
+export const getPrincipalProfile = createAsyncThunk(
+  'auth/getPrincipalProfile',
   async (_, { rejectWithValue }) => {
     try {
-      const user = authService.getCurrentUser();
-      const token = authService.getToken();
-      
-      if (user && token) {
-        return { user, token };
-      } else {
-        throw new Error('No valid authentication found');
-      }
+      const response = await principalService.getProfile();
+      return response.data;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch profile');
+    }
+  }
+);
+
+export const updatePrincipalProfile = createAsyncThunk(
+  'auth/updatePrincipalProfile',
+  async (profileData, { rejectWithValue }) => {
+    try {
+      const response = await principalService.updateProfile(profileData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to update profile');
     }
   }
 );
 
 const initialState = {
   user: null,
-  token: null,
-  isAuthenticated: false,
+  token: localStorage.getItem('principalToken'),
+  isAuthenticated: !!localStorage.getItem('principalToken'),
   isLoading: false,
   error: null,
 };
@@ -61,68 +65,62 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
-    setUser: (state, action) => {
-      state.user = action.payload;
-      state.isAuthenticated = !!action.payload;
-    },
-    setToken: (state, action) => {
-      state.token = action.payload;
+    setLoading: (state, action) => {
+      state.isLoading = action.payload;
     },
   },
   extraReducers: (builder) => {
     builder
       // Login
-      .addCase(login.pending, (state) => {
+      .addCase(loginPrincipal.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(login.fulfilled, (state, action) => {
+      .addCase(loginPrincipal.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.user = action.payload.user;
-        state.token = action.payload.token;
         state.isAuthenticated = true;
-        state.error = null;
+        state.user = action.payload.principal;
+        state.token = action.payload.token;
+        localStorage.setItem('principalToken', action.payload.token);
       })
-      .addCase(login.rejected, (state, action) => {
+      .addCase(loginPrincipal.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
-        state.isAuthenticated = false;
       })
-      
       // Logout
-      .addCase(logout.pending, (state) => {
-        state.isLoading = true;
-      })
-      .addCase(logout.fulfilled, (state) => {
-        state.isLoading = false;
+      .addCase(logoutPrincipal.fulfilled, (state) => {
         state.user = null;
         state.token = null;
         state.isAuthenticated = false;
-        state.error = null;
+        localStorage.removeItem('principalToken');
       })
-      .addCase(logout.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload;
-      })
-      
-      // Check auth status
-      .addCase(checkAuthStatus.pending, (state) => {
+      // Get Profile
+      .addCase(getPrincipalProfile.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(checkAuthStatus.fulfilled, (state, action) => {
+      .addCase(getPrincipalProfile.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.user = action.payload.user;
-        state.token = action.payload.token;
-        state.isAuthenticated = true;
-        state.error = null;
+        state.user = action.payload;
       })
-      .addCase(checkAuthStatus.rejected, (state, action) => {
+      .addCase(getPrincipalProfile.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
-        state.isAuthenticated = false;
+      })
+      // Update Profile
+      .addCase(updatePrincipalProfile.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updatePrincipalProfile.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload;
+      })
+      .addCase(updatePrincipalProfile.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
       });
   },
 });
 
-export const { clearError, setUser, setToken } = authSlice.actions;
+export const { clearError, setLoading } = authSlice.actions;
 export default authSlice.reducer;

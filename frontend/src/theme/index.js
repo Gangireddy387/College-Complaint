@@ -1,6 +1,6 @@
-import { createTheme, responsiveFontSizes } from '@mui/material/styles';
+import { createTheme } from '@mui/material/styles';
 
-let theme = createTheme({
+export const theme = createTheme({
   palette: {
     primary: {
       main: '#1976d2',
@@ -16,14 +16,46 @@ let theme = createTheme({
       default: '#f5f5f5',
       paper: '#ffffff',
     },
+    text: {
+      primary: '#333333',
+      secondary: '#666666',
+    },
   },
   typography: {
     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-    h4: {
+    h1: {
+      fontSize: '2.5rem',
       fontWeight: 600,
+      color: '#1976d2',
+    },
+    h2: {
+      fontSize: '2rem',
+      fontWeight: 500,
+      color: '#1976d2',
+    },
+    h3: {
+      fontSize: '1.75rem',
+      fontWeight: 500,
+    },
+    h4: {
+      fontSize: '1.5rem',
+      fontWeight: 500,
+    },
+    h5: {
+      fontSize: '1.25rem',
+      fontWeight: 500,
     },
     h6: {
+      fontSize: '1rem',
       fontWeight: 500,
+    },
+    body1: {
+      fontSize: '1rem',
+      lineHeight: 1.6,
+    },
+    body2: {
+      fontSize: '0.875rem',
+      lineHeight: 1.5,
     },
   },
   components: {
@@ -32,6 +64,23 @@ let theme = createTheme({
         root: {
           textTransform: 'none',
           borderRadius: 8,
+          padding: '10px 24px',
+          fontWeight: 500,
+        },
+        contained: {
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+          '&:hover': {
+            boxShadow: '0 4px 8px rgba(0,0,0,0.15)',
+          },
+        },
+      },
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiOutlinedInput-root': {
+            borderRadius: 8,
+          },
         },
       },
     },
@@ -39,7 +88,7 @@ let theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 12,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
         },
       },
     },
@@ -50,31 +99,9 @@ let theme = createTheme({
         },
       },
     },
-    MuiDrawer: {
-      styleOverrides: {
-        paper: {
-          backgroundColor: '#ffffff',
-          borderRight: '1px solid rgba(0, 0, 0, 0.12)',
-        },
-      },
-    },
   },
-  // Add custom properties
-  drawerWidth: 280,
-  // Z-index configuration
-  zIndex: {
-    mobileStepper: 1000,
-    fab: 1050,
-    speedDial: 1050,
-    appBar: 1100,
-    drawer: 1200,
-    modal: 1300,
-    snackbar: 1400,
-    tooltip: 1500,
+  shape: {
+    borderRadius: 8,
   },
+  spacing: 8,
 });
-
-// Make typography responsive
-theme = responsiveFontSizes(theme);
-
-export { theme };

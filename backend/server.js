@@ -65,10 +65,45 @@ async function startServer() {
       throw error;
     }
 
+    // Create default principal after tables are created
+    try {
+      console.log('Creating default principal...');
+      const { Principal } = require('./models');
+      
+      // Check if a principal already exists
+      const existingPrincipal = await Principal.findOne();
+      
+      if (existingPrincipal) {
+        console.log('A principal already exists in the database.');
+      } else {
+        // Create default principal
+        const defaultPrincipal = await Principal.create({
+          employee_id: 'PRIN001',
+          first_name: 'John',
+          last_name: 'Doe',
+          email: 'principal@college.com',
+          password: 'principal123', // This will be hashed by the model hook
+          phone_number: '1234567890',
+          joining_date: new Date(),
+          status: 'active'
+        });
+
+        console.log('✅ Default principal created successfully:');
+        console.log('   Email:', defaultPrincipal.email);
+        console.log('   Password: principal123');
+        console.log('   Employee ID:', defaultPrincipal.employee_id);
+      }
+    } catch (error) {
+      console.error('Error creating default principal:', error);
+      // Don't throw error here, continue with server startup
+    }
+
     // Start listening only after database is ready
     app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
+      console.log(`🚀 Server is running on port ${PORT}`);
       console.log(`Environment: ${process.env.NODE_ENV}`);
+      console.log(`📧 Default Principal Login: principal@college.com`);
+      console.log(`🔑 Default Password: principal123`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);

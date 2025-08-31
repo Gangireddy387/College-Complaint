@@ -1,58 +1,74 @@
-import api from './api';
+import axios from 'axios';
+
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+// Create axios instance
+const api = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Request interceptor to add auth token
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('principalToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor to handle token expiration
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('principalToken');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 export const principalService = {
+  // Authentication
+  login: async (credentials) => {
+    return api.post('/principal/login', credentials);
+  },
+
+  logout: async () => {
+    return api.post('/principal/logout');
+  },
+
+  // Profile Management
+  getProfile: async () => {
+    return api.get('/principal/profile');
+  },
+
+  updateProfile: async (profileData) => {
+    return api.put('/principal/profile', profileData);
+  },
+
+  changePassword: async (passwordData) => {
+    return api.put('/principal/change-password', passwordData);
+  },
+
+  // Dashboard Data
   getDashboardStats: async () => {
-    const response = await api.get('/principal/dashboard');
-    return response.data;
+    return api.get('/principal/dashboard/stats');
   },
 
-  getDepartments: async () => {
-    const response = await api.get('/principal/departments');
-    return response.data;
+  getRecentComplaints: async () => {
+    return api.get('/principal/dashboard/recent-complaints');
   },
 
-  getDepartmentById: async (departmentId) => {
-    const response = await api.get(`/principal/departments/${departmentId}`);
-    return response.data;
-  },
-
-  updateDepartment: async (departmentId, data) => {
-    const response = await api.put(`/principal/departments/${departmentId}`, data);
-    return response.data;
-  },
-
-  assignHOD: async (departmentId, facultyId) => {
-    const response = await api.post(`/principal/departments/${departmentId}/hod`, {
-      facultyId,
-    });
-    return response.data;
-  },
-
-  getAllComplaints: async (params) => {
-    const response = await api.get('/principal/complaints', { params });
-    return response.data;
-  },
-
-  handleComplaint: async (complaintId, actionData) => {
-    const response = await api.put(
-      `/principal/complaints/${complaintId}`,
-      actionData
-    );
-    return response.data;
-  },
-
-  getFacultyStats: async () => {
-    const response = await api.get('/principal/faculty/stats');
-    return response.data;
-  },
-
-  getStudentStats: async () => {
-    const response = await api.get('/principal/students/stats');
-    return response.data;
-  },
-
-  getAttendanceStats: async (params) => {
-    const response = await api.get('/principal/attendance/stats', { params });
-    return response.data;
+  getDepartmentStats: async () => {
+    return api.get('/principal/dashboard/department-stats');
   },
 };

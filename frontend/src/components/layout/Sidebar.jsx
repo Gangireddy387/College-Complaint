@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Box,
   Drawer,
   List,
   ListItem,
@@ -7,282 +8,252 @@ import {
   ListItemIcon,
   ListItemText,
   Divider,
-  Box,
-  useTheme,
   Typography,
-  useMediaQuery,
-  Collapse,
+  Avatar,
+  Chip,
   IconButton,
-  Tooltip,
 } from '@mui/material';
 import {
-  Dashboard as DashboardIcon,
-  Assignment as AssignmentIcon,
-  Schedule as ScheduleIcon,
-  People as PeopleIcon,
-  Business as BusinessIcon,
-  School as SchoolIcon,
-  Book as BookIcon,
-  Assessment as AssessmentIcon,
-  Settings as SettingsIcon,
-  Person as PersonIcon,
-  Timeline as TimelineIcon,
-  Group as GroupIcon,
-  ExpandLess,
-  ExpandMore,
+  Dashboard,
+  School,
+  People,
+  Group,
+  Close as CloseIcon,
+  AccountCircle,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 const drawerWidth = 280;
 
-const getNavigationItems = (userRole) => {
-  const baseItems = [
-    {
-      text: 'Dashboard',
-      icon: <DashboardIcon />,
-      path: `/${userRole}/dashboard`,
-    },
-  ];
+const menuItems = [
+  {
+    text: 'Dashboard',
+    icon: <Dashboard />,
+    path: '/dashboard',
+  },
+  {
+    text: 'Departments',
+    icon: <School />,
+    path: '/departments',
+  },
+  {
+    text: 'Faculties',
+    icon: <People />,
+    path: '/faculties',
+  },
+  {
+    text: 'Students',
+    icon: <Group />,
+    path: '/students',
+  },
+];
 
-  const studentItems = [
-    {
-      text: 'Profile',
-      icon: <PersonIcon />,
-      path: `/${userRole}/profile`,
-    },
-    {
-      text: 'Attendance',
-      icon: <TimelineIcon />,
-      path: `/${userRole}/attendance`,
-    },
-    {
-      text: 'Timetable',
-      icon: <BookIcon />,
-      path: `/${userRole}/timetable`,
-    },
-    {
-      text: 'Subjects',
-      icon: <SchoolIcon />,
-      path: `/${userRole}/subjects`,
-    },
-    {
-      text: 'Sections',
-      icon: <GroupIcon />,
-      path: `/${userRole}/sections`,
-    },
-  ];
-
-  const facultyItems = [
-    {
-      text: 'Classes',
-      icon: <SchoolIcon />,
-      path: `/${userRole}/classes`,
-    },
-    {
-      text: 'Mark Attendance',
-      icon: <TimelineIcon />,
-      path: `/${userRole}/attendance`,
-    },
-    {
-      text: 'Complaints',
-      icon: <AssignmentIcon />,
-      path: `/${userRole}/complaints`,
-    },
-    {
-      text: 'Timetable',
-      icon: <BookIcon />,
-      path: `/${userRole}/timetable`,
-    },
-  ];
-
-  const principalItems = [
-    {
-      text: 'Management',
-      icon: <SettingsIcon />,
-      path: `/${userRole}/management`,
-    },
-    {
-      text: 'Departments',
-      icon: <BusinessIcon />,
-      path: `/${userRole}/departments`,
-    },
-    {
-      text: 'Faculty',
-      icon: <PeopleIcon />,
-      path: `/${userRole}/faculty`,
-    },
-    {
-      text: 'Student Management',
-      icon: <PeopleIcon />,
-      path: `/${userRole}/students`,
-    },
-  ];
-
-  switch (userRole) {
-    case 'student':
-      return [...baseItems, ...studentItems];
-
-    case 'faculty':
-      return [...baseItems, ...facultyItems];
-
-    case 'principal':
-      return [...baseItems, ...principalItems];
-
-    default:
-      return baseItems;
-  }
-};
-
-export const Sidebar = ({ open, onClose, userRole, isMobile }) => {
-  const theme = useTheme();
+const Sidebar = ({ open, onToggle }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
-
-  const navigationItems = getNavigationItems(userRole);
+  const { user } = useSelector((state) => state.auth);
 
   const handleNavigation = (path) => {
     navigate(path);
-    if (isMobile) {
-      onClose();
+    // Close sidebar on mobile
+    if (window.innerWidth < 768) {
+      onToggle();
     }
   };
 
-  const drawer = (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      {/* Header */}
-      <Box 
-        sx={{ 
-          p: isSmallScreen ? 1.5 : 2,
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-          backgroundColor: 'background.paper',
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <SchoolIcon 
-            color="primary" 
-            sx={{ 
-              fontSize: isSmallScreen ? '1.5rem' : '2rem',
-            }} 
-          />
-          <Typography 
-            variant={isSmallScreen ? "subtitle1" : "h6"} 
-            color="primary"
-            sx={{ fontWeight: 600 }}
-          >
-            {userRole?.charAt(0).toUpperCase() + userRole?.slice(1)} Portal
-          </Typography>
-        </Box>
-      </Box>
+  const isActive = (path) => {
+    return location.pathname === path;
+  };
 
-      {/* Navigation Items */}
-      <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
-        <List sx={{ p: 0 }}>
-          {navigationItems.map((item, index) => {
-            const isActive = location.pathname === item.path;
-            return (
-              <ListItem 
-                key={item.text} 
-                disablePadding
-                sx={{ mb: 0.5 }}
-              >
+  return (
+         <Drawer
+       variant="permanent"
+       sx={{
+         width: drawerWidth,
+         flexShrink: 0,
+                   '& .MuiDrawer-paper': {
+            width: drawerWidth,
+            boxSizing: 'border-box',
+            background: 'linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+            color: 'white',
+            borderRight: 'none',
+            boxShadow: '2px 0 20px rgba(0,0,0,0.3)',
+          },
+         display: { xs: 'none', md: 'block' },
+       }}
+     >
+      {/* Mobile overlay drawer */}
+             <Drawer
+         variant="temporary"
+         open={open}
+         onClose={onToggle}
+         sx={{
+           display: { xs: 'block', md: 'none' },
+                       '& .MuiDrawer-paper': {
+              width: drawerWidth,
+              background: 'linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+              color: 'white',
+              boxShadow: '2px 0 20px rgba(0,0,0,0.3)',
+            },
+         }}
+       >
+                 <Box sx={{ p: 2, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+           <IconButton onClick={onToggle} sx={{ color: 'white' }}>
+             <CloseIcon />
+           </IconButton>
+         </Box>
+        <Divider sx={{ backgroundColor: 'rgba(255,255,255,0.2)', my: 1 }} />
+        {/* Mobile drawer content */}
+        <Box sx={{ pt: 2 }}>
+          {/* User Profile */}
+          <Box sx={{ p: 2, textAlign: 'center' }}>
+            <Avatar
+              sx={{
+                width: 60,
+                height: 60,
+                background: 'linear-gradient(45deg, #e94560, #f39c12)',
+                fontSize: '1.5rem',
+                mx: 'auto',
+                mb: 1,
+                boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+              }}
+            >
+              {user?.first_name?.charAt(0)?.toUpperCase()}
+            </Avatar>
+            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 0.5 }}>
+              {user?.first_name} {user?.last_name}
+            </Typography>
+            <Chip
+              label="Principal"
+              size="small"
+              sx={{
+                background: 'linear-gradient(45deg, #e94560, #f39c12)',
+                color: 'white',
+                fontWeight: 'bold',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+              }}
+            />
+          </Box>
+          <Divider sx={{ backgroundColor: 'rgba(255,255,255,0.2)', mb: 2 }} />
+          
+          {/* Navigation Menu */}
+          <List>
+            {menuItems.map((item) => (
+              <ListItem key={item.text} disablePadding>
                 <ListItemButton
-                  selected={isActive}
                   onClick={() => handleNavigation(item.path)}
                   sx={{
-                    mx: isSmallScreen ? 1 : 2,
-                    borderRadius: 2,
-                    minHeight: isSmallScreen ? 48 : 56,
-                    '&.Mui-selected': {
-                      backgroundColor: 'primary.main',
-                      color: 'primary.contrastText',
-                      '&:hover': {
-                        backgroundColor: 'primary.dark',
-                      },
-                      '& .MuiListItemIcon-root': {
-                        color: 'primary.contrastText',
-                      },
-                    },
+                    mx: 1,
+                    borderRadius: 3,
+                    mb: 0.5,
+                    backgroundColor: isActive(item.path) ? 'rgba(255,255,255,0.15)' : 'transparent',
+                    backdropFilter: isActive(item.path) ? 'blur(10px)' : 'none',
                     '&:hover': {
-                      backgroundColor: 'action.hover',
+                      backgroundColor: 'rgba(255,255,255,0.1)',
+                      transform: 'translateX(5px)',
+                      transition: 'all 0.3s ease',
                     },
-                    transition: 'all 0.2s ease-in-out',
+                    transition: 'all 0.3s ease',
                   }}
                 >
-                  <ListItemIcon 
-                    sx={{ 
-                      minWidth: isSmallScreen ? 36 : 40,
-                      color: isActive ? 'inherit' : 'text.secondary',
-                    }}
-                  >
+                  <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
                     {item.icon}
                   </ListItemIcon>
-                  <ListItemText 
+                  <ListItemText
                     primary={item.text}
-                    primaryTypographyProps={{
-                      fontSize: isSmallScreen ? '0.875rem' : '1rem',
-                      fontWeight: isActive ? 600 : 400,
+                    sx={{
+                      '& .MuiListItemText-primary': {
+                        fontWeight: isActive(item.path) ? 'bold' : 'normal',
+                      },
                     }}
                   />
                 </ListItemButton>
               </ListItem>
-            );
-          })}
+            ))}
+          </List>
+        </Box>
+      </Drawer>
+
+      {/* Desktop sidebar */}
+      <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+        
+        
+        <Divider sx={{ backgroundColor: 'rgba(255,255,255,0.2)', my: 1 }} />
+        
+        {/* User Profile */}
+        <Box sx={{ p: 3, textAlign: 'center' }}>
+          <Avatar
+            sx={{
+              width: 80,
+              height: 80,
+                              background: 'linear-gradient(45deg, #e94560, #f39c12)',
+              fontSize: '2rem',
+              mx: 'auto',
+              mb: 2,
+              boxShadow: '0 6px 12px rgba(0,0,0,0.2)',
+            }}
+          >
+            {user?.first_name?.charAt(0)?.toUpperCase()}
+          </Avatar>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
+            {user?.first_name} {user?.last_name}
+          </Typography>
+          <Chip
+            label="Principal"
+            size="small"
+            sx={{
+                              background: 'linear-gradient(45deg, #e94560, #f39c12)',
+              color: 'white',
+              fontWeight: 'bold',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+            }}
+          />
+          <Typography variant="body2" sx={{ mt: 1, opacity: 0.8 }}>
+            {user?.email}
+          </Typography>
+        </Box>
+        
+        <Divider sx={{ backgroundColor: 'rgba(255,255,255,0.2)', my: 1 }} />
+        
+        {/* Navigation Menu */}
+        <List sx={{ pt: 2 }}>
+          {menuItems.map((item) => (
+            <ListItem key={item.text} disablePadding>
+              <ListItemButton
+                onClick={() => handleNavigation(item.path)}
+                sx={{
+                  mx: 2,
+                  borderRadius: 3,
+                  mb: 0.5,
+                  backgroundColor: isActive(item.path) ? 'rgba(255,255,255,0.15)' : 'transparent',
+                  backdropFilter: isActive(item.path) ? 'blur(10px)' : 'none',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    transform: 'translateX(5px)',
+                    transition: 'all 0.3s ease',
+                  },
+                  transition: 'all 0.3s ease',
+                }}
+              >
+                <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
+                  {item.icon}
+                </ListItemIcon>
+                <ListItemText
+                  primary={item.text}
+                  sx={{
+                    '& .MuiListItemText-primary': {
+                      fontWeight: isActive(item.path) ? 'bold' : 'normal',
+                    },
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
+          ))}
         </List>
       </Box>
-
-      {/* Footer */}
-      <Box 
-        sx={{ 
-          p: isSmallScreen ? 1.5 : 2,
-          borderTop: '1px solid',
-          borderColor: 'divider',
-          backgroundColor: 'background.paper',
-        }}
-      >
-        <Typography 
-          variant="caption" 
-          color="text.secondary"
-          sx={{ textAlign: 'center', display: 'block' }}
-        >
-          College Management System
-        </Typography>
-      </Box>
-    </Box>
-  );
-
-  return (
-    <Drawer
-      variant={isMobile ? 'temporary' : 'permanent'}
-      open={open}
-      onClose={onClose}
-      ModalProps={{
-        keepMounted: isMobile,
-      }}
-      sx={{
-        width: drawerWidth,
-        flexShrink: 0,
-        '& .MuiDrawer-paper': {
-          width: drawerWidth,
-          boxSizing: 'border-box',
-          backgroundColor: 'background.paper',
-          borderRight: '1px solid',
-          borderColor: 'divider',
-          boxShadow: isMobile ? 3 : 1,
-          ...(isMobile && {
-            width: '100%',
-            maxWidth: '320px',
-          }),
-        },
-        ...(isMobile && {
-          '& .MuiBackdrop-root': {
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          },
-        }),
-      }}
-    >
-      {drawer}
     </Drawer>
   );
 };
+
+export default Sidebar;
