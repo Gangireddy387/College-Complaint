@@ -20,6 +20,7 @@ import {
   Group,
   Close as CloseIcon,
   AccountCircle,
+  Settings,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -46,6 +47,11 @@ const menuItems = [
     text: 'Students',
     icon: <Group />,
     path: '/students',
+  },
+  {
+    text: 'College Profile',
+    icon: <Settings />,
+    path: '/college-profile',
   },
 ];
 

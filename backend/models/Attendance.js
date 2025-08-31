@@ -149,6 +149,14 @@ Attendance.init({
     type: DataTypes.JSONB,
     defaultValue: {},
     comment: 'Additional metadata about the attendance'
+  },
+  collegeId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'colleges',
+      key: 'id'
+    }
   }
 }, {
   sequelize,

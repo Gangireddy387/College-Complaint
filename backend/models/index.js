@@ -9,6 +9,8 @@ const Attendance = require('./Attendance');
 const DisciplinaryComplaint = require('./DisciplinaryComplaint');
 const ClassRoom = require('./ClassRoom');
 const SectionStudent = require('./SectionStudent');
+const OTP = require('./OTP');
+const College = require('./College');
 
 // Department Relationships
 Department.hasMany(Student, {
@@ -218,6 +220,115 @@ DisciplinaryComplaint.belongsTo(Student, {
   as: 'student'
 });
 
+// College Relationships
+College.hasMany(Principal, {
+  foreignKey: 'collegeId',
+  as: 'collegePrincipals'
+});
+Principal.belongsTo(College, {
+  foreignKey: 'collegeId',
+  as: 'college'
+});
+
+College.hasMany(Department, {
+  foreignKey: 'collegeId',
+  as: 'collegeDepartments'
+});
+Department.belongsTo(College, {
+  foreignKey: 'collegeId',
+  as: 'college'
+});
+
+College.hasMany(Faculty, {
+  foreignKey: 'collegeId',
+  as: 'collegeFaculty'
+});
+Faculty.belongsTo(College, {
+  foreignKey: 'collegeId',
+  as: 'college'
+});
+
+College.hasMany(Student, {
+  foreignKey: 'collegeId',
+  as: 'collegeStudents'
+});
+Student.belongsTo(College, {
+  foreignKey: 'collegeId',
+  as: 'college'
+});
+
+College.hasMany(ClassRoom, {
+  foreignKey: 'collegeId',
+  as: 'collegeClassrooms'
+});
+ClassRoom.belongsTo(College, {
+  foreignKey: 'collegeId',
+  as: 'college'
+});
+
+College.hasMany(Section, {
+  foreignKey: 'collegeId',
+  as: 'collegeSections'
+});
+Section.belongsTo(College, {
+  foreignKey: 'collegeId',
+  as: 'college'
+});
+
+College.hasMany(Subject, {
+  foreignKey: 'collegeId',
+  as: 'collegeSubjects'
+});
+Subject.belongsTo(College, {
+  foreignKey: 'collegeId',
+  as: 'college'
+});
+
+College.hasMany(TimeSlot, {
+  foreignKey: 'collegeId',
+  as: 'collegeTimeslots'
+});
+TimeSlot.belongsTo(College, {
+  foreignKey: 'collegeId',
+  as: 'college'
+});
+
+College.hasMany(Attendance, {
+  foreignKey: 'collegeId',
+  as: 'collegeAttendances'
+});
+Attendance.belongsTo(College, {
+  foreignKey: 'collegeId',
+  as: 'college'
+});
+
+College.hasMany(DisciplinaryComplaint, {
+  foreignKey: 'collegeId',
+  as: 'collegeComplaints'
+});
+DisciplinaryComplaint.belongsTo(College, {
+  foreignKey: 'collegeId',
+  as: 'college'
+});
+
+College.hasMany(SectionStudent, {
+  foreignKey: 'collegeId',
+  as: 'collegeSectionStudents'
+});
+SectionStudent.belongsTo(College, {
+  foreignKey: 'collegeId',
+  as: 'college'
+});
+
+College.hasMany(OTP, {
+  foreignKey: 'collegeId',
+  as: 'collegeOtps'
+});
+OTP.belongsTo(College, {
+  foreignKey: 'collegeId',
+  as: 'college'
+});
+
 // SectionStudent direct associations
 SectionStudent.belongsTo(Section, {
   foreignKey: 'sectionId'
@@ -237,5 +348,7 @@ module.exports = {
   Attendance,
   DisciplinaryComplaint,
   ClassRoom,
-  SectionStudent
+  SectionStudent,
+  OTP,
+  College
 };

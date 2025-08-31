@@ -18,11 +18,22 @@ app.get('/', (req, res) => {
   res.json({ message: 'Welcome to College Complaint Management System API' });
 });
 
+// Test route for forgot password
+app.get('/api/principal/test', (req, res) => {
+  res.json({ message: 'Forgot password API is working!' });
+});
+
 // Import routes
 const principalRoutes = require('./routes/principal.routes');
+const principalForgotPasswordRoutes = require('./routes/principalForgotPassword');
+const collegeRoutes = require('./routes/college.routes');
 
 // Use routes
 app.use('/api/principal', principalRoutes);
+app.use('/api/principal', principalForgotPasswordRoutes);
+app.use('/api/college', collegeRoutes);
+
+
 
 // Error handling middleware
 app.use((err, req, res, next) => {

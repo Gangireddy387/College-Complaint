@@ -13,6 +13,7 @@ import {
   InputAdornment,
   Paper,
   Container,
+  Link,
 } from '@mui/material';
 import {
   Visibility,
@@ -99,6 +100,10 @@ const PrincipalLogin = () => {
 
   const handleTogglePasswordVisibility = () => {
     setShowPassword(!showPassword);
+  };
+
+  const handleForgotPassword = () => {
+    navigate('/forgot-password');
   };
 
   return (
@@ -239,7 +244,7 @@ const PrincipalLogin = () => {
                   ),
                 }}
                 sx={{ 
-                  mb: 3,
+                  mb: 2,
                   '& .MuiOutlinedInput-root': {
                     '&:hover fieldset': {
                       borderColor: '#e94560',
@@ -250,6 +255,42 @@ const PrincipalLogin = () => {
                   },
                 }}
               />
+
+              {/* Forgot Password and Register Links */}
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+                <Link
+                  component="button"
+                  variant="body2"
+                  onClick={() => navigate('/register')}
+                  sx={{
+                    color: '#e94560',
+                    textDecoration: 'none',
+                    '&:hover': {
+                      textDecoration: 'underline',
+                      color: '#f39c12',
+                    },
+                    transition: 'all 0.3s ease',
+                  }}
+                >
+                  Create Account
+                </Link>
+                <Link
+                  component="button"
+                  variant="body2"
+                  onClick={handleForgotPassword}
+                  sx={{
+                    color: '#e94560',
+                    textDecoration: 'none',
+                    '&:hover': {
+                      textDecoration: 'underline',
+                      color: '#f39c12',
+                    },
+                    transition: 'all 0.3s ease',
+                  }}
+                >
+                  Forgot Password?
+                </Link>
+              </Box>
 
               <Button
                 type="submit"

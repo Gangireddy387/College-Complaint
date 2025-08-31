@@ -6,8 +6,11 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { store } from './store/store';
 import { theme } from './theme';
 import PrincipalLogin from './pages/auth/PrincipalLogin';
+import PrincipalRegister from './pages/auth/PrincipalRegister';
+import PrincipalForgotPassword from './pages/auth/PrincipalForgotPassword';
 import PrincipalDashboard from './pages/principal/Dashboard';
 import PrincipalProfile from './pages/principal/PrincipalProfile';
+import CollegeProfile from './pages/principal/CollegeProfile';
 
 import Departments from './pages/principal/Departments';
 import Faculties from './pages/principal/Faculties';
@@ -22,8 +25,11 @@ function App() {
         <Router>
           <Routes>
             <Route path="/login" element={<PrincipalLogin />} />
+            <Route path="/register" element={<PrincipalRegister />} />
+            <Route path="/forgot-password" element={<PrincipalForgotPassword />} />
             <Route path="/dashboard" element={<PrincipalDashboard />} />
             <Route path="/profile" element={<PrincipalProfile />} />
+            <Route path="/college-profile" element={<ProtectedRoute><CollegeProfile /></ProtectedRoute>} />
 
             <Route path="/departments" element={<ProtectedRoute><Departments /></ProtectedRoute>} />
             <Route path="/faculties" element={<ProtectedRoute><Faculties /></ProtectedRoute>} />

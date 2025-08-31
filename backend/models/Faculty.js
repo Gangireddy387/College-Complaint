@@ -107,6 +107,14 @@ Faculty.init({
   search_vector: {
     type: DataTypes.TSVECTOR,
     allowNull: true
+  },
+  collegeId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'colleges',
+      key: 'id'
+    }
   }
 }, {
   sequelize,

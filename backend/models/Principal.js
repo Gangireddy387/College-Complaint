@@ -52,6 +52,19 @@ Principal.init({
   status: {
     type: DataTypes.ENUM('active', 'inactive'),
     defaultValue: 'active'
+  },
+  isVerified: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    allowNull: false
+  },
+  collegeId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'colleges',
+      key: 'id'
+    }
   }
 }, {
   sequelize,

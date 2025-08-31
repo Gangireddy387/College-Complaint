@@ -14,96 +14,23 @@ async function startServer() {
     await sequelize.authenticate();
     console.log('Database connection has been established successfully.');
 
-    // Initialize database and create tables
-    console.log('Initializing database and creating tables...');
-    
-    // Create tables in correct order based on dependencies
-    const models = require('./models');
+    // Initialize database and create tables (preserve existing data)
+    console.log('Initializing database and syncing tables...');
     
     try {
-      // Drop schema and recreate
-      await sequelize.query('DROP SCHEMA IF EXISTS public CASCADE;');
-      await sequelize.query('CREATE SCHEMA public;');
-      await sequelize.query('GRANT ALL ON SCHEMA public TO public;');
-      
-      console.log('Creating tables...');
-      
-      // Create tables in order
-      const tableOrder = [
-        'Principal',
-        'Department',
-        'Faculty',
-        'Student',
-        'ClassRoom',
-        'Section',
-        'Subject',
-        'TimeSlot',
-        'Attendance',
-        'DisciplinaryComplaint',
-        'SectionStudent'
-      ];
-      
-      for (const modelName of tableOrder) {
-        console.log(`Creating ${modelName} table...`);
-        await models[modelName].sync({ force: true });
-      }
-      
-      // Add any additional constraints
-      console.log('Adding constraints...');
-      await sequelize.query(`
-        ALTER TABLE "departments"
-        ADD CONSTRAINT "fk_department_hod"
-        FOREIGN KEY ("hod_id")
-        REFERENCES "faculties" ("id")
-        ON DELETE SET NULL
-        ON UPDATE CASCADE;
-      `);
-      
-      console.log('All database tables created successfully');
+      // Sync all models without force (preserves existing data)
+      await sequelize.sync({ alter: true });
+      console.log('Database tables synced successfully');
     } catch (error) {
-      console.error('Error creating tables:', error);
+      console.error('Error syncing tables:', error);
       throw error;
-    }
-
-    // Create default principal after tables are created
-    try {
-      console.log('Creating default principal...');
-      const { Principal } = require('./models');
-      
-      // Check if a principal already exists
-      const existingPrincipal = await Principal.findOne();
-      
-      if (existingPrincipal) {
-        console.log('A principal already exists in the database.');
-      } else {
-        // Create default principal
-        const defaultPrincipal = await Principal.create({
-          employee_id: 'PRIN001',
-          first_name: 'John',
-          last_name: 'Doe',
-          email: 'principal@college.com',
-          password: 'principal123', // This will be hashed by the model hook
-          phone_number: '1234567890',
-          joining_date: new Date(),
-          status: 'active'
-        });
-
-        console.log('✅ Default principal created successfully:');
-        console.log('   Email:', defaultPrincipal.email);
-        console.log('   Password: principal123');
-        console.log('   Employee ID:', defaultPrincipal.employee_id);
-      }
-    } catch (error) {
-      console.error('Error creating default principal:', error);
-      // Don't throw error here, continue with server startup
     }
 
     // Start listening only after database is ready
     app.listen(PORT, () => {
       console.log(`🚀 Server is running on port ${PORT}`);
       console.log(`Environment: ${process.env.NODE_ENV}`);
-      console.log(`📧 Default Principal Login: principal@college.com`);
-      console.log(`🔑 Default Password: principal123`);
+      console.log(`🔗 API Base URL: http://localhost:${PORT}/api`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);

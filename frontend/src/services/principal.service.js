@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.REACT_APP_API_URL || '/api';
 
 // Create axios instance
 const api = axios.create({
@@ -70,5 +70,45 @@ export const principalService = {
 
   getDepartmentStats: async () => {
     return api.get('/principal/dashboard/department-stats');
+  },
+
+  // Registration
+  register: async (registrationData) => {
+    return api.post('/principal/register', registrationData);
+  },
+
+  // Forgot Password
+  sendOTP: async (email) => {
+    return api.post('/principal/forgot-password', { email });
+  },
+
+  verifyOTP: async (email, otp) => {
+    return api.post('/principal/verify-otp', { email, otp });
+  },
+
+  resetPassword: async (email, otp, newPassword) => {
+    return api.post('/principal/reset-password', { email, otp, newPassword });
+  },
+
+  // Admin methods for verification
+  getAllPrincipals: async () => {
+    return api.get('/principal/all');
+  },
+
+  verifyPrincipal: async (principalId) => {
+    return api.put(`/principal/verify/${principalId}`);
+  },
+
+  // College Profile Methods
+  getCollegeProfile: async () => {
+    return api.get('/college/profile');
+  },
+
+  createCollege: async (collegeData) => {
+    return api.post('/college', collegeData);
+  },
+
+  updateCollegeProfile: async (collegeData) => {
+    return api.put('/college/profile', collegeData);
   },
 };

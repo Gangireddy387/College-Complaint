@@ -46,6 +46,14 @@ SectionStudent.init({
   remarks: {
     type: DataTypes.TEXT,
     allowNull: true
+  },
+  collegeId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'colleges',
+      key: 'id'
+    }
   }
 }, {
   sequelize,
