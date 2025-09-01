@@ -92,13 +92,7 @@ export const theme = createTheme({
         },
       },
     },
-    MuiPaper: {
-      styleOverrides: {
-        root: {
-          borderRadius: 8,
-        },
-      },
-    },
+    
   },
   shape: {
     borderRadius: 8,

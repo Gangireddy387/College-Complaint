@@ -83,7 +83,12 @@ const Sidebar = ({ open, onToggle }) => {
             boxSizing: 'border-box',
             background: 'linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
             color: 'white',
-            borderRight: 'none',
+            borderRight: 'none !important',
+            border: 'none !important',
+            borderLeft: 'none !important',
+            borderTop: 'none !important',
+            borderBottom: 'none !important',
+            outline: 'none !important',
             boxShadow: '2px 0 20px rgba(0,0,0,0.3)',
           },
          display: { xs: 'none', md: 'block' },
@@ -100,6 +105,12 @@ const Sidebar = ({ open, onToggle }) => {
               width: drawerWidth,
               background: 'linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
               color: 'white',
+              borderRight: 'none !important',
+              border: 'none !important',
+              borderLeft: 'none !important',
+              borderTop: 'none !important',
+              borderBottom: 'none !important',
+              outline: 'none !important',
               boxShadow: '2px 0 20px rgba(0,0,0,0.3)',
             },
          }}
@@ -151,7 +162,7 @@ const Sidebar = ({ open, onToggle }) => {
                   onClick={() => handleNavigation(item.path)}
                   sx={{
                     mx: 1,
-                    borderRadius: 3,
+                    borderRadius: 0,
                     mb: 0.5,
                     backgroundColor: isActive(item.path) ? 'rgba(255,255,255,0.15)' : 'transparent',
                     backdropFilter: isActive(item.path) ? 'blur(10px)' : 'none',
@@ -230,7 +241,7 @@ const Sidebar = ({ open, onToggle }) => {
                 onClick={() => handleNavigation(item.path)}
                 sx={{
                   mx: 2,
-                  borderRadius: 3,
+                  borderRadius: 0,
                   mb: 0.5,
                   backgroundColor: isActive(item.path) ? 'rgba(255,255,255,0.15)' : 'transparent',
                   backdropFilter: isActive(item.path) ? 'blur(10px)' : 'none',

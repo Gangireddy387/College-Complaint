@@ -207,7 +207,7 @@ const PrincipalProfile = () => {
 
         <Grid container spacing={3}>
           {/* Profile Card */}
-          <Grid item xs={12} md={8}>
+          <Grid item xs={12} lg={8}>
             <Card 
               elevation={3}
               sx={{
@@ -223,20 +223,21 @@ const PrincipalProfile = () => {
               }}
             >
               <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'center', sm: 'flex-start' }, mb: 3 }}>
                   <Avatar
                     sx={{
-                      width: 100,
-                      height: 100,
+                      width: { xs: 80, sm: 100 },
+                      height: { xs: 80, sm: 100 },
                       background: 'linear-gradient(45deg, #e94560, #f39c12)',
-                      fontSize: '2.5rem',
-                      mr: 3,
+                      fontSize: { xs: '2rem', sm: '2.5rem' },
+                      mr: { xs: 0, sm: 3 },
+                      mb: { xs: 2, sm: 0 },
                       boxShadow: '0 6px 12px rgba(0,0,0,0.2)',
                     }}
                   >
                     {user?.first_name?.charAt(0)?.toUpperCase()}
                   </Avatar>
-                  <Box sx={{ flexGrow: 1 }}>
+                  <Box sx={{ flexGrow: 1, textAlign: { xs: 'center', sm: 'left' } }}>
                     <Typography 
                       variant="h4" 
                       component="h2" 
@@ -247,6 +248,7 @@ const PrincipalProfile = () => {
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
                         fontWeight: 'bold',
+                        fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' },
                       }}
                     >
                       {user?.first_name} {user?.last_name}
@@ -278,6 +280,7 @@ const PrincipalProfile = () => {
                       sx={{
                         borderColor: '#e94560',
                         color: '#e94560',
+                        mt: { xs: 2, sm: 0 },
                         '&:hover': {
                           borderColor: '#f39c12',
                           backgroundColor: 'rgba(233, 69, 96, 0.1)',
@@ -322,6 +325,16 @@ const PrincipalProfile = () => {
                           helperText={validationErrors.first_name}
                           margin="normal"
                           placeholder="Enter your first name"
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              '&:hover fieldset': {
+                                borderColor: '#e94560',
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: '#e94560',
+                              },
+                            },
+                          }}
                         />
                       </Grid>
                       <Grid item xs={12} sm={6}>
@@ -335,6 +348,16 @@ const PrincipalProfile = () => {
                           helperText={validationErrors.last_name}
                           margin="normal"
                           placeholder="Enter your last name"
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              '&:hover fieldset': {
+                                borderColor: '#e94560',
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: '#e94560',
+                              },
+                            },
+                          }}
                         />
                       </Grid>
                       <Grid item xs={12}>
@@ -349,6 +372,16 @@ const PrincipalProfile = () => {
                           helperText={validationErrors.email}
                           margin="normal"
                           placeholder="Enter your email address"
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              '&:hover fieldset': {
+                                borderColor: '#e94560',
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: '#e94560',
+                              },
+                            },
+                          }}
                         />
                       </Grid>
                       <Grid item xs={12}>
@@ -362,10 +395,20 @@ const PrincipalProfile = () => {
                           helperText={validationErrors.phone_number}
                           margin="normal"
                           placeholder="Enter 10-digit phone number"
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              '&:hover fieldset': {
+                                borderColor: '#e94560',
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: '#e94560',
+                              },
+                            },
+                          }}
                         />
                       </Grid>
                     </Grid>
-                    <Box sx={{ mt: 4, display: 'flex', gap: 2 }}>
+                    <Box sx={{ mt: 4, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
                       <Button
                         variant="contained"
                         startIcon={<Save />}
@@ -422,7 +465,7 @@ const PrincipalProfile = () => {
                     >
                       Principal Contact Information
                     </Typography>
-                    <Grid container spacing={3}>
+                    <Grid container spacing={2}>
                       <Grid item xs={12} sm={6}>
                         <Paper 
                           sx={{ 
@@ -510,7 +553,7 @@ const PrincipalProfile = () => {
                     >
                       Principal Account Information
                     </Typography>
-                    <Grid container spacing={3}>
+                    <Grid container spacing={2}>
                       <Grid item xs={12} sm={6}>
                         <Paper 
                           sx={{ 
@@ -589,7 +632,7 @@ const PrincipalProfile = () => {
           </Grid>
 
           {/* Sidebar Info */}
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} lg={4}>
             <Card 
               elevation={3}
               sx={{

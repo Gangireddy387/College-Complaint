@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   AppBar,
   Toolbar,
@@ -24,6 +24,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logoutPrincipal } from '../../store/slices/authSlice';
+import { getCollegeProfile } from '../../store/slices/collegeSlice';
 
 const Navbar = ({ onSidebarToggle }) => {
   const theme = useTheme();
@@ -31,8 +32,16 @@ const Navbar = ({ onSidebarToggle }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
+  const { college } = useSelector((state) => state.college);
 
   const [anchorEl, setAnchorEl] = React.useState(null);
+
+  // Fetch college data when component mounts
+  useEffect(() => {
+    if (!college) {
+      dispatch(getCollegeProfile());
+    }
+  }, [dispatch, college]);
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -68,6 +77,14 @@ const Navbar = ({ onSidebarToggle }) => {
     handleClose();
   };
 
+  // Get the title to display
+  const getTitle = () => {
+    if (college && college.name) {
+      return college.name;
+    }
+    return 'College Management System';
+  };
+
   return (
     <AppBar
       position="fixed"
@@ -79,6 +96,7 @@ const Navbar = ({ onSidebarToggle }) => {
         boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
         zIndex: theme.zIndex.drawer + 1,
         backdropFilter: 'blur(10px)',
+        borderRadius: 0,
       }}
     >
       <Toolbar>
@@ -98,8 +116,20 @@ const Navbar = ({ onSidebarToggle }) => {
         {/* Logo and Title */}
         <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
           <School sx={{ mr: 1, color: 'white', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }} />
-          <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', textShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
-            College Management System
+          <Typography 
+            variant="h6" 
+            component="div" 
+            sx={{ 
+              fontWeight: 'bold', 
+              textShadow: '0 2px 4px rgba(0,0,0,0.2)',
+              fontSize: { xs: '1rem', sm: '1.25rem' },
+              maxWidth: { xs: '200px', sm: '300px', md: '400px' },
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {getTitle()}
           </Typography>
         </Box>
 

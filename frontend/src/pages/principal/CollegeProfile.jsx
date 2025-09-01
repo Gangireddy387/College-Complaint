@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   Box,
   Container,
@@ -19,10 +20,13 @@ import {
   Paper
 } from '@mui/material';
 import { Save, Edit, School } from '@mui/icons-material';
-import { principalService } from '../../services/principal.service';
+import { getCollegeProfile, createCollege, updateCollegeProfile } from '../../store/slices/collegeSlice';
 import MainLayout from '../../layouts/MainLayout';
 
 const CollegeProfile = () => {
+  const dispatch = useDispatch();
+  const { college, isLoading, error } = useSelector((state) => state.college);
+
   const [formData, setFormData] = useState({
     name: '',
     code: '',
@@ -38,44 +42,33 @@ const CollegeProfile = () => {
     status: 'active'
   });
 
-  const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
-  const [error, setError] = useState('');
   const [isEditing, setIsEditing] = useState(false);
-  const [collegeData, setCollegeData] = useState(null);
 
   // Load existing college data
   useEffect(() => {
-    loadCollegeData();
-  }, []);
+    dispatch(getCollegeProfile());
+  }, [dispatch]);
 
-  const loadCollegeData = async () => {
-    try {
-      setLoading(true);
-      const response = await principalService.getCollegeProfile();
-      if (response.data) {
-        setCollegeData(response.data);
-        setFormData({
-          name: response.data.name || '',
-          code: response.data.code || '',
-          type: response.data.type || 'private',
-          address: response.data.address || '',
-          phone: response.data.phone || '',
-          email: response.data.email || '',
-          website: response.data.website || '',
-          establishment_date: response.data.establishment_date || '',
-          facilities: response.data.facilities || [],
-          departments: response.data.departments || [],
-          achievements: response.data.achievements || [],
-          status: response.data.status || 'active'
-        });
-      }
-    } catch (error) {
-      console.log('No existing college data found');
-    } finally {
-      setLoading(false);
+  // Update form data when college data changes
+  useEffect(() => {
+    if (college) {
+      setFormData({
+        name: college.name || '',
+        code: college.code || '',
+        type: college.type || 'private',
+        address: college.address || '',
+        phone: college.phone || '',
+        email: college.email || '',
+        website: college.website || '',
+        establishment_date: college.establishment_date || '',
+        facilities: college.facilities || [],
+        departments: college.departments || [],
+        achievements: college.achievements || [],
+        status: college.status || 'active'
+      });
     }
-  };
+  }, [college]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -94,15 +87,15 @@ const CollegeProfile = () => {
 
   const validateForm = () => {
     if (!formData.name || !formData.code || !formData.address || !formData.phone || !formData.email || !formData.establishment_date) {
-      setError('Please fill in all required fields');
+      setSuccess('');
       return false;
     }
     if (!/^[0-9]{10}$/.test(formData.phone)) {
-      setError('Phone number must be 10 digits');
+      setSuccess('');
       return false;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      setError('Please enter a valid email address');
+      setSuccess('');
       return false;
     }
     return true;
@@ -112,19 +105,14 @@ const CollegeProfile = () => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    setLoading(true);
-    setError('');
     setSuccess('');
 
     try {
-      const response = await principalService.updateCollegeProfile(formData);
+      await dispatch(updateCollegeProfile(formData)).unwrap();
       setSuccess('College profile updated successfully!');
-      setCollegeData(response.data.college);
       setIsEditing(false);
     } catch (error) {
-      setError(error.response?.data?.message || 'Failed to update college profile');
-    } finally {
-      setLoading(false);
+      console.error('Failed to update college profile:', error);
     }
   };
 
@@ -132,23 +120,18 @@ const CollegeProfile = () => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    setLoading(true);
-    setError('');
     setSuccess('');
 
     try {
-      const response = await principalService.createCollege(formData);
+      await dispatch(createCollege(formData)).unwrap();
       setSuccess('College created successfully! Your account has been linked to this college.');
-      setCollegeData(response.data.college);
       setIsEditing(false);
     } catch (error) {
-      setError(error.response?.data?.message || 'Failed to create college');
-    } finally {
-      setLoading(false);
+      console.error('Failed to create college:', error);
     }
   };
 
-  if (loading && !collegeData) {
+  if (isLoading && !college) {
     return (
       <MainLayout>
         <Container maxWidth="lg">
@@ -176,6 +159,7 @@ const CollegeProfile = () => {
               WebkitTextFillColor: 'transparent',
               fontWeight: 'bold',
               textShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' },
             }}
           >
             College Profile
@@ -198,7 +182,7 @@ const CollegeProfile = () => {
         )}
 
         <Grid container spacing={3}>
-          <Grid item xs={12}>
+          <Grid item xs={12} lg={8}>
             <Card
               elevation={3}
               sx={{
@@ -214,15 +198,16 @@ const CollegeProfile = () => {
               }}
             >
               <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'center', sm: 'flex-start' }, mb: 3 }}>
                   <School 
                     sx={{ 
-                      mr: 2, 
+                      mr: { xs: 0, sm: 2 }, 
+                      mb: { xs: 2, sm: 0 },
                       background: 'linear-gradient(45deg, #e94560, #f39c12)',
                       backgroundClip: 'text',
                       WebkitBackgroundClip: 'text',
                       WebkitTextFillColor: 'transparent',
-                      fontSize: '2rem',
+                      fontSize: { xs: '1.5rem', sm: '2rem' },
                     }} 
                   />
                   <Typography 
@@ -234,13 +219,14 @@ const CollegeProfile = () => {
                       WebkitBackgroundClip: 'text',
                       WebkitTextFillColor: 'transparent',
                       fontWeight: 'bold',
+                      textAlign: { xs: 'center', sm: 'left' },
                     }}
                   >
                     College Information
                   </Typography>
                 </Box>
 
-                {collegeData ? (
+                {college ? (
                   // Display existing college data
                   <Paper 
                     sx={{ 
@@ -251,8 +237,8 @@ const CollegeProfile = () => {
                       border: '1px solid rgba(233, 69, 96, 0.1)',
                     }}
                   >
-                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                      <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#e94560' }}>
+                    <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'center', sm: 'flex-start' }} mb={2} gap={2}>
+                      <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#e94560', textAlign: { xs: 'center', sm: 'left' } }}>
                         Current College Details
                       </Typography>
                       <Button
@@ -265,7 +251,10 @@ const CollegeProfile = () => {
                           '&:hover': {
                             borderColor: '#f39c12',
                             backgroundColor: 'rgba(233, 69, 96, 0.1)',
+                            transform: 'translateY(-2px)',
+                            transition: 'all 0.3s ease',
                           },
+                          transition: 'all 0.3s ease',
                         }}
                       >
                         Edit Profile
@@ -273,18 +262,18 @@ const CollegeProfile = () => {
                     </Box>
                     
                     <Grid container spacing={2}>
-                      <Grid item xs={12} md={6}>
+                      <Grid item xs={12} sm={6}>
                         <Typography variant="subtitle2" color="textSecondary" sx={{ fontWeight: 'bold' }}>Name</Typography>
-                        <Typography variant="body1" sx={{ mb: 2, color: '#e94560' }}>{collegeData.name}</Typography>
+                        <Typography variant="body1" sx={{ mb: 2, color: '#e94560' }}>{college.name}</Typography>
                       </Grid>
-                      <Grid item xs={12} md={6}>
+                      <Grid item xs={12} sm={6}>
                         <Typography variant="subtitle2" color="textSecondary" sx={{ fontWeight: 'bold' }}>Code</Typography>
-                        <Typography variant="body1" sx={{ mb: 2, color: '#e94560' }}>{collegeData.code}</Typography>
+                        <Typography variant="body1" sx={{ mb: 2, color: '#e94560' }}>{college.code}</Typography>
                       </Grid>
-                      <Grid item xs={12} md={6}>
+                      <Grid item xs={12} sm={6}>
                         <Typography variant="subtitle2" color="textSecondary" sx={{ fontWeight: 'bold' }}>Type</Typography>
                         <Chip 
-                          label={collegeData.type} 
+                          label={college.type} 
                           color="primary" 
                           sx={{ 
                             mb: 2,
@@ -294,11 +283,11 @@ const CollegeProfile = () => {
                           }} 
                         />
                       </Grid>
-                      <Grid item xs={12} md={6}>
+                      <Grid item xs={12} sm={6}>
                         <Typography variant="subtitle2" color="textSecondary" sx={{ fontWeight: 'bold' }}>Status</Typography>
                         <Chip 
-                          label={collegeData.status} 
-                          color={collegeData.status === 'active' ? 'success' : 'default'} 
+                          label={college.status} 
+                          color={college.status === 'active' ? 'success' : 'default'} 
                           sx={{ 
                             mb: 2,
                             fontWeight: 'bold',
@@ -307,36 +296,36 @@ const CollegeProfile = () => {
                       </Grid>
                       <Grid item xs={12}>
                         <Typography variant="subtitle2" color="textSecondary" sx={{ fontWeight: 'bold' }}>Address</Typography>
-                        <Typography variant="body1" sx={{ mb: 2, color: '#e94560' }}>{collegeData.address}</Typography>
+                        <Typography variant="body1" sx={{ mb: 2, color: '#e94560' }}>{college.address}</Typography>
                       </Grid>
-                      <Grid item xs={12} md={6}>
+                      <Grid item xs={12} sm={6}>
                         <Typography variant="subtitle2" color="textSecondary" sx={{ fontWeight: 'bold' }}>Phone</Typography>
-                        <Typography variant="body1" sx={{ mb: 2, color: '#e94560' }}>{collegeData.phone}</Typography>
+                        <Typography variant="body1" sx={{ mb: 2, color: '#e94560' }}>{college.phone}</Typography>
                       </Grid>
-                      <Grid item xs={12} md={6}>
+                      <Grid item xs={12} sm={6}>
                         <Typography variant="subtitle2" color="textSecondary" sx={{ fontWeight: 'bold' }}>Email</Typography>
-                        <Typography variant="body1" sx={{ mb: 2, color: '#e94560' }}>{collegeData.email}</Typography>
+                        <Typography variant="body1" sx={{ mb: 2, color: '#e94560' }}>{college.email}</Typography>
                       </Grid>
-                      {collegeData.website && (
+                      {college.website && (
                         <Grid item xs={12}>
                           <Typography variant="subtitle2" color="textSecondary" sx={{ fontWeight: 'bold' }}>Website</Typography>
-                          <Typography variant="body1" sx={{ mb: 2, color: '#e94560' }}>{collegeData.website}</Typography>
+                          <Typography variant="body1" sx={{ mb: 2, color: '#e94560' }}>{college.website}</Typography>
                         </Grid>
                       )}
-                      <Grid item xs={12} md={6}>
+                      <Grid item xs={12} sm={6}>
                         <Typography variant="subtitle2" color="textSecondary" sx={{ fontWeight: 'bold' }}>Establishment Date</Typography>
                         <Typography variant="body1" sx={{ mb: 2, color: '#e94560' }}>
-                          {new Date(collegeData.establishment_date).toLocaleDateString()}
+                          {new Date(college.establishment_date).toLocaleDateString()}
                         </Typography>
                       </Grid>
                     </Grid>
 
-                    {collegeData.facilities && collegeData.facilities.length > 0 && (
+                    {college.facilities && college.facilities.length > 0 && (
                       <>
                         <Divider sx={{ my: 2, borderColor: 'rgba(233, 69, 96, 0.2)' }} />
                         <Typography variant="subtitle2" color="textSecondary" sx={{ mb: 1, fontWeight: 'bold' }}>Facilities</Typography>
                         <Box sx={{ mb: 2 }}>
-                          {collegeData.facilities.map((facility, index) => (
+                          {college.facilities.map((facility, index) => (
                             <Chip 
                               key={index} 
                               label={facility} 
@@ -353,12 +342,12 @@ const CollegeProfile = () => {
                       </>
                     )}
 
-                    {collegeData.departments && collegeData.departments.length > 0 && (
+                    {college.departments && college.departments.length > 0 && (
                       <>
                         <Divider sx={{ my: 2, borderColor: 'rgba(233, 69, 96, 0.2)' }} />
                         <Typography variant="subtitle2" color="textSecondary" sx={{ mb: 1, fontWeight: 'bold' }}>Departments</Typography>
                         <Box sx={{ mb: 2 }}>
-                          {collegeData.departments.map((dept, index) => (
+                          {college.departments.map((dept, index) => (
                             <Chip 
                               key={index} 
                               label={dept} 
@@ -374,12 +363,12 @@ const CollegeProfile = () => {
                       </>
                     )}
 
-                    {collegeData.achievements && collegeData.achievements.length > 0 && (
+                    {college.achievements && college.achievements.length > 0 && (
                       <>
                         <Divider sx={{ my: 2, borderColor: 'rgba(233, 69, 96, 0.2)' }} />
                         <Typography variant="subtitle2" color="textSecondary" sx={{ mb: 1, fontWeight: 'bold' }}>Achievements</Typography>
                         <Box sx={{ mb: 2 }}>
-                          {collegeData.achievements.map((achievement, index) => (
+                          {college.achievements.map((achievement, index) => (
                             <Chip 
                               key={index} 
                               label={achievement} 
@@ -397,7 +386,7 @@ const CollegeProfile = () => {
                   </Paper>
                 ) : null}
 
-                {(isEditing || !collegeData) && (
+                {(isEditing || !college) && (
                   <Paper 
                     sx={{ 
                       p: 3,
@@ -407,12 +396,12 @@ const CollegeProfile = () => {
                     }}
                   >
                     <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold', color: '#e94560' }}>
-                      {collegeData ? 'Edit College Information' : 'Create New College'}
+                      {college ? 'Edit College Information' : 'Create New College'}
                     </Typography>
                     
-                    <Box component="form" onSubmit={collegeData ? handleSubmit : handleCreateCollege}>
+                    <Box component="form" onSubmit={college ? handleSubmit : handleCreateCollege}>
                       <Grid container spacing={3}>
-                        <Grid item xs={12} md={6}>
+                        <Grid item xs={12} sm={6}>
                           <TextField
                             fullWidth
                             label="College Name *"
@@ -432,7 +421,7 @@ const CollegeProfile = () => {
                             }}
                           />
                         </Grid>
-                        <Grid item xs={12} md={6}>
+                        <Grid item xs={12} sm={6}>
                           <TextField
                             fullWidth
                             label="College Code *"
@@ -452,7 +441,7 @@ const CollegeProfile = () => {
                             }}
                           />
                         </Grid>
-                        <Grid item xs={12} md={6}>
+                        <Grid item xs={12} sm={6}>
                           <FormControl fullWidth>
                             <InputLabel>Type *</InputLabel>
                             <Select
@@ -477,7 +466,7 @@ const CollegeProfile = () => {
                             </Select>
                           </FormControl>
                         </Grid>
-                        <Grid item xs={12} md={6}>
+                        <Grid item xs={12} sm={6}>
                           <FormControl fullWidth>
                             <InputLabel>Status</InputLabel>
                             <Select
@@ -523,7 +512,7 @@ const CollegeProfile = () => {
                             }}
                           />
                         </Grid>
-                        <Grid item xs={12} md={6}>
+                        <Grid item xs={12} sm={6}>
                           <TextField
                             fullWidth
                             label="Phone Number *"
@@ -544,7 +533,7 @@ const CollegeProfile = () => {
                             }}
                           />
                         </Grid>
-                        <Grid item xs={12} md={6}>
+                        <Grid item xs={12} sm={6}>
                           <TextField
                             fullWidth
                             label="Email *"
@@ -565,7 +554,7 @@ const CollegeProfile = () => {
                             }}
                           />
                         </Grid>
-                        <Grid item xs={12} md={6}>
+                        <Grid item xs={12} sm={6}>
                           <TextField
                             fullWidth
                             label="Website"
@@ -584,7 +573,7 @@ const CollegeProfile = () => {
                             }}
                           />
                         </Grid>
-                        <Grid item xs={12} md={6}>
+                        <Grid item xs={12} sm={6}>
                           <TextField
                             fullWidth
                             label="Establishment Date *"
@@ -664,12 +653,12 @@ const CollegeProfile = () => {
                           />
                         </Grid>
                         <Grid item xs={12}>
-                          <Box display="flex" gap={2}>
+                          <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2}>
                             <Button
                               type="submit"
                               variant="contained"
                               startIcon={<Save />}
-                              disabled={loading}
+                              disabled={isLoading}
                               sx={{
                                 background: 'linear-gradient(45deg, #e94560, #f39c12)',
                                 color: 'white',
@@ -684,14 +673,30 @@ const CollegeProfile = () => {
                                 },
                               }}
                             >
-                              {loading ? <CircularProgress size={20} /> : (collegeData ? 'Update Profile' : 'Create College')}
+                              {isLoading ? <CircularProgress size={20} /> : (college ? 'Update Profile' : 'Create College')}
                             </Button>
                             {isEditing && (
                               <Button
                                 variant="outlined"
                                 onClick={() => {
                                   setIsEditing(false);
-                                  loadCollegeData();
+                                  // Reset form data to current college data
+                                  if (college) {
+                                    setFormData({
+                                      name: college.name || '',
+                                      code: college.code || '',
+                                      type: college.type || 'private',
+                                      address: college.address || '',
+                                      phone: college.phone || '',
+                                      email: college.email || '',
+                                      website: college.website || '',
+                                      establishment_date: college.establishment_date || '',
+                                      facilities: college.facilities || [],
+                                      departments: college.departments || [],
+                                      achievements: college.achievements || [],
+                                      status: college.status || 'active'
+                                    });
+                                  }
                                 }}
                                 sx={{
                                   borderColor: '#e94560',
@@ -699,7 +704,10 @@ const CollegeProfile = () => {
                                   '&:hover': {
                                     borderColor: '#f39c12',
                                     backgroundColor: 'rgba(233, 69, 96, 0.1)',
+                                    transform: 'translateY(-2px)',
+                                    transition: 'all 0.3s ease',
                                   },
+                                  transition: 'all 0.3s ease',
                                 }}
                               >
                                 Cancel
@@ -711,6 +719,128 @@ const CollegeProfile = () => {
                     </Box>
                   </Paper>
                 )}
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Sidebar Info */}
+          <Grid item xs={12} lg={4}>
+            <Card
+              elevation={3}
+              sx={{
+                background: 'linear-gradient(135deg, rgba(26, 26, 46, 0.05) 0%, rgba(22, 33, 62, 0.05) 100%)',
+                border: '1px solid rgba(233, 69, 96, 0.2)',
+                borderRadius: 3,
+                '&:hover': {
+                  boxShadow: '0 8px 24px rgba(233, 69, 96, 0.2)',
+                  transform: 'translateY(-2px)',
+                  transition: 'all 0.3s ease',
+                },
+                transition: 'all 0.3s ease',
+              }}
+            >
+              <CardContent>
+                <Typography 
+                  variant="h6" 
+                  gutterBottom
+                  sx={{
+                    background: 'linear-gradient(135deg, #e94560 0%, #f39c12 100%)',
+                    backgroundClip: 'text',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  College Quick Actions
+                </Typography>
+                <Divider sx={{ mb: 3 }} />
+                
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    startIcon={<Edit />}
+                    onClick={() => setIsEditing(true)}
+                    disabled={isEditing}
+                    sx={{
+                      borderColor: '#e94560',
+                      color: '#e94560',
+                      '&:hover': {
+                        borderColor: '#f39c12',
+                        backgroundColor: 'rgba(233, 69, 96, 0.1)',
+                        transform: 'translateY(-2px)',
+                        transition: 'all 0.3s ease',
+                      },
+                      transition: 'all 0.3s ease',
+                    }}
+                  >
+                    Edit College Profile
+                  </Button>
+                  
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    startIcon={<School />}
+                    onClick={() => window.history.back()}
+                    sx={{
+                      borderColor: '#e94560',
+                      color: '#e94560',
+                      '&:hover': {
+                        borderColor: '#f39c12',
+                        backgroundColor: 'rgba(233, 69, 96, 0.1)',
+                        transform: 'translateY(-2px)',
+                        transition: 'all 0.3s ease',
+                      },
+                      transition: 'all 0.3s ease',
+                    }}
+                  >
+                    Back to Dashboard
+                  </Button>
+                </Box>
+
+                <Divider sx={{ my: 3 }} />
+
+                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                  College Profile Status
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                  <Box
+                    sx={{
+                      width: 12,
+                      height: 12,
+                      borderRadius: '50%',
+                      bgcolor: college ? 'success.main' : 'warning.main',
+                      mr: 1,
+                    }}
+                  />
+                  <Typography variant="body2">
+                    {college ? 'Profile Complete' : 'Profile Pending'}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                  <Box
+                    sx={{
+                      width: 12,
+                      height: 12,
+                      borderRadius: '50%',
+                      bgcolor: 'success.main',
+                      mr: 1,
+                    }}
+                  />
+                  <Typography variant="body2">College Active</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Box
+                    sx={{
+                      width: 12,
+                      height: 12,
+                      borderRadius: '50%',
+                      bgcolor: 'success.main',
+                      mr: 1,
+                    }}
+                  />
+                  <Typography variant="body2">Management Ready</Typography>
+                </Box>
               </CardContent>
             </Card>
           </Grid>
