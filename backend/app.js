@@ -27,11 +27,15 @@ app.get('/api/principal/test', (req, res) => {
 const principalRoutes = require('./routes/principal.routes');
 const principalForgotPasswordRoutes = require('./routes/principalForgotPassword');
 const collegeRoutes = require('./routes/college.routes');
+const departmentRoutes = require('./routes/department.routes');
+const facultyRoutes = require('./routes/faculty.routes');
 
 // Use routes
 app.use('/api/principal', principalRoutes);
 app.use('/api/principal', principalForgotPasswordRoutes);
 app.use('/api/college', collegeRoutes);
+app.use('/api/department', departmentRoutes);
+app.use('/api/faculty', facultyRoutes);
 
 
 

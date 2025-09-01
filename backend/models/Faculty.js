@@ -149,9 +149,42 @@ Faculty.init({
         const salt = await bcrypt.genSalt(10);
         faculty.password = await bcrypt.hash(faculty.password, salt);
       }
+    },
+    afterCreate: async (faculty) => {
+      await updateDepartmentFacultyCount(faculty.department_id);
+    },
+    afterUpdate: async (faculty) => {
+      await updateDepartmentFacultyCount(faculty.department_id);
+    },
+    afterDestroy: async (faculty) => {
+      await updateDepartmentFacultyCount(faculty.department_id);
     }
   }
 });
+
+// Function to update department faculty count
+async function updateDepartmentFacultyCount(departmentId) {
+  try {
+    const Department = require('./Department');
+    
+    // Count active faculty in this department
+    const facultyCount = await Faculty.count({
+      where: { 
+        department_id: departmentId,
+        status: 'active'
+      }
+    });
+    
+    // Update the department with new faculty count
+    await Department.update({
+      total_faculty: facultyCount
+    }, {
+      where: { id: departmentId }
+    });
+  } catch (error) {
+    console.error('Error updating department faculty count:', error);
+  }
+}
 
 // PostgreSQL-specific: Trigger for updating search vector
 sequelize.query(`

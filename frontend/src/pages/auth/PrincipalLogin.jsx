@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
-  Card,
   CardContent,
   TextField,
   Button,
@@ -22,7 +21,7 @@ import {
   Email,
   Lock,
 } from '@mui/icons-material';
-import { loginPrincipal, clearError } from '../../store/slices/authSlice';
+import { loginPrincipal } from '../../store/slices/authSlice';
 
 const PrincipalLogin = () => {
   const dispatch = useDispatch();
@@ -42,10 +41,7 @@ const PrincipalLogin = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  useEffect(() => {
-    // Clear any existing errors when component mounts
-    dispatch(clearError());
-  }, [dispatch]);
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

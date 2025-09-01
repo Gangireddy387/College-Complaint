@@ -24,22 +24,22 @@ Student.belongsTo(Department, {
 });
 
 Department.hasMany(Faculty, {
-  foreignKey: 'departmentId',
+  foreignKey: 'department_id',
   as: 'faculty',
   onDelete: 'RESTRICT'
 });
 Faculty.belongsTo(Department, {
-  foreignKey: 'departmentId',
+  foreignKey: 'department_id',
   as: 'department'
 });
 
 Department.belongsTo(Faculty, {
-  foreignKey: 'hodId',
+  foreignKey: 'hod_id',
   as: 'headOfDepartment',
   constraints: false
 });
 Faculty.hasOne(Department, {
-  foreignKey: 'hodId',
+  foreignKey: 'hod_id',
   as: 'managedDepartment',
   constraints: false
 });

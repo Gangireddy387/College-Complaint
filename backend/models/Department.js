@@ -31,11 +31,14 @@ Department.init({
   hod_id: {
     type: DataTypes.INTEGER,
     allowNull: true,
-    // We'll add the foreign key constraint after both tables are created
+    references: {
+      model: 'faculties',
+      key: 'id'
+    }
   },
   established_year: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true,
     validate: {
       min: 1900,
       max: new Date().getFullYear()
@@ -134,8 +137,50 @@ Department.init({
     {
       fields: ['status']
     }
-  ]
+  ],
+  hooks: {
+    afterCreate: async (department) => {
+      await updateDepartmentCounts(department.id);
+    },
+    afterUpdate: async (department) => {
+      await updateDepartmentCounts(department.id);
+    }
+  }
 });
+
+// Function to update department counts
+async function updateDepartmentCounts(departmentId) {
+  try {
+    const Student = require('./Student');
+    const Faculty = require('./Faculty');
+    
+    // Count students in this department
+    const studentCount = await Student.count({
+      where: { 
+        department_id: departmentId,
+        status: 'active'
+      }
+    });
+    
+    // Count faculty in this department
+    const facultyCount = await Faculty.count({
+      where: { 
+        department_id: departmentId,
+        status: 'active'
+      }
+    });
+    
+    // Update the department with new counts
+    await Department.update({
+      total_students: studentCount,
+      total_faculty: facultyCount
+    }, {
+      where: { id: departmentId }
+    });
+  } catch (error) {
+    console.error('Error updating department counts:', error);
+  }
+}
 
 // PostgreSQL-specific: Trigger for updating search vector
 sequelize.query(`

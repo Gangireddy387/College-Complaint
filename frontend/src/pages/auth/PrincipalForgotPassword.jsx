@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { principalService } from '../../services/principal.service';
 import {
   Box,
-  Card,
   CardContent,
   TextField,
   Button,
@@ -15,7 +14,8 @@ import {
   Stepper,
   Step,
   StepLabel,
-  Grid,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import {
   School,
@@ -27,6 +27,9 @@ import {
 
 const PrincipalForgotPassword = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  
   const [activeStep, setActiveStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -113,7 +116,7 @@ const PrincipalForgotPassword = () => {
     setSuccess('');
 
     try {
-      const response = await principalService.sendOTP(formData.email);
+      await principalService.sendOTP(formData.email);
       setSuccess('OTP sent successfully to your email!');
       setActiveStep(1);
     } catch (error) {
@@ -133,7 +136,7 @@ const PrincipalForgotPassword = () => {
     setSuccess('');
 
     try {
-      const response = await principalService.verifyOTP(formData.email, formData.otp);
+      await principalService.verifyOTP(formData.email, formData.otp);
       setSuccess('OTP verified successfully!');
       setActiveStep(2);
     } catch (error) {
@@ -153,7 +156,7 @@ const PrincipalForgotPassword = () => {
     setSuccess('');
 
     try {
-      const response = await principalService.resetPassword(formData.email, formData.otp, formData.newPassword);
+      await principalService.resetPassword(formData.email, formData.otp, formData.newPassword);
       setSuccess('Password reset successfully! Redirecting to login...');
       setTimeout(() => {
         navigate('/login');
@@ -174,10 +177,26 @@ const PrincipalForgotPassword = () => {
       case 0:
         return (
           <Box>
-            <Typography variant="h6" gutterBottom sx={{ mb: 3, color: '#e94560', fontWeight: 'bold' }}>
+            <Typography 
+              variant={isMobile ? "h6" : "h6"} 
+              gutterBottom 
+              sx={{ 
+                mb: isMobile ? 2 : 3, 
+                color: '#e94560', 
+                fontWeight: 'bold',
+                fontSize: isMobile ? '1.1rem' : undefined,
+              }}
+            >
               Enter Your Email Address
             </Typography>
-            <Typography variant="body2" sx={{ mb: 3, opacity: 0.8 }}>
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                mb: isMobile ? 2 : 3, 
+                opacity: 0.8,
+                fontSize: isMobile ? '0.875rem' : undefined,
+              }}
+            >
               We'll send a 4-digit OTP to your registered email address to verify your identity.
             </Typography>
             <TextField
@@ -190,13 +209,14 @@ const PrincipalForgotPassword = () => {
               error={!!validationErrors.email}
               helperText={validationErrors.email}
               margin="normal"
+              size={isMobile ? "small" : "medium"}
               InputProps={{
                 startAdornment: (
-                  <Email sx={{ color: '#e94560', mr: 1 }} />
+                  <Email sx={{ color: '#e94560', mr: 1, fontSize: isMobile ? 20 : 24 }} />
                 ),
               }}
               sx={{ 
-                mb: 3,
+                mb: isMobile ? 2 : 3,
                 '& .MuiOutlinedInput-root': {
                   '&:hover fieldset': {
                     borderColor: '#e94560',
@@ -205,23 +225,29 @@ const PrincipalForgotPassword = () => {
                     borderColor: '#e94560',
                   },
                 },
+                '& .MuiInputLabel-root': {
+                  fontSize: isMobile ? '0.875rem' : undefined,
+                },
+                '& .MuiInputBase-input': {
+                  fontSize: isMobile ? '0.875rem' : undefined,
+                },
               }}
             />
             <Button
               fullWidth
               variant="contained"
-              size="large"
+              size={isMobile ? "medium" : "large"}
               onClick={handleSendOTP}
               disabled={isLoading}
               sx={{
-                py: 1.5,
-                fontSize: '1.1rem',
+                py: isMobile ? 1 : 1.5,
+                fontSize: isMobile ? '1rem' : '1.1rem',
                 fontWeight: 600,
                 background: 'linear-gradient(135deg, #e94560 0%, #f39c12 100%)',
                 '&:hover': {
                   background: 'linear-gradient(135deg, #f39c12 0%, #e94560 100%)',
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 8px 16px rgba(233, 69, 96, 0.4)',
+                  transform: isMobile ? 'translateY(-1px)' : 'translateY(-2px)',
+                  boxShadow: isMobile ? '0 4px 8px rgba(233, 69, 96, 0.4)' : '0 8px 16px rgba(233, 69, 96, 0.4)',
                 },
                 '&:disabled': {
                   background: 'rgba(233, 69, 96, 0.5)',
@@ -237,10 +263,26 @@ const PrincipalForgotPassword = () => {
       case 1:
         return (
           <Box>
-            <Typography variant="h6" gutterBottom sx={{ mb: 3, color: '#e94560', fontWeight: 'bold' }}>
+            <Typography 
+              variant={isMobile ? "h6" : "h6"} 
+              gutterBottom 
+              sx={{ 
+                mb: isMobile ? 2 : 3, 
+                color: '#e94560', 
+                fontWeight: 'bold',
+                fontSize: isMobile ? '1.1rem' : undefined,
+              }}
+            >
               Enter 4-Digit OTP
             </Typography>
-            <Typography variant="body2" sx={{ mb: 3, opacity: 0.8 }}>
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                mb: isMobile ? 2 : 3, 
+                opacity: 0.8,
+                fontSize: isMobile ? '0.875rem' : undefined,
+              }}
+            >
               We've sent a 4-digit OTP to {formData.email}. Please enter it below.
             </Typography>
             <TextField
@@ -253,14 +295,15 @@ const PrincipalForgotPassword = () => {
               error={!!validationErrors.otp}
               helperText={validationErrors.otp}
               margin="normal"
+              size={isMobile ? "small" : "medium"}
               inputProps={{ maxLength: 4 }}
               InputProps={{
                 startAdornment: (
-                  <Security sx={{ color: '#e94560', mr: 1 }} />
+                  <Security sx={{ color: '#e94560', mr: 1, fontSize: isMobile ? 20 : 24 }} />
                 ),
               }}
               sx={{ 
-                mb: 3,
+                mb: isMobile ? 2 : 3,
                 '& .MuiOutlinedInput-root': {
                   '&:hover fieldset': {
                     borderColor: '#e94560',
@@ -269,23 +312,29 @@ const PrincipalForgotPassword = () => {
                     borderColor: '#e94560',
                   },
                 },
+                '& .MuiInputLabel-root': {
+                  fontSize: isMobile ? '0.875rem' : undefined,
+                },
+                '& .MuiInputBase-input': {
+                  fontSize: isMobile ? '0.875rem' : undefined,
+                },
               }}
             />
             <Button
               fullWidth
               variant="contained"
-              size="large"
+              size={isMobile ? "medium" : "large"}
               onClick={handleVerifyOTP}
               disabled={isLoading}
               sx={{
-                py: 1.5,
-                fontSize: '1.1rem',
+                py: isMobile ? 1 : 1.5,
+                fontSize: isMobile ? '1rem' : '1.1rem',
                 fontWeight: 600,
                 background: 'linear-gradient(135deg, #e94560 0%, #f39c12 100%)',
                 '&:hover': {
                   background: 'linear-gradient(135deg, #f39c12 0%, #e94560 100%)',
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 8px 16px rgba(233, 69, 96, 0.4)',
+                  transform: isMobile ? 'translateY(-1px)' : 'translateY(-2px)',
+                  boxShadow: isMobile ? '0 4px 8px rgba(233, 69, 96, 0.4)' : '0 8px 16px rgba(233, 69, 96, 0.4)',
                 },
                 '&:disabled': {
                   background: 'rgba(233, 69, 96, 0.5)',
@@ -301,10 +350,26 @@ const PrincipalForgotPassword = () => {
       case 2:
         return (
           <Box>
-            <Typography variant="h6" gutterBottom sx={{ mb: 3, color: '#e94560', fontWeight: 'bold' }}>
+            <Typography 
+              variant={isMobile ? "h6" : "h6"} 
+              gutterBottom 
+              sx={{ 
+                mb: isMobile ? 2 : 3, 
+                color: '#e94560', 
+                fontWeight: 'bold',
+                fontSize: isMobile ? '1.1rem' : undefined,
+              }}
+            >
               Set New Password
             </Typography>
-            <Typography variant="body2" sx={{ mb: 3, opacity: 0.8 }}>
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                mb: isMobile ? 2 : 3, 
+                opacity: 0.8,
+                fontSize: isMobile ? '0.875rem' : undefined,
+              }}
+            >
               Please enter your new password. Make sure it's secure and easy to remember.
             </Typography>
             <TextField
@@ -317,13 +382,14 @@ const PrincipalForgotPassword = () => {
               error={!!validationErrors.newPassword}
               helperText={validationErrors.newPassword}
               margin="normal"
+              size={isMobile ? "small" : "medium"}
               InputProps={{
                 startAdornment: (
-                  <Lock sx={{ color: '#e94560', mr: 1 }} />
+                  <Lock sx={{ color: '#e94560', mr: 1, fontSize: isMobile ? 20 : 24 }} />
                 ),
               }}
               sx={{ 
-                mb: 2,
+                mb: isMobile ? 1.5 : 2,
                 '& .MuiOutlinedInput-root': {
                   '&:hover fieldset': {
                     borderColor: '#e94560',
@@ -331,6 +397,12 @@ const PrincipalForgotPassword = () => {
                   '&.Mui-focused fieldset': {
                     borderColor: '#e94560',
                   },
+                },
+                '& .MuiInputLabel-root': {
+                  fontSize: isMobile ? '0.875rem' : undefined,
+                },
+                '& .MuiInputBase-input': {
+                  fontSize: isMobile ? '0.875rem' : undefined,
                 },
               }}
             />
@@ -344,13 +416,14 @@ const PrincipalForgotPassword = () => {
               error={!!validationErrors.confirmPassword}
               helperText={validationErrors.confirmPassword}
               margin="normal"
+              size={isMobile ? "small" : "medium"}
               InputProps={{
                 startAdornment: (
-                  <Lock sx={{ color: '#e94560', mr: 1 }} />
+                  <Lock sx={{ color: '#e94560', mr: 1, fontSize: isMobile ? 20 : 24 }} />
                 ),
               }}
               sx={{ 
-                mb: 3,
+                mb: isMobile ? 2 : 3,
                 '& .MuiOutlinedInput-root': {
                   '&:hover fieldset': {
                     borderColor: '#e94560',
@@ -359,23 +432,29 @@ const PrincipalForgotPassword = () => {
                     borderColor: '#e94560',
                   },
                 },
+                '& .MuiInputLabel-root': {
+                  fontSize: isMobile ? '0.875rem' : undefined,
+                },
+                '& .MuiInputBase-input': {
+                  fontSize: isMobile ? '0.875rem' : undefined,
+                },
               }}
             />
             <Button
               fullWidth
               variant="contained"
-              size="large"
+              size={isMobile ? "medium" : "large"}
               onClick={handleResetPassword}
               disabled={isLoading}
               sx={{
-                py: 1.5,
-                fontSize: '1.1rem',
+                py: isMobile ? 1 : 1.5,
+                fontSize: isMobile ? '1rem' : '1.1rem',
                 fontWeight: 600,
                 background: 'linear-gradient(135deg, #e94560 0%, #f39c12 100%)',
                 '&:hover': {
                   background: 'linear-gradient(135deg, #f39c12 0%, #e94560 100%)',
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 8px 16px rgba(233, 69, 96, 0.4)',
+                  transform: isMobile ? 'translateY(-1px)' : 'translateY(-2px)',
+                  boxShadow: isMobile ? '0 4px 8px rgba(233, 69, 96, 0.4)' : '0 8px 16px rgba(233, 69, 96, 0.4)',
                 },
                 '&:disabled': {
                   background: 'rgba(233, 69, 96, 0.5)',
@@ -401,24 +480,25 @@ const PrincipalForgotPassword = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 2,
+        padding: isMobile ? 1 : 2,
       }}
     >
-      <Container maxWidth="sm">
+      <Container maxWidth={isMobile ? false : "sm"} sx={{ px: isMobile ? 1 : 2 }}>
         <Paper
           elevation={24}
           sx={{
-            borderRadius: 3,
+            borderRadius: isMobile ? 2 : 3,
             overflow: 'hidden',
             background: 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(10px)',
             border: '1px solid rgba(233, 69, 96, 0.2)',
             '&:hover': {
-              boxShadow: '0 20px 40px rgba(233, 69, 96, 0.3)',
-              transform: 'translateY(-5px)',
+              boxShadow: isMobile ? '0 10px 20px rgba(233, 69, 96, 0.3)' : '0 20px 40px rgba(233, 69, 96, 0.3)',
+              transform: isMobile ? 'translateY(-2px)' : 'translateY(-5px)',
               transition: 'all 0.3s ease',
             },
             transition: 'all 0.3s ease',
+            width: '100%',
           }}
         >
           {/* Header */}
@@ -427,31 +507,33 @@ const PrincipalForgotPassword = () => {
               background: 'linear-gradient(135deg, #e94560 0%, #f39c12 100%)',
               color: 'white',
               textAlign: 'center',
-              padding: 4,
+              padding: isMobile ? 2 : 4,
             }}
           >
             <School sx={{ 
-              fontSize: 60, 
-              mb: 2,
+              fontSize: isMobile ? 40 : 60, 
+              mb: isMobile ? 1 : 2,
               filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))',
             }} />
             <Typography 
-              variant="h4" 
+              variant={isMobile ? "h5" : "h4"}
               component="h1" 
               gutterBottom
               sx={{
                 fontWeight: 'bold',
                 textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                fontSize: isMobile ? '1.5rem' : undefined,
               }}
             >
               Forgot Password
             </Typography>
             <Typography 
-              variant="h6" 
+              variant={isMobile ? "body1" : "h6"}
               component="h2"
               sx={{
                 opacity: 0.9,
                 textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+                fontSize: isMobile ? '0.9rem' : undefined,
               }}
             >
               Reset Your Principal Account Password
@@ -459,9 +541,9 @@ const PrincipalForgotPassword = () => {
           </Box>
 
           {/* Content */}
-          <CardContent sx={{ padding: 4 }}>
+          <CardContent sx={{ padding: isMobile ? 2 : 4 }}>
             {/* Back to Login */}
-            <Box sx={{ mb: 3 }}>
+            <Box sx={{ mb: isMobile ? 2 : 3 }}>
               <Link
                 component="button"
                 variant="body2"
@@ -471,6 +553,7 @@ const PrincipalForgotPassword = () => {
                   textDecoration: 'none',
                   display: 'flex',
                   alignItems: 'center',
+                  fontSize: isMobile ? '0.875rem' : undefined,
                   '&:hover': {
                     textDecoration: 'underline',
                     color: '#f39c12',
@@ -478,13 +561,25 @@ const PrincipalForgotPassword = () => {
                   transition: 'all 0.3s ease',
                 }}
               >
-                <ArrowBack sx={{ mr: 1, fontSize: 20 }} />
+                <ArrowBack sx={{ mr: 1, fontSize: isMobile ? 16 : 20 }} />
                 Back to Login
               </Link>
             </Box>
 
             {/* Stepper */}
-            <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
+            <Stepper 
+              activeStep={activeStep} 
+              sx={{ 
+                mb: isMobile ? 2 : 4,
+                '& .MuiStepLabel-label': {
+                  fontSize: isMobile ? '0.75rem' : undefined,
+                },
+                '& .MuiStepLabel-iconContainer': {
+                  paddingRight: isMobile ? 1 : 2,
+                },
+              }}
+              orientation={isMobile ? "vertical" : "horizontal"}
+            >
               {steps.map((label) => (
                 <Step key={label}>
                   <StepLabel>{label}</StepLabel>
@@ -494,13 +589,13 @@ const PrincipalForgotPassword = () => {
 
             {/* Error/Success Messages */}
             {error && (
-              <Alert severity="error" sx={{ mb: 3 }}>
+              <Alert severity="error" sx={{ mb: isMobile ? 2 : 3, fontSize: isMobile ? '0.875rem' : undefined }}>
                 {error}
               </Alert>
             )}
 
             {success && (
-              <Alert severity="success" sx={{ mb: 3 }}>
+              <Alert severity="success" sx={{ mb: isMobile ? 2 : 3, fontSize: isMobile ? '0.875rem' : undefined }}>
                 {success}
               </Alert>
             )}

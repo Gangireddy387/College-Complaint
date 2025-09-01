@@ -142,9 +142,42 @@ Student.init({
         const salt = await bcrypt.genSalt(10);
         student.password = await bcrypt.hash(student.password, salt);
       }
+    },
+    afterCreate: async (student) => {
+      await updateDepartmentStudentCount(student.department_id);
+    },
+    afterUpdate: async (student) => {
+      await updateDepartmentStudentCount(student.department_id);
+    },
+    afterDestroy: async (student) => {
+      await updateDepartmentStudentCount(student.department_id);
     }
   }
 });
+
+// Function to update department student count
+async function updateDepartmentStudentCount(departmentId) {
+  try {
+    const Department = require('./Department');
+    
+    // Count active students in this department
+    const studentCount = await Student.count({
+      where: { 
+        department_id: departmentId,
+        status: 'active'
+      }
+    });
+    
+    // Update the department with new student count
+    await Department.update({
+      total_students: studentCount
+    }, {
+      where: { id: departmentId }
+    });
+  } catch (error) {
+    console.error('Error updating department student count:', error);
+  }
+}
 
 // PostgreSQL-specific: Trigger for updating search vector
 sequelize.query(`

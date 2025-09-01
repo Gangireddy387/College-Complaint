@@ -111,4 +111,54 @@ export const principalService = {
   updateCollegeProfile: async (collegeData) => {
     return api.put('/college/profile', collegeData);
   },
+
+  // Department Methods
+  getDepartments: async () => {
+    return api.get('/department');
+  },
+
+  getDepartment: async (id) => {
+    return api.get(`/department/${id}`);
+  },
+
+  createDepartment: async (departmentData) => {
+    return api.post('/department', departmentData);
+  },
+
+  updateDepartment: async (id, departmentData) => {
+    return api.put(`/department/${id}`, departmentData);
+  },
+
+  deleteDepartment: async (id) => {
+    return api.delete(`/department/${id}`);
+  },
+
+  getAvailableFaculty: async () => {
+    return api.get('/department/faculty/available');
+  },
+
+  // Faculty Methods
+  getFaculty: async () => {
+    return api.get('/faculty');
+  },
+
+  getFacultyMember: async (id) => {
+    return api.get(`/faculty/${id}`);
+  },
+
+  createFaculty: async (facultyData) => {
+    return api.post('/faculty', facultyData);
+  },
+
+  updateFaculty: async (id, facultyData) => {
+    return api.put(`/faculty/${id}`, facultyData);
+  },
+
+  deleteFaculty: async (id) => {
+    return api.delete(`/faculty/${id}`);
+  },
+
+  getAvailableDepartments: async () => {
+    return api.get('/faculty/departments/available');
+  },
 };
