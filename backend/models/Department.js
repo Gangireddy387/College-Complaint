@@ -95,11 +95,6 @@ Department.init({
     type: DataTypes.INTEGER,
     defaultValue: 0
   },
-  budget: {
-    type: DataTypes.DECIMAL(12, 2),
-    allowNull: true,
-    comment: 'Current fiscal year budget'
-  },
   metadata: {
     type: DataTypes.JSONB,
     defaultValue: {},

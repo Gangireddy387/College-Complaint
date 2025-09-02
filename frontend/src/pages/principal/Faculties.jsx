@@ -77,9 +77,7 @@ const Faculties = () => {
     phone_number: '',
     joining_date: '',
     experience: [],
-    publications: [],
     achievements: [],
-    current_workload: 0,
     status: 'active'
   });
   
@@ -212,9 +210,7 @@ const Faculties = () => {
       phone_number: facultyMember.phone_number || '',
       joining_date: facultyMember.joining_date,
       experience: facultyMember.experience || [],
-      publications: facultyMember.publications || [],
       achievements: facultyMember.achievements || [],
-      current_workload: facultyMember.current_workload || 0,
       status: facultyMember.status
     });
     setOpenDialog(true);
@@ -250,9 +246,7 @@ const Faculties = () => {
       phone_number: '',
       joining_date: '',
       experience: [],
-      publications: [],
       achievements: [],
-      current_workload: 0,
       status: 'active'
     });
     setValidationErrors({});
@@ -447,11 +441,6 @@ const Faculties = () => {
                               ID: {facultyMember.employee_id}
                             </Typography>
                           </Box>
-                          <Chip
-                            label={facultyMember.status}
-                            color={getStatusColor(facultyMember.status)}
-                            size="small"
-                          />
                         </Box>
                         
                         <Stack spacing={1} sx={{ mb: 2 }}>
@@ -517,7 +506,6 @@ const Faculties = () => {
                       <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Employee ID</TableCell>
                       <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Department</TableCell>
                       <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Contact</TableCell>
-                      <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Status</TableCell>
                       <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Actions</TableCell>
                     </TableRow>
                   </TableHead>
@@ -558,13 +546,6 @@ const Faculties = () => {
                               </Typography>
                             )}
                           </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={facultyMember.status}
-                            color={getStatusColor(facultyMember.status)}
-                            size="small"
-                          />
                         </TableCell>
                         <TableCell>
                           <Box sx={{ display: 'flex', gap: 1 }}>
@@ -646,6 +627,7 @@ const Faculties = () => {
                   error={!!validationErrors.employee_id}
                   helperText={validationErrors.employee_id}
                   required
+                  sx={{ mt: 2 }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -658,6 +640,7 @@ const Faculties = () => {
                   error={!!validationErrors.designation}
                   helperText={validationErrors.designation}
                   required
+                  sx={{ mt: 2 }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -772,16 +755,6 @@ const Faculties = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Current Workload (hours/week)"
-                  name="current_workload"
-                  type="number"
-                  value={formData.current_workload}
-                  onChange={handleInputChange}
-                />
-              </Grid>
             </Grid>
           </DialogContent>
           <DialogActions sx={{ p: 3 }}>
@@ -874,13 +847,6 @@ const Faculties = () => {
                     <Typography variant="subtitle2" color="text.secondary">Joining Date</Typography>
                     <Typography variant="body1" sx={{ mb: 2 }}>
                       {new Date(viewingFaculty.joining_date).toLocaleDateString()}
-                    </Typography>
-                  </Grid>
-                  
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="subtitle2" color="text.secondary">Current Workload</Typography>
-                    <Typography variant="body1" sx={{ mb: 2 }}>
-                      {viewingFaculty.current_workload || 0} hours/week
                     </Typography>
                   </Grid>
                   

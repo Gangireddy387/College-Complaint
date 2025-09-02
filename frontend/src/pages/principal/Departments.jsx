@@ -414,11 +414,6 @@ const Departments = () => {
                               Code: {department.department_code}
                             </Typography>
                           </Box>
-                          <Chip
-                            label={department.status}
-                            color={getStatusColor(department.status)}
-                            size="small"
-                          />
                         </Box>
                         
                         <Stack spacing={1} sx={{ mb: 2 }}>
@@ -472,14 +467,13 @@ const Departments = () => {
               <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
                 <Table>
                   <TableHead>
-                    <TableRow sx={{ background: 'linear-gradient(135deg, #e94560 0%, #f39c12 100%)' }}>
-                      <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Department</TableCell>
-                      <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Code</TableCell>
-                      <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>HOD</TableCell>
-                      <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Contact</TableCell>
-                      <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Status</TableCell>
-                      <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Actions</TableCell>
-                    </TableRow>
+                                          <TableRow sx={{ background: 'linear-gradient(135deg, #e94560 0%, #f39c12 100%)' }}>
+                        <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Department</TableCell>
+                        <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Code</TableCell>
+                        <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>HOD</TableCell>
+                        <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Contact</TableCell>
+                        <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Actions</TableCell>
+                      </TableRow>
                   </TableHead>
                   <TableBody>
                     {departments.map((department) => (
@@ -518,13 +512,6 @@ const Departments = () => {
                               </Typography>
                             )}
                           </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={department.status}
-                            color={getStatusColor(department.status)}
-                            size="small"
-                          />
                         </TableCell>
                         <TableCell>
                           <Box sx={{ display: 'flex', gap: 1 }}>

@@ -76,20 +76,10 @@ Faculty.init({
     defaultValue: [],
     comment: 'Previous work experience'
   },
-  publications: {
-    type: DataTypes.JSONB,
-    defaultValue: [],
-    comment: 'Research publications and papers'
-  },
   achievements: {
     type: DataTypes.JSONB,
     defaultValue: [],
     comment: 'Awards and recognitions'
-  },
-  current_workload: {
-    type: DataTypes.INTEGER,
-    defaultValue: 0,
-    comment: 'Current teaching hours per week'
   },
   status: {
     type: DataTypes.ENUM('active', 'on_leave', 'inactive', 'terminated'),
