@@ -18,14 +18,6 @@ Subject.init({
     type: DataTypes.STRING,
     allowNull: false
   },
-  section_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'sections',
-      key: 'id'
-    }
-  },
   faculty_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -33,6 +25,15 @@ Subject.init({
       model: 'faculties',
       key: 'id'
     }
+  },
+  classroom_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'class_rooms',
+      key: 'id'
+    },
+    comment: 'Primary classroom where this subject is taught'
   },
   semester: {
     type: DataTypes.INTEGER,
@@ -122,10 +123,13 @@ Subject.init({
       using: 'gin'
     },
     {
-      fields: ['section_id', 'semester']
+      fields: ['semester']
     },
     {
       fields: ['faculty_id', 'status']
+    },
+    {
+      fields: ['classroom_id', 'semester']
     }
   ]
 });

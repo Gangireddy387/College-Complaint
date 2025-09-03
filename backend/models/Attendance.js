@@ -58,6 +58,15 @@ Attendance.init({
       key: 'id'
     }
   },
+  classroom_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'class_rooms',
+      key: 'id'
+    },
+    comment: 'Classroom where attendance was marked'
+  },
   status: {
     type: DataTypes.ENUM('present', 'absent', 'late', 'excused'),
     allowNull: false,
@@ -190,6 +199,11 @@ Attendance.init({
     {
       fields: ['marked_by', 'date'],
       name: 'attendance_faculty_date_idx'
+    },
+    // Index for classroom queries
+    {
+      fields: ['classroom_id', 'date'],
+      name: 'attendance_classroom_date_idx'
     }
   ],
   hooks: {
@@ -201,19 +215,10 @@ Attendance.init({
       }
     },
     beforeCreate: async (attendance) => {
-      // Check if student is enrolled in the section
-      const timeSlot = await sequelize.models.TimeSlot.findByPk(attendance.time_slot_id, {
-        include: ['section']
-      });
-      const enrollment = await sequelize.models.SectionStudent.findOne({
-        where: {
-          student_id: attendance.student_id,
-          section_id: timeSlot.section.id,
-          status: 'active'
-        }
-      });
-      if (!enrollment) {
-        throw new Error('Student is not enrolled in this section');
+      // Validate that the student and time slot exist
+      const timeSlot = await sequelize.models.TimeSlot.findByPk(attendance.time_slot_id);
+      if (!timeSlot) {
+        throw new Error('Time slot not found');
       }
     },
     beforeUpdate: async (attendance) => {

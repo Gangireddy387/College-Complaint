@@ -2,13 +2,11 @@ const Student = require('./Student');
 const Principal = require('./Principal');
 const Faculty = require('./Faculty');
 const Department = require('./Department');
-const Section = require('./Section');
 const Subject = require('./Subject');
 const TimeSlot = require('./TimeSlot');
 const Attendance = require('./Attendance');
 const DisciplinaryComplaint = require('./DisciplinaryComplaint');
 const ClassRoom = require('./ClassRoom');
-const SectionStudent = require('./SectionStudent');
 const OTP = require('./OTP');
 const College = require('./College');
 
@@ -44,16 +42,6 @@ Faculty.hasOne(Department, {
   constraints: false
 });
 
-Department.hasMany(Section, {
-  foreignKey: 'departmentId',
-  as: 'sections',
-  onDelete: 'RESTRICT'
-});
-Section.belongsTo(Department, {
-  foreignKey: 'departmentId',
-  as: 'department'
-});
-
 // Principal Relationships
 Principal.hasMany(DisciplinaryComplaint, {
   foreignKey: 'principalId',
@@ -65,16 +53,6 @@ DisciplinaryComplaint.belongsTo(Principal, {
 });
 
 // Faculty Relationships
-Faculty.hasMany(Section, {
-  foreignKey: 'classTeacherId',
-  as: 'sectionsHandled',
-  onDelete: 'RESTRICT'
-});
-Section.belongsTo(Faculty, {
-  foreignKey: 'classTeacherId',
-  as: 'classTeacher'
-});
-
 Faculty.hasMany(Subject, {
   foreignKey: 'facultyId',
   as: 'subjectsHandled',
@@ -123,48 +101,43 @@ DisciplinaryComplaint.belongsTo(Faculty, {
 });
 
 // ClassRoom Relationships
-ClassRoom.hasMany(Section, {
-  foreignKey: 'classRoomId',
-  as: 'sections',
-  onDelete: 'RESTRICT'
+ClassRoom.belongsTo(Department, {
+  foreignKey: 'department_id',
+  as: 'department'
 });
-Section.belongsTo(ClassRoom, {
-  foreignKey: 'classRoomId',
-  as: 'classRoom'
-});
-
-// Section Relationships
-Section.belongsToMany(Student, {
-  through: SectionStudent,
-  foreignKey: 'sectionId',
-  otherKey: 'studentId',
-  as: 'students'
-});
-Student.belongsToMany(Section, {
-  through: SectionStudent,
-  foreignKey: 'studentId',
-  otherKey: 'sectionId',
-  as: 'sections'
+Department.hasMany(ClassRoom, {
+  foreignKey: 'department_id',
+  as: 'classrooms'
 });
 
-Section.hasMany(Subject, {
-  foreignKey: 'sectionId',
-  as: 'subjects',
-  onDelete: 'RESTRICT'
-});
-Subject.belongsTo(Section, {
-  foreignKey: 'sectionId',
-  as: 'section'
-});
-
-Section.hasMany(TimeSlot, {
-  foreignKey: 'sectionId',
+ClassRoom.hasMany(TimeSlot, {
+  foreignKey: 'classroom_id',
   as: 'timeSlots',
   onDelete: 'RESTRICT'
 });
-TimeSlot.belongsTo(Section, {
-  foreignKey: 'sectionId',
-  as: 'section'
+TimeSlot.belongsTo(ClassRoom, {
+  foreignKey: 'classroom_id',
+  as: 'classroom'
+});
+
+ClassRoom.hasMany(Subject, {
+  foreignKey: 'classroom_id',
+  as: 'subjects',
+  onDelete: 'RESTRICT'
+});
+Subject.belongsTo(ClassRoom, {
+  foreignKey: 'classroom_id',
+  as: 'classroom'
+});
+
+ClassRoom.hasMany(Attendance, {
+  foreignKey: 'classroom_id',
+  as: 'attendances',
+  onDelete: 'RESTRICT'
+});
+Attendance.belongsTo(ClassRoom, {
+  foreignKey: 'classroom_id',
+  as: 'classroom'
 });
 
 // Subject Relationships
@@ -266,15 +239,6 @@ ClassRoom.belongsTo(College, {
   as: 'college'
 });
 
-College.hasMany(Section, {
-  foreignKey: 'collegeId',
-  as: 'collegeSections'
-});
-Section.belongsTo(College, {
-  foreignKey: 'collegeId',
-  as: 'college'
-});
-
 College.hasMany(Subject, {
   foreignKey: 'collegeId',
   as: 'collegeSubjects'
@@ -311,15 +275,6 @@ DisciplinaryComplaint.belongsTo(College, {
   as: 'college'
 });
 
-College.hasMany(SectionStudent, {
-  foreignKey: 'collegeId',
-  as: 'collegeSectionStudents'
-});
-SectionStudent.belongsTo(College, {
-  foreignKey: 'collegeId',
-  as: 'college'
-});
-
 College.hasMany(OTP, {
   foreignKey: 'collegeId',
   as: 'collegeOtps'
@@ -329,26 +284,16 @@ OTP.belongsTo(College, {
   as: 'college'
 });
 
-// SectionStudent direct associations
-SectionStudent.belongsTo(Section, {
-  foreignKey: 'sectionId'
-});
-SectionStudent.belongsTo(Student, {
-  foreignKey: 'studentId'
-});
-
 module.exports = {
   Student,
   Principal,
   Faculty,
   Department,
-  Section,
   Subject,
   TimeSlot,
   Attendance,
   DisciplinaryComplaint,
   ClassRoom,
-  SectionStudent,
   OTP,
   College
 };

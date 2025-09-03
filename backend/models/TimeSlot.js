@@ -29,14 +29,6 @@ TimeSlot.init({
       key: 'id'
     }
   },
-  section_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'sections',
-      key: 'id'
-    }
-  },
   faculty_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -45,9 +37,14 @@ TimeSlot.init({
       key: 'id'
     }
   },
-  room_number: {
-    type: DataTypes.STRING,
-    allowNull: false
+  classroom_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'class_rooms',
+      key: 'id'
+    },
+    comment: 'Reference to the classroom where this time slot is scheduled'
   },
   effective_date: {
     type: DataTypes.DATEONLY,
@@ -108,13 +105,16 @@ TimeSlot.init({
       using: 'gin'
     },
     {
-      fields: ['subject_id', 'section_id', 'day_of_week']
+      fields: ['subject_id', 'day_of_week']
     },
     {
       fields: ['faculty_id', 'status']
     },
     {
       fields: ['effective_date', 'end_date']
+    },
+    {
+      fields: ['classroom_id', 'day_of_week']
     }
   ],
   validate: {
@@ -218,7 +218,6 @@ sequelize.query(`
   CREATE OR REPLACE FUNCTION time_slot_search_vector_update() RETURNS trigger AS $$
   BEGIN
     NEW.search_vector :=
-      setweight(to_tsvector('english', COALESCE(NEW.room_number, '')), 'A') ||
       setweight(to_tsvector('english', COALESCE(NEW.day_of_week, '')), 'B') ||
       setweight(to_tsvector('english', COALESCE(NEW.cancel_reason, '')), 'C');
     RETURN NEW;

@@ -72,6 +72,15 @@ ClassRoom.init({
       len: [2, 50]
     }
   },
+  department_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'departments',
+      key: 'id'
+    },
+    comment: 'Department that primarily uses this classroom'
+  },
   floor: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -245,6 +254,10 @@ ClassRoom.init({
     {
       fields: ['building', 'floor'],
       name: 'classroom_location_idx'
+    },
+    {
+      fields: ['department_id'],
+      name: 'classroom_department_idx'
     }
   ],
   hooks: {
