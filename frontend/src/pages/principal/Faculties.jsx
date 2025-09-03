@@ -57,6 +57,7 @@ const Faculties = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   
   // Dialog states
   const [openDialog, setOpenDialog] = useState(false);
@@ -126,14 +127,20 @@ const Faculties = () => {
     
     if (!formData.employee_id) {
       errors.employee_id = 'Employee ID is required';
+    } else if (formData.employee_id.trim().length < 2) {
+      errors.employee_id = 'Employee ID must be at least 2 characters';
     }
     
     if (!formData.first_name) {
       errors.first_name = 'First name is required';
+    } else if (formData.first_name.trim().length < 2) {
+      errors.first_name = 'First name must be at least 2 characters';
     }
     
     if (!formData.last_name) {
       errors.last_name = 'Last name is required';
+    } else if (formData.last_name.trim().length < 2) {
+      errors.last_name = 'Last name must be at least 2 characters';
     }
     
     if (!formData.email) {
@@ -154,10 +161,18 @@ const Faculties = () => {
     
     if (!formData.designation) {
       errors.designation = 'Designation is required';
+    } else if (formData.designation.trim().length < 2) {
+      errors.designation = 'Designation must be at least 2 characters';
     }
     
     if (!formData.joining_date) {
       errors.joining_date = 'Joining date is required';
+    } else {
+      const joiningDate = new Date(formData.joining_date);
+      const today = new Date();
+      if (joiningDate > today) {
+        errors.joining_date = 'Joining date cannot be in the future';
+      }
     }
     
     if (formData.phone_number && !/^[0-9]{10}$/.test(formData.phone_number)) {
@@ -173,10 +188,18 @@ const Faculties = () => {
       return;
     }
 
+    setSubmitting(true);
     try {
       const submitData = { ...formData };
+      
+      // Remove password if editing and password is empty
       if (editingFaculty && !submitData.password) {
         delete submitData.password;
+      }
+      
+      // Ensure joining_date is in the correct format
+      if (submitData.joining_date) {
+        submitData.joining_date = new Date(submitData.joining_date).toISOString().split('T')[0];
       }
 
       if (editingFaculty) {
@@ -191,7 +214,10 @@ const Faculties = () => {
       resetForm();
       loadData();
     } catch (error) {
+      console.error('Error saving faculty:', error);
       setError(error.response?.data?.message || 'Failed to save faculty');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -764,6 +790,7 @@ const Faculties = () => {
             <Button
               onClick={handleSubmit}
               variant="contained"
+              disabled={submitting}
               sx={{
                 background: 'linear-gradient(135deg, #e94560 0%, #f39c12 100%)',
                 '&:hover': {
@@ -771,6 +798,9 @@ const Faculties = () => {
                 },
               }}
             >
+              {submitting ? (
+                <CircularProgress size={20} color="inherit" sx={{ mr: 1 }} />
+              ) : null}
               {editingFaculty ? 'Update' : 'Create'}
             </Button>
           </DialogActions>

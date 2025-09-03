@@ -386,4 +386,47 @@ router.get('/all', authenticateToken, async (req, res) => {
   }
 });
 
+// Dashboard routes
+router.get('/dashboard/recent-complaints', authenticateToken, async (req, res) => {
+  try {
+    // For now, return empty array since complaints system is not implemented yet
+    // This can be updated when the complaints system is added
+    res.json([]);
+  } catch (error) {
+    console.error('Get recent complaints error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+router.get('/dashboard/department-stats', authenticateToken, async (req, res) => {
+  try {
+    const { Department, Faculty } = require('../models');
+    
+    const departments = await Department.findAll({
+      include: [
+        {
+          model: Faculty,
+          as: 'faculty',
+          attributes: ['id'],
+          where: { status: 'active' },
+          required: false
+        }
+      ],
+      attributes: ['id', 'name', 'total_students', 'total_faculty']
+    });
+
+    const departmentStats = departments.map(dept => ({
+      id: dept.id,
+      name: dept.name,
+      total_faculty: dept.faculty ? dept.faculty.length : dept.total_faculty || 0,
+      total_students: dept.total_students || 0
+    }));
+
+    res.json(departmentStats);
+  } catch (error) {
+    console.error('Get department stats error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 module.exports = router;

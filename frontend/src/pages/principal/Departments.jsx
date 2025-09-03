@@ -27,6 +27,10 @@ import {
   useTheme,
   useMediaQuery,
   Stack,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import {
   School,
@@ -55,6 +59,9 @@ const Departments = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [editingDepartment, setEditingDepartment] = useState(null);
   const [viewingDepartment, setViewingDepartment] = useState(null);
+  const [openHODDialog, setOpenHODDialog] = useState(false);
+  const [selectedDepartment, setSelectedDepartment] = useState(null);
+  const [selectedHOD, setSelectedHOD] = useState('');
   
   // Form state
   const [formData, setFormData] = useState({
@@ -78,7 +85,7 @@ const Departments = () => {
       setLoading(true);
       const [departmentsResponse, facultyResponse] = await Promise.all([
         principalService.getDepartments(),
-        principalService.getAvailableFaculty()
+        principalService.getFaculty()
       ]);
       
       setDepartments(departmentsResponse.data);
@@ -218,6 +225,37 @@ const Departments = () => {
 
   const getStatusColor = (status) => {
     return status === 'active' ? 'success' : 'error';
+  };
+
+  const handleAssignHOD = (department) => {
+    setSelectedDepartment(department);
+    setSelectedHOD('');
+    setOpenHODDialog(true);
+  };
+
+  const handleHODSubmit = async () => {
+    if (!selectedHOD) {
+      return;
+    }
+
+    try {
+      await principalService.updateDepartment(selectedDepartment.id, {
+        hod_id: selectedHOD
+      });
+      setSuccess('HOD assigned successfully!');
+      setOpenHODDialog(false);
+      loadData();
+    } catch (error) {
+      setError(error.response?.data?.message || 'Failed to assign HOD');
+    }
+  };
+
+  const getDepartmentFaculty = (departmentId) => {
+    console.log('Faculty data:', faculty);
+    console.log('Department ID:', departmentId);
+    const filteredFaculty = faculty.filter(f => f.department?.id === departmentId && f.status === 'active');
+    console.log('Filtered faculty:', filteredFaculty);
+    return filteredFaculty;
   };
 
   if (loading) {
@@ -429,6 +467,20 @@ const Departments = () => {
                         </Stack>
 
                         <Box sx={{ display: 'flex', gap: 1 }}>
+                          {!department.hod_id && (
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              onClick={() => handleAssignHOD(department)}
+                              sx={{ 
+                                color: '#e94560', 
+                                borderColor: '#e94560',
+                                '&:hover': { borderColor: '#e94560', backgroundColor: 'rgba(233, 69, 96, 0.1)' }
+                              }}
+                            >
+                              Assign HOD
+                            </Button>
+                          )}
                           <IconButton
                             size="small"
                             onClick={() => handleView(department)}
@@ -496,6 +548,21 @@ const Departments = () => {
                           <Typography variant="body2">
                             {getHODName(department.hod_id)}
                           </Typography>
+                          {!department.hod_id && (
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              onClick={() => handleAssignHOD(department)}
+                              sx={{ 
+                                mt: 1,
+                                color: '#e94560', 
+                                borderColor: '#e94560',
+                                '&:hover': { borderColor: '#e94560', backgroundColor: 'rgba(233, 69, 96, 0.1)' }
+                              }}
+                            >
+                              Assign HOD
+                            </Button>
+                          )}
                         </TableCell>
                         <TableCell>
                           <Box>
@@ -784,6 +851,69 @@ const Departments = () => {
               </DialogActions>
             </>
           )}
+        </Dialog>
+
+        {/* Assign HOD Dialog */}
+        <Dialog
+          open={openHODDialog}
+          onClose={() => setOpenHODDialog(false)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle sx={{ 
+            background: 'linear-gradient(135deg, #e94560 0%, #f39c12 100%)',
+            color: 'white'
+          }}>
+            Assign Head of Department
+          </DialogTitle>
+          <DialogContent sx={{ pt: 3 }}>
+            {selectedDepartment && (
+              <Box>
+                <Typography variant="h6" sx={{ mb: 2, color: '#e94560' }}>
+                  {selectedDepartment.name}
+                </Typography>
+                
+                <FormControl fullWidth sx={{ mt: 2 }}>
+                  <InputLabel>Select Faculty Member</InputLabel>
+                  <Select
+                    value={selectedHOD}
+                    onChange={(e) => setSelectedHOD(e.target.value)}
+                    label="Select Faculty Member"
+                  >
+                    {getDepartmentFaculty(selectedDepartment.id).map((facultyMember) => (
+                      <MenuItem key={facultyMember.id} value={facultyMember.id}>
+                        {facultyMember.first_name} {facultyMember.last_name} - {facultyMember.designation}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                
+                {getDepartmentFaculty(selectedDepartment.id).length === 0 && (
+                  <Alert severity="warning" sx={{ mt: 2 }}>
+                    No active faculty members found in this department. Please add faculty members first.
+                  </Alert>
+                )}
+              </Box>
+            )}
+          </DialogContent>
+          <DialogActions sx={{ p: 3 }}>
+            <Button onClick={() => setOpenHODDialog(false)} color="inherit">
+              Cancel
+            </Button>
+            <Button
+              onClick={handleHODSubmit}
+              variant="contained"
+              disabled={!selectedHOD || getDepartmentFaculty(selectedDepartment?.id).length === 0}
+              sx={{
+                background: 'linear-gradient(135deg, #e94560 0%, #f39c12 100%)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #f39c12 0%, #e94560 100%)',
+                },
+              }}
+            >
+              Assign HOD
+            </Button>
+          </DialogActions>
         </Dialog>
       </Container>
     </MainLayout>
