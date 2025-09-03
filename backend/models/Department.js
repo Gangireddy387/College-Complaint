@@ -1,6 +1,40 @@
 const { Model, DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
 
+// Function to update department counts
+async function updateDepartmentCounts(departmentId) {
+  try {
+    const Student = require('./Student');
+    const Faculty = require('./Faculty');
+    
+    // Count students in this department
+    const studentCount = await Student.count({
+      where: { 
+        department_id: departmentId,
+        status: 'active'
+      }
+    });
+    
+    // Count faculty in this department
+    const facultyCount = await Faculty.count({
+      where: { 
+        department_id: departmentId,
+        status: 'active'
+      }
+    });
+    
+    // Update the department with new counts
+    await Department.update({
+      total_students: studentCount,
+      total_faculty: facultyCount
+    }, {
+      where: { id: departmentId }
+    });
+  } catch (error) {
+    console.error('Error updating department counts:', error);
+  }
+}
+
 class Department extends Model {}
 
 Department.init({
@@ -49,11 +83,13 @@ Department.init({
     unique: true,
     allowNull: false,
     validate: {
-      isEmail: true
+      isEmail: true,
+      notEmpty: true
     }
   },
   phone_number: {
     type: DataTypes.STRING,
+    allowNull: true,
     validate: {
       is: /^[0-9]{10}$/
     }
@@ -142,40 +178,6 @@ Department.init({
     }
   }
 });
-
-// Function to update department counts
-async function updateDepartmentCounts(departmentId) {
-  try {
-    const Student = require('./Student');
-    const Faculty = require('./Faculty');
-    
-    // Count students in this department
-    const studentCount = await Student.count({
-      where: { 
-        department_id: departmentId,
-        status: 'active'
-      }
-    });
-    
-    // Count faculty in this department
-    const facultyCount = await Faculty.count({
-      where: { 
-        department_id: departmentId,
-        status: 'active'
-      }
-    });
-    
-    // Update the department with new counts
-    await Department.update({
-      total_students: studentCount,
-      total_faculty: facultyCount
-    }, {
-      where: { id: departmentId }
-    });
-  } catch (error) {
-    console.error('Error updating department counts:', error);
-  }
-}
 
 // PostgreSQL-specific: Trigger for updating search vector
 sequelize.query(`

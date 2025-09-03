@@ -63,11 +63,7 @@ const Departments = () => {
     description: '',
     email: '',
     phone_number: '',
-    location: {},
-    facilities: [],
-    programs: [],
-    achievements: [],
-    research_areas: []
+    established_year: new Date().getFullYear()
   });
   
   const [validationErrors, setValidationErrors] = useState({});
@@ -127,6 +123,12 @@ const Departments = () => {
       errors.email = 'Please enter a valid email address';
     }
     
+    if (!formData.established_year) {
+      errors.established_year = 'Establishment year is required';
+    } else if (formData.established_year < 1900 || formData.established_year > new Date().getFullYear()) {
+      errors.established_year = 'Please enter a valid establishment year';
+    }
+    
     if (formData.phone_number && !/^[0-9]{10}$/.test(formData.phone_number)) {
       errors.phone_number = 'Phone number must be 10 digits';
     }
@@ -165,11 +167,7 @@ const Departments = () => {
       description: department.description || '',
       email: department.email,
       phone_number: department.phone_number || '',
-      location: department.location || {},
-      facilities: department.facilities || [],
-      programs: department.programs || [],
-      achievements: department.achievements || [],
-      research_areas: department.research_areas || []
+      established_year: department.established_year || new Date().getFullYear()
     });
     setOpenDialog(true);
   };
@@ -197,11 +195,7 @@ const Departments = () => {
       description: '',
       email: '',
       phone_number: '',
-      location: {},
-      facilities: [],
-      programs: [],
-      achievements: [],
-      research_areas: []
+      established_year: new Date().getFullYear()
     });
     setValidationErrors({});
     setEditingDepartment(null);
@@ -581,32 +575,32 @@ const Departments = () => {
           }}>
             {editingDepartment ? 'Edit Department' : 'Create New Department'}
           </DialogTitle>
-          <DialogContent sx={{ pt: 3 }}>
-                         <Grid container spacing={3}>
-               <Grid item xs={12} sm={6} sx={{ mt: 2 }}>
-                 <TextField
-                   fullWidth
-                   label="Department Code"
-                   name="department_code"
-                   value={formData.department_code}
-                   onChange={handleInputChange}
-                   error={!!validationErrors.department_code}
-                   helperText={validationErrors.department_code}
-                   required
-                 />
-               </Grid>
-               <Grid item xs={12} sm={6} sx={{ mt: 2 }}>
-                 <TextField
-                   fullWidth
-                   label="Department Name"
-                   name="name"
-                   value={formData.name}
-                   onChange={handleInputChange}
-                   error={!!validationErrors.name}
-                   helperText={validationErrors.name}
-                   required
-                 />
-               </Grid>
+                    <DialogContent sx={{ pt: 3 }}>
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={6} sx={{ mt: 2 }}>
+                <TextField
+                  fullWidth
+                  label="Department Code"
+                  name="department_code"
+                  value={formData.department_code}
+                  onChange={handleInputChange}
+                  error={!!validationErrors.department_code}
+                  helperText={validationErrors.department_code}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} sx={{ mt: 2 }}>
+                <TextField
+                  fullWidth
+                  label="Department Name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  error={!!validationErrors.name}
+                  helperText={validationErrors.name}
+                  required
+                />
+              </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
@@ -631,6 +625,20 @@ const Departments = () => {
                   helperText={validationErrors.phone_number}
                 />
               </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Establishment Year"
+                  name="established_year"
+                  type="number"
+                  value={formData.established_year}
+                  onChange={handleInputChange}
+                  error={!!validationErrors.established_year}
+                  helperText={validationErrors.established_year}
+                  inputProps={{ min: 1900, max: new Date().getFullYear() }}
+                  required
+                />
+              </Grid>
               <Grid item xs={12}>
                 <TextField
                   fullWidth
@@ -642,7 +650,6 @@ const Departments = () => {
                   rows={3}
                 />
               </Grid>
-
             </Grid>
           </DialogContent>
           <DialogActions sx={{ p: 3 }}>
@@ -720,7 +727,7 @@ const Departments = () => {
                   <Grid item xs={12} sm={6}>
                     <Typography variant="subtitle2" color="text.secondary">Established Year</Typography>
                     <Typography variant="body1" sx={{ mb: 2 }}>
-                      {viewingDepartment.established_year}
+                      {viewingDepartment.established_year || 'Not specified'}
                     </Typography>
                   </Grid>
                   
@@ -753,15 +760,6 @@ const Departments = () => {
                       {viewingDepartment.total_students || 0}
                     </Typography>
                   </Grid>
-                  
-                  {viewingDepartment.budget && (
-                    <Grid item xs={12}>
-                      <Typography variant="subtitle2" color="text.secondary">Budget</Typography>
-                      <Typography variant="body1" sx={{ mb: 2 }}>
-                        ₹{viewingDepartment.budget}
-                      </Typography>
-                    </Grid>
-                  )}
                 </Grid>
               </DialogContent>
               <DialogActions sx={{ p: 3 }}>

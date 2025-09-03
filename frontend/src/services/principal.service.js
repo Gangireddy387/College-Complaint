@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { isTokenExpired, redirectToLogin } from '../utils/sessionUtils';
 
 const API_URL = process.env.REACT_APP_API_URL || '/api';
 
@@ -14,6 +15,14 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('principalToken');
+    
+    // Check if token is expired before making request
+    if (token && isTokenExpired(token)) {
+      console.log('Token expired, redirecting to login...');
+      redirectToLogin();
+      return Promise.reject(new Error('Token expired'));
+    }
+    
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -28,10 +37,14 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.error('API Error:', error.config?.url, error.response?.status, error.message);
+    
+    // Handle 401 Unauthorized (token expired or invalid)
     if (error.response?.status === 401) {
-      localStorage.removeItem('principalToken');
-      window.location.href = '/login';
+      console.log('Session expired, redirecting to login...');
+      redirectToLogin();
     }
+    
     return Promise.reject(error);
   }
 );

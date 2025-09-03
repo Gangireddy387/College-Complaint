@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { principalService } from '../../services/principal.service';
+import { isTokenExpired, clearSession } from '../../utils/sessionUtils';
 
 // Async thunks
 export const loginPrincipal = createAsyncThunk(
@@ -53,7 +54,14 @@ export const updatePrincipalProfile = createAsyncThunk(
 const initialState = {
   user: null,
   token: localStorage.getItem('principalToken'),
-  isAuthenticated: !!localStorage.getItem('principalToken'),
+  isAuthenticated: (() => {
+    try {
+      const token = localStorage.getItem('principalToken');
+      return token && !isTokenExpired(token);
+    } catch (error) {
+      return false;
+    }
+  })(),
   isLoading: false,
   error: null,
 };
@@ -92,7 +100,7 @@ const authSlice = createSlice({
         state.user = null;
         state.token = null;
         state.isAuthenticated = false;
-        localStorage.removeItem('principalToken');
+        clearSession();
       })
       // Get Profile
       .addCase(getPrincipalProfile.pending, (state) => {
@@ -101,10 +109,16 @@ const authSlice = createSlice({
       .addCase(getPrincipalProfile.fulfilled, (state, action) => {
         state.isLoading = false;
         state.user = action.payload;
+        state.isAuthenticated = true;
       })
       .addCase(getPrincipalProfile.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
+        // If profile fetch fails, clear authentication state
+        state.user = null;
+        state.token = null;
+        state.isAuthenticated = false;
+        clearSession();
       })
       // Update Profile
       .addCase(updatePrincipalProfile.pending, (state) => {
